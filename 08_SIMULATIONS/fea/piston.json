@@ -11,119 +11,120 @@
   "rho": 2700
  },
  "mesh": {
-  "nodes": 19863,
-  "tets": 81998,
+  "nodes": 19772,
+  "tets": 81483,
   "h_max": 4.0,
-  "quality_gamma_min": 1.95852276221207e-05,
-  "quality_gamma_mean": 0.7515567020099293,
+  "quality_gamma_min": 2.034808581035958e-05,
+  "quality_gamma_mean": 0.7513290420034657,
   "quality_below_0p1": 56,
-  "volume_mm3": 165235.45264937603
+  "volume_mm3": 164466.82528444042,
+  "dropped_zero_volume_tets": 0
  },
  "results": {
   "gas_pressure": {
    "applied_force_N": [
-    -3.9590915119107767e-13,
-    -1.796767105871022e-12,
-    -76817.29182544583
+    -1.5802173442591312e-13,
+    -5273.966557895904,
+    -58439.39887912327
    ],
    "expected_force_N": 78418.86502258162,
    "pin_reaction_N": [
     0.0,
     0.0,
-    76817.29182544583
+    58439.39887912327
    ],
    "support_reaction_N": [
-    5.429869887052519e-10,
-    3.072431198347658e-10,
-    3.7396929997157713e-10
+    -2.829310119523143e-10,
+    5273.966557896948,
+    -1.6552803572267294e-10
    ],
-   "peak_bearing_pressure_MPa": 85.25382444261449,
-   "vm_max_MPa": 181.79171630359153,
-   "vm_p999_MPa": 105.38935856591505,
+   "peak_bearing_pressure_MPa": 64.85756180905015,
+   "vm_max_MPa": 640.2595322846212,
+   "vm_p999_MPa": 143.22759960569596,
    "vm_max_location": [
-    11.769411103941412,
-    -18.544581334530434,
-    10.882134747803963
+    23.487153953897348,
+    1.0829425966631239,
+    -13.447220720847929
    ],
-   "crown_deflection_mm": 0.0900151629736911,
-   "dofs": 405429,
-   "solve_s": 2708.326000928879,
-   "T_at_vm_max_C": 248.15298540764002
+   "crown_deflection_mm": 0.14057631135110743,
+   "dofs": 403341,
+   "solve_s": 2320.7694351673126,
+   "T_at_vm_max_C": 169.45552544166162
   },
   "thermal": {
-   "T_max_C": 431.4793535655649,
-   "T_crown_mean_C": 379.87386453770273,
-   "T_top_ring_groove_C": 267.6481976690136,
-   "T_min_C": 172.19258319127368,
-   "heat_in_crown_W": 5363.343892433417,
-   "heat_to_gallery_W": 3253.762086107261,
-   "heat_to_undercrown_W": 854.7982319673871,
-   "heat_to_liner_W": 1125.679981693817,
-   "heat_to_pin_W": 129.10359266483005,
-   "energy_balance_error_pct": 2.271259293862702e-12,
+   "T_max_C": 374.77103419440857,
+   "T_crown_mean_C": 332.257988435111,
+   "T_top_ring_groove_C": 222.1925589998961,
+   "T_min_C": 159.23628954723927,
+   "heat_in_crown_W": 3712.0481697354685,
+   "heat_to_gallery_W": 2269.6246435940698,
+   "heat_to_undercrown_W": 594.5138975856153,
+   "heat_to_liner_W": 771.1021224814083,
+   "heat_to_pin_W": 76.807506074157,
+   "energy_balance_error_pct": 5.877214723841481e-12,
    "T_max_location": [
-    0.31893686854775183,
-    -4.532031491696387,
-    38.72076584422601
+    -0.4193655482773124,
+    24.817814030547822,
+    47.122052654241784
    ]
   },
   "thermal_sensitivity": [
    {
     "case": "gallery 1,500 W/m2K",
-    "T_max_C": 469.63653498332235,
-    "T_crown_mean_C": 421.7374137513822,
-    "T_top_ring_groove_C": 303.4036643538302
+    "T_max_C": 413.71450675514404,
+    "T_crown_mean_C": 364.60523611977715,
+    "T_top_ring_groove_C": 247.6009699584713
    },
    {
     "case": "gallery 4,000 W/m2K",
-    "T_max_C": 395.88524019601005,
-    "T_crown_mean_C": 340.5430367297613,
-    "T_top_ring_groove_C": 234.81411441184554
+    "T_max_C": 342.51292970426346,
+    "T_crown_mean_C": 302.075306379665,
+    "T_top_ring_groove_C": 199.51202221748468
    },
    {
     "case": "under-crown 1,000 W/m2K",
-    "T_max_C": 411.3695546357187,
-    "T_crown_mean_C": 368.59451417663774,
-    "T_top_ring_groove_C": 254.4550559257866
+    "T_max_C": 366.44509676877476,
+    "T_crown_mean_C": 324.0539171375432,
+    "T_top_ring_groove_C": 212.6387024616049
    },
    {
     "case": "gallery 4,000 + under-crown 1,000 W/m2K",
-    "T_max_C": 381.39793208811545,
-    "T_crown_mean_C": 333.50731315161704,
-    "T_top_ring_groove_C": 226.3332788581841
+    "T_max_C": 333.57147796175286,
+    "T_crown_mean_C": 297.0426557291547,
+    "T_top_ring_groove_C": 193.40614129108826
    }
   ],
   "gas_plus_thermal": {
-   "vm_max_MPa": 285.39677912658544,
-   "vm_p999_MPa": 138.30733294240392,
+   "vm_max_MPa": 639.4691567485773,
+   "vm_p999_MPa": 146.90365073536768,
    "vm_max_location": [
-    11.769411103941412,
-    -18.544581334530434,
-    10.882134747803963
+    23.487153953897348,
+    1.0829425966631239,
+    -13.447220720847929
    ],
-   "T_at_vm_max_C": 248.15298540764002,
+   "T_at_vm_max_C": 169.45552544166162,
    "support_reaction_N": [
-    1.2641901914189901e-08,
-    4.340788339884938e-09,
-    -4.185940483125705e-09
+    1.1645405473270642e-08,
+    5273.9665579012,
+    -5.947640602244064e-09
    ],
-   "max_displacement_mm": 0.38950116700716714,
-   "radial_growth_max_mm": 0.27398888388595166,
-   "top_land_radial_growth_max_mm": 0.3306702962150013,
+   "max_displacement_mm": 0.38400616688197037,
+   "radial_growth_max_mm": 0.19594215842779092,
+   "top_land_radial_growth_max_mm": 0.3238968726202169,
    "top_land_cold_clearance_mm": 0.43000000000000005
   },
   "fatigue_estimate": {
    "note": "gas load from zero to the design pressure every cycle: alternating stress = half the 99.9th-percentile gas-case stress, against the room-temperature fatigue limit (no mean-stress or temperature correction - the hot strength at the boss and ring belt is lower)",
-   "sigma_a_MPa": 52.69467928295752,
+   "sigma_a_MPa": 71.61379980284798,
    "fatigue_limit_MPa": 110,
-   "factor": 2.0874972861932974
+   "factor": 1.5360168054596854
   }
  },
  "inputs": {
   "p_design_MPa": 13.5,
   "q_piston_W": 5988.2642671185595,
   "h_gas": 900.0,
-  "T_gas_eff_K": 1662.365036446151,
+  "T_gas_eff_K": 1660.9993287729203,
   "h_gallery": 2500.0,
   "h_undercrown": 500.0,
   "T_oil_K": 400.0,
@@ -131,23 +132,23 @@
   "T_liner_K": 430.0
  },
  "facet_counts": {
-  "crown": 2589,
-  "gallery": 3134,
-  "under_crown": 10040,
-  "pin_upper": 799,
-  "chamber": 4913,
-  "top_land": 1964,
+  "crown": 1717,
+  "gallery": 3140,
+  "under_crown": 10004,
+  "pin_upper": 814,
+  "chamber": 4336,
+  "top_land": 2004,
   "pin_bearing": 576
  },
  "design": {
   "gallery_area_mm2": 86.39999999999998,
   "gallery_z": [
-   15.867419604813145,
-   44.390185471883726
+   15.68146083068778,
+   44.55165527537116
   ],
   "crown_thk": 11.0,
   "ring_belt_inner_r": 22.0,
-  "mass_kg": 0.44572410148034086
+  "mass_kg": 0.44363247911269554
  },
  "boundary_conditions": "gas and gas + thermal: design gas pressure on all chamber-side surfaces above the top ring (crown, valve pockets, top land; ring-groove and second-land pressures neglected); pin reaction as a cosine bearing pressure on the upper half of both pin bores, scaled to balance the gas load; statically determinate 3-2-1 point support (bore bottoms, skirt bottom) - no restraint of the thermal growth. Thermal: cycle-mean gas side, oil gallery 2,500 W/m2K and under-crown splash 500 W/m2K at 127 degC, ring belt and skirt to the liner. No skirt contact, no pin deformation"
 }

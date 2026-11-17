@@ -331,7 +331,8 @@ def piston_solids():
     for sx in (-1, 1):
         y0 = -P.valve_du_in
         zc = ch + y0 * ta
-        org = (sx * 17.6 - 1.6 * n[0], y0 - 1.6 * n[1], zc - 1.6 * n[2])
+        pd = P.piston_valve_pocket_depth
+        org = (sx * 17.6 - pd * n[0], y0 - pd * n[1], zc - pd * n[2])
         piston = piston - Plane(origin=org, x_dir=(1, 0, 0), z_dir=n) * Cylinder(P.valve_in_dia / 2 + 1.8, 30, align=CMIN)
     gap = Pos(r, 0, 0) * Box(12, 0.35, 10, align=(Align.CENTER, Align.CENTER, Align.CENTER))
     ring_c = (Cylinder(P.bore / 2, P.ring1_h - 0.03, align=CMIN) - Cylinder(P.bore / 2 - P.ring_radial, P.ring1_h, align=CMIN)) - gap

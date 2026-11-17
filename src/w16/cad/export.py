@@ -214,8 +214,9 @@ def validate(reg, info):
         for sx in (-1, 1):
             y0 = -P.valve_du_in
             zc = P.comp_height + y0 * math.tan(ta)
-            org = (sx * 17.6 - 1.6 * n[0], y0 - 1.6 * n[1], zc - 1.6 * n[2])
-            cyl = Plane(origin=org, x_dir=(1, 0, 0), z_dir=n) * Cylinder(P.valve_in_dia / 2 + 1.8, 1.6, align=(Align.CENTER, Align.CENTER, Align.MIN))
+            pd = P.piston_valve_pocket_depth
+            org = (sx * 17.6 - pd * n[0], y0 - pd * n[1], zc - pd * n[2])
+            cyl = Plane(origin=org, x_dir=(1, 0, 0), z_dir=n) * Cylinder(P.valve_in_dia / 2 + 1.8, pd, align=(Align.CENTER, Align.CENTER, Align.MIN))
             pk = cyl if pk is None else pk + cyl
         v_pockets = ((ploc * pk) & vol).volume
         v_crev = VT.crevice_volume(P.crown_tilt_axis)            # top-land annulus (with the D-040 relief) + ring-groove clearances

@@ -11,43 +11,43 @@
   "rho": 2680
  },
  "mesh": {
-  "nodes": 16419,
-  "tets": 57160,
+  "nodes": 16399,
+  "tets": 56985,
   "h_max": 4.5,
-  "quality_gamma_min": 1.8815680506129093e-05,
-  "quality_gamma_mean": 0.7278545337972518,
-  "quality_below_0p1": 1043,
-  "volume_mm3": 467614.7447298915,
-  "dropped_zero_volume_tets": 25
+  "quality_gamma_min": 1.887733704844803e-05,
+  "quality_gamma_mean": 0.7281971720095383,
+  "quality_below_0p1": 1021,
+  "volume_mm3": 467653.2707095622,
+  "dropped_zero_volume_tets": 9
  },
  "element": "P1 tetrahedra",
  "inputs": {
   "q_roof_W_mm2": 1.0045080452567525,
-  "q_seat_W_mm2": 0.9173063798328422,
-  "roof_area_mm2": 2629.2843932153555,
-  "seat_area_mm2": 3751.913356262065,
+  "q_seat_W_mm2": 0.9588169123125606,
+  "roof_area_mm2": 2469.199296079855,
+  "seat_area_mm2": 3756.6965863908886,
   "h_jacket_W_m2K": 15172.702625023656,
   "T_coolant_K": 368.0
  },
  "results": {
-  "T_max_C": 335.69886212594395,
-  "T_roof_max_C": 335.69886212594395,
-  "T_roof_mean_C": 144.05451860873893,
-  "heat_to_coolant_W": 6082.79138453191,
-  "heat_target_W": 6082.791384532087,
-  "heat_applied_W": 6082.791384532087,
-  "energy_balance_error_pct": 2.9156263240706816e-12,
-  "roof_facets": 538,
-  "seat_facets": 576,
-  "jacket_facets": 16345,
+  "T_max_C": 338.9082344207427,
+  "T_roof_max_C": 338.9082344207427,
+  "T_roof_mean_C": 143.69030058275644,
+  "heat_to_coolant_W": 6082.314779712842,
+  "heat_target_W": 6082.314779712972,
+  "heat_applied_W": 6082.314779712972,
+  "energy_balance_error_pct": 2.1382935126495745e-12,
+  "roof_facets": 519,
+  "seat_facets": 562,
+  "jacket_facets": 16313,
   "T_max_location": [
    -82.0,
-   28.9,
-   9.3
+   23.8,
+   7.7
   ],
-  "T_gas_side_p99_C": 261.91147188435093,
-  "T_valve_bridge_max_C": 220.1537304569938,
-  "T_valve_bridge_mean_C": 156.14182677809555,
+  "T_gas_side_p99_C": 243.140383228906,
+  "T_valve_bridge_max_C": 220.47772647230215,
+  "T_valve_bridge_mean_C": 159.15745195467736,
   "note": "The slice faces (x = position 3 +/- 36.5 mm) cut through the outer intake-valve seat pockets, leaving thin adiabatic slivers; T_max and the gas-side 99th percentile are dominated by these slivers and are slice artefacts. Representative results: valve-bridge maximum and mean, roof mean."
  },
  "boundary_conditions": "cycle-mean chamber heat of one cylinder: roof area at the 1-D roof flux, the valve-head share through the seat-insert pockets; convection on all water-jacket walls inside the slice; port gas-side heat input (exhaust ports) not applied; cut faces adiabatic"

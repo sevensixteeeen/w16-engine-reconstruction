@@ -109,8 +109,8 @@ def head_layout():
     return out
 
 
-CHAMBER_CAD_FACTOR = 1.0578      # set so that the CAD-measured clearance volume gives CR 9.0 (see 06_ASSEMBLIES/cad_validation.json);
-                                 # D-040: 1.0105 before - the D-039 chamber cut reaches the joint face over the whole bore (+3.7 cm3)
+CHAMBER_CAD_FACTOR = 1.0725      # set so that the CAD-measured clearance volume gives CR 9.0 (see 06_ASSEMBLIES/cad_validation.json);
+                                 # D-042: 1.0578 before - the 2.2 mm piston valve pockets (were 1.6) add 1.2 cm3; D-040: 1.0105 before - the D-039 chamber cut reaches the joint face over the whole bore (+3.7 cm3)
                                  # and the D-040 top-land relief adds 1.8 cm3 of crevice; D-038: 1.0022 before the D-034 head layout
 
 
@@ -241,16 +241,17 @@ def rocker_ratio(far=None):
 
 
 # ------------------------------------------------------------------ piston-to-valve clearance
-PISTON_POCKET_DEPTH = 1.6        # mm, valve pockets in the crown under the long valves (cad/cranktrain.piston_solids)
-
-
 def piston_valve_clearance():
-    """Minimum clearance between each valve head and the piston crown plane over the cycle (mm).
+    """Minimum vertical clearance between each valve head rim and the piston crown over the cycle (mm).
 
-    theta: deg ATDC gas-exchange TDC.  The crown is parallel to the head joint face (D-010)."""
+    theta: deg ATDC gas-exchange TDC.  The crown plane is tilted by crown_tilt to the joint face, so the clearance is
+    taken at 72 points round the valve rim, each against the crown height under that point.  D-042: the crown height was
+    taken under the valve centre before; for the long valves the lowest rim point lies ~15 mm nearer the crown's low
+    edge, where the crown is ~2.15 mm lower, so the old value was ~2 mm too pessimistic (CAD: true minimum distance)."""
     lay = head_layout()
     th = np.arange(-360.0, 360.0, 0.5)
     (li, _, _), (le, _, _) = valve_lifts(th)
+    phi = np.linspace(0.0, 2 * math.pi, 73)[:-1]
     out = {}
     for row in ("inner", "outer"):
         c = L.CYL[2] if row == "inner" else L.CYL[1]
@@ -261,11 +262,15 @@ def piston_valve_clearance():
         tk = math.tan(math.radians(getattr(P, "crown_tilt", 0.0)))
         for kind, lift, dia in (("in", li, P.valve_in_dia), ("ex", le, P.valve_ex_dia)):
             v = lay[row][kind]
-            tilt = math.radians(abs(v["tilt"]))
-            low = v["w_head"] - lift * math.cos(tilt) - dia / 2 * math.sin(tilt)
-            crown_w = crown_low + abs(d_row["roof_edge_u"] - v["u_head"]) * tk     # tilted crown under this valve
-            pocket = PISTON_POCKET_DEPTH if v["far"] else 0.0          # the long (far-row) valves run over the crown pockets
-            cl = low - crown_w + pocket
+            au, aw = v["u_tip"] - v["u_head"], P.valve_tip_w - v["w_head"]
+            na = math.hypot(au, aw)
+            au, aw = au / na, aw / na                              # valve axis (u, w), towards the tip
+            r = dia / 2
+            u_rim = v["u_head"] - lift[:, None] * au + r * np.sin(phi)[None, :] * aw
+            w_rim = v["w_head"] - lift[:, None] * aw - r * np.sin(phi)[None, :] * au
+            crown_w = crown_low[:, None] + np.abs(d_row["roof_edge_u"] - u_rim) * tk    # tilted crown under each rim point
+            pocket = P.piston_valve_pocket_depth if v["far"] else 0.0   # the long (far-row) valves run over the crown pockets
+            cl = (w_rim - crown_w).min(axis=1) + pocket
             i = int(np.argmin(cl))
             out[(row, kind)] = dict(min_clear=float(cl[i]), at_theta=float(th[i]), lift_there=float(lift[i]), pocket_depth=pocket,
                                     required=1.5 if kind == "in" else 2.0)

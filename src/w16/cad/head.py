@@ -19,6 +19,8 @@ LAY = VT.head_layout()
 W_FLOOR = 62.0            # floor of the valve-gear chamber
 W_JKT = (11.0, 50.0)      # water-jacket band
 SEAT_DROP = P.spring_seat_drop   # spring seat below the valve tip, along the stem
+SEAT_POCKET_DEPTH = 3.5   # seat-insert pocket cut below the seat plane (D-041: 1.5 before - the roof lies up to 1.8 mm below
+                          # the seat plane at the pocket radius, and the 1.2 mm valve margin left the pocket with lift)
 R_PORT = {"in": 12.5, "ex": 11.0}
 WEB_X = [loc_x(1) - 36.5, loc_x(2) + 36.5, loc_x(4) + 36.5, loc_x(6) + 36.5, loc_x(8) + 36.5]
 W_PIV = 110.0             # hydraulic support element ball centre
@@ -180,7 +182,7 @@ def cyl_tools(i):
         keep.insert(0, port_solid(i, kind, 4.5))
         for s in (-1, 1):
             H, T, a = valve_geo(i, kind, s)
-            gas.append(cyl_between(H - a * 1.5, H + a * 6.0, rv + 1.7))                    # seat-insert pocket
+            gas.append(cyl_between(H - a * SEAT_POCKET_DEPTH, H + a * 6.0, rv + 1.7))      # seat-insert pocket
             S = T - a * SEAT_DROP
             gas.append(cyl_between(H + a * 10.0, S + a * 1.0, P.valve_guide_od / 2))        # guide bore
             keep.append(cyl_between(H + a * 6.0, H + a * 62.0, P.valve_guide_od / 2 + 3.5))
@@ -379,6 +381,9 @@ def pad_contact(v, lift):
     return float(np.array([a[1], -a[0]]) @ (k - (T - a * lift)))
 
 
+FINGER_CORNER_DROP = 3.0          # top edge at the pivot-side corner, above the roller axis (D-041 long finger, D-042 short; 5.5 before)
+
+
 def finger_solid(far):
     """Roller finger follower; local: origin at the support-element ball centre, valve tip at u = -(tip+pivot arm),
     w = +2 (valve tip plane), roller axis at u = -pivot arm.  far=True: long-valve finger, far=False: short-valve finger.
@@ -388,8 +393,12 @@ def finger_solid(far):
     lp = P.finger_piv_far if far else P.finger_piv_near
     lt = lp + (P.finger_tip_far if far else P.finger_tip_near)
     rw = ROLLER_W - W_PIV
-    prof = poly([(-lt - 3, d + 1.5), (-lt + 4.5, d + 1.5), (-lt + 12, d - 1.0), (-7, d - 2.5), (-6, 0.5), (6, 0.5), (6, 8.0),
-                 (-lp + 9, rw + 5.5), (-lp - 9, rw + 5.5), (-lt - 3, d + 6.5)])
+    # top corner on the pivot side of the roller.  D-041: chamfered on the long-valve finger, D-042 on the short one (11.5 mm instead of
+    # 14 mm above the ball centre at 9 mm from the roller axis, back to 14 mm at 4 mm) - the intake lobe flank clipped it
+    # at 6-7 mm lift; the axle bosses (roller axis +/-3 mm) keep the full height.
+    corner = [(-lp + 9, rw + FINGER_CORNER_DROP), (-lp + 4, rw + 5.5)]          # D-042: short-valve finger too
+    prof = poly([(-lt - 3, d + 1.5), (-lt + 4.5, d + 1.5), (-lt + 12, d - 1.0), (-7, d - 2.5), (-6, 0.5), (6, 0.5), (6, 8.0)]
+                + corner + [(-lp - 9, rw + 5.5), (-lt - 3, d + 6.5)])
     body = extrude(Plane(origin=(-6, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0)) * prof, amount=12.0)
     body = body - box_at(-4.3, 4.3, -lp - 9.5, -lp + 9.5, d - 6, rw + 12)                          # roller slot
     body = body - Sphere(4.05)                                                                      # ball socket
