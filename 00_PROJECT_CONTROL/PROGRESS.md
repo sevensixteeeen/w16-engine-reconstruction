@@ -2,7 +2,7 @@
 
 _Last updated: 2026-11-18_
 
-Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-042) first. Run everything from the project root with
+Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-043) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
 
 ## D-041 + D-042 — applied in the source, verified by targeted checks, NOT regenerated (awaiting approval)
@@ -24,21 +24,75 @@ rewritten first. Nothing has been pushed. Other staged items elsewhere in the re
 1.02 / 1.40 mm); finger bodies vs camshafts ≥ 1.49 mm (short finger 1.675 / 1.722, was 0.29 / 0.51); rollers in contact; CR
 8.9998; head FE (`fea/head.json`): 9 zero-volume tets dropped, heat balance 0.0 %, valve bridge 220 / 159 degC.
 
-**Piston FE — NOT verified.** The run started here at 22:12 was stopped by Claude Code's low-memory guard. The user re-ran it in
-their own terminal; it finished 23:21 and wrote `08_SIMULATIONS/fea/piston.json`. Reported by the user, not yet checked: peak
-stress 640 MPa (182 MPa on D-040), crown temperature 332 degC (380 degC on D-040). The run log
-`08_SIMULATIONS/fea_piston_run.log` was not updated (still the 22:31 file, restored to the D-040 log content). A 3.5x jump in
-peak stress from a 0.6 mm deeper pocket is not plausible on its own — check the peak location, mesh (gamma min, dropped
-tets), load balance and support reactions in `piston.json` before using any of these numbers. D-042 in DECISIONS.md still says
-the piston FE is not available.
+**Piston FE — the 23:21 run is INVALID; fixed by D-043; re-run pending (user's terminal).** The run of 2026-11-17 23:21
+(`08_SIMULATIONS/fea/piston.json`, committed in `46a4cfe`) reported 640 / 143 MPa and a crown of 332 degC. Cause: the facet
+band that selects the chamber side was a fixed 2.2 mm, and the D-042 pocket floors are exactly 2.2 mm deep. The floors (a third
+of the crown) got no gas pressure and no gas-side heat: 58.4 kN + 5.27 kN sideways instead of 76.8 kN; the side load went into
+the point support and produced the 640 MPa there; 3.7 instead of 5.4 kW into the crown. The run log was not written because the
+run printed to the console. D-043 (approved 2026-11-18) ties the band to the pocket depth and adds guards that fail the case on a
+wrong load or heat balance, a loaded-area change or a facet on a ring groove — before the solve and again after it. Verified
+through the case code (thermal only): 76,817.3 N, no side force, heat applied 5,866 / 5,988 W (−2.04 %, the relieved top-land
+annulus, as D-040), crown 380.3 degC mean / 433.2 max, groove 266.8 degC (D-040: 379.9 / 431.5 / 267.6); coarse-mesh smoke test
+of the whole case passed. Until the re-run, no piston stress or fatigue number on D-042 exists.
+
+**Piston FE re-run (user, from `cmd`, nothing else running, ~52 min, ~10 GB):**
+```
+cd <project root>
+set PYTHONPATH=src
+.venv\Scripts\python.exe -m w16.sim.fea piston > 08_SIMULATIONS\fea_piston_run.log 2>&1
+```
+Then check: `piston checks` line at the top of the log; `checks` in `piston.json` (solved_gas / solved_gas_thermal reactions
+~0); no `piston_FAILED.json`; peak location back at the slot-end corner.
+
+**Geometric checks on D-042 (2026-11-18)** — `tools/check_piston_clearances.py`, result `08_SIMULATIONS/clearance/piston_clearances.json`
+(exact CAD distances; cylinder positions 1 and 2 of both banks, both valves of each pair; crank angle swept ±90 deg around
+gas-exchange TDC, refined to 0.05 deg; the spread over banks / valve pairs is ≤ 0.003 mm, so one value per case).
+
+Piston to valve (θ = deg after gas-exchange TDC; criterion 1.5 mm intake / 2.0 mm exhaust):
+
+| Valve | Phaser advanced | Mid | Phaser retarded | Closest features (valve / piston) |
+|---|---|---|---|---|
+| Long intake (outer row) | **1.887** (+8.6°, 3.65 mm lift) | 3.670 (+1.5°, 0.16) | 3.756 (0°, closed) | rim edge / pocket floor (adv.); rim edge / pocket rim edge (mid, ret.) |
+| Short intake (inner row) | 7.822 (+8.9°, 3.69) | 10.741 (+2.5°, 0.20) | 10.889 (0°, closed) | rim edge / crown plane |
+| Long exhaust (inner row) | 5.445 (0°, closed) | 5.372 (−1.5°, 0.09) | **4.737** (−6.0°, 1.02) | rim edge / pocket floor |
+| Short exhaust (outer row) | 10.977 (0°, closed) | 10.902 (−1.5°, 0.09) | 10.240 (−6.3°, 1.05) | rim edge / crown plane |
+
+Phaser: intake ±26, exhaust ±11 deg crank. Binding case: long intake at full advance, 1.887 mm (the D-042 record's 1.890 mm is
+the bank-1 value; bank 2 is 0.003 mm lower).
+
+Why deeper pockets stopped helping beyond 2.2 mm (long intake, full advance, crown as built, no CR refit): 1.6 / 2.2 / 2.4 mm →
+1.290 / 1.890 / 2.090 mm, all rim edge to **pocket floor** at +8.55° (one for one with depth). From 2.6 mm on, 2.104 mm at
+every depth (2.6 / 3.0 / 4.0): the closest point moves to the **pocket rim edge on the outer side of the pocket** (piston
+(±33.6, −25.1), where the pocket runs out towards the crown edge) at +6.45°, 3.35 mm lift — the valve rim passes over the
+pocket's edge, which depth does not move. The plateau is 2.10 mm; the D-042 search with the CR refit gave 2.07 / 2.06 mm at
+2.4 / 2.6 because each refit raises the crown (≈0.07 mm per 0.2 mm of depth). Beyond ~2.4 mm only a wider pocket or a
+smaller crown tilt helps.
+
+Crown to head at firing TDC (all four checked cylinders identical; D-040 baseline from the `pre-D041` source):
+
+| | D-040 | D-042 |
+|---|---|---|
+| Minimum, whole piston top | 0.430 | 0.430 — crown edge / top land vs the bore cylinder of the chamber cut in the head (radial: r 42.57 vs 43.0; same as in the liner, not changed by the crown / deck change) |
+| Crown faces vs chamber surfaces (without that wall and the joint face) | 2.766 | 2.770 — crown plane vs the roof / chamber-wall corner at the roof's low edge |
+| Crown plane to roof plane, axial, minimum | 2.943 | 2.949 — at the crown's low edge (the deck clearance is set there, so the tilt change pivots about it) |
+| Crown top above the head joint face | 10.855 | 11.247 (+0.39 at the high edge) |
+| Nearest head part: outer intake seat insert vs pocket rim | 1.873 | 1.822 |
+| Inner exhaust seat insert | 3.522 | 3.798 |
+| Spark plug | 8.34 | 8.16 |
+
+The 0.19 mm change raises the high side of the crown 0.39 mm further into the head but does not reduce the crown-to-roof
+clearance (minimum at the low edge); the tightest head part is the intake seat insert, 1.82 mm, against the pocket rim.
 
 **Not regenerated** (still the D-040 state): CAD exports, `cad_validation.json`, `interference_report.json`, views, animations,
 drawings, BOM and final report. To finish, after approval: verify the piston FE; assembly; export all; FE rod (piston mass),
 crank, insert, block (deck moved); interference (~7 h, faster with `E.interference(2, 3)`); render; drawings; diagrams; docs.
 
 **Open items from D-041 / D-042.**
-- Piston FE result above — unverified, suspect.
-- Oil-ring land over the pin-bore exit 0.97 → 0.77 mm; crown under the pockets to the oil gallery 3.9 → 3.3 mm.
+- Piston FE on D-042 — re-run pending (above); then the stress / temperature at the thinnest crown section (3.3 mm from the
+  outer intake pocket floor to the gallery) and a fatigue estimate with temperature-dependent strength.
+- Oil-ring land over the pin-bore exit 0.97 → 0.77 mm — logged as a detail-design open item (DECISIONS.md, 2026-11-18);
+  crown under the pockets to the oil gallery 3.9 → 3.3 mm.
+- Finger corner walls 1.7 mm (short finger W16-06-007, long finger W16-06-013) — logged as a detail-design open item.
 - Outer-intake piston-to-valve at mid phaser 3.725 → 3.670 mm; the corrected analytic formula reads 1 mm high at mid phaser —
   use the CAD check for acceptance.
 - Seat-insert pocket to water-jacket wall 1.23 / 1.49 mm — open detail-design item, deliberately not changed (see 1a below).
@@ -75,9 +129,15 @@ compression height 40 mm) geometry and its output checked.
    ~350 °C); hot strength / fatigue of boss and ring belt need a temperature-dependent analysis; the slot-end corner under
    the crown is unradiused in the concept CAD (mesh-dependent peak). The piston FE gas load is 2 % low (the relieved
    top-land annulus is not loaded).
+2a. **Detail design — piston oil-ring land over the pin-bore exit 0.77 mm** (D-042; 0.97 mm in D-040; logged 2026-11-18):
+   thin forged land next to the boss and the drain holes; local stress / temperature to be read from the valid D-042 piston FE;
+   options and knock-on checks in DECISIONS.md (open items).
 3. **Connecting rod:** fatigue factor 1.18 and yield factor 1.80 at overspeed (titanium rod).
 4. **Tight valve-gear margins:** finger ratio 2.7 on the short valves; plug well vs cam core 0.945 mm; long-valve spring
    vs short-valve support-element boss 1.175 mm; piston-cooling jet vs rod about 2.3 mm (D-036).
+4a. **Detail design — finger-follower corner walls 1.7 mm** (D-041 / D-042; logged 2026-11-18): the pivot-side chamfer leaves
+   two 1.7 mm side walls, 10.8-11.0 mm high on the short-valve finger W16-06-007 (ratio 2.7, the higher load) and 11.8 mm on
+   the long-valve finger W16-06-013; stiffness and stress at maximum cam force / overspeed not analysed (finger FE).
 5. **Block thermal distortion:** block FE slice gives up to 511 µm bore out-of-round (upper bound, rigid base) — needs a
    full-block thermo-mechanical analysis with head clamp load.
 6. **Packaging overlaps** outside the valve train (35 static pairs): air duct B vs charge pipe B (1.5 cm³), air duct A
@@ -108,4 +168,4 @@ Cautions:
   in their saddles at 0.03 mm clearance). Splitting the angles over more workers, e.g. `E.interference(2, 3)`, shortens it.
 - The piston FE needs ~10 GB of the 15.6 GB RAM; run one heavy job at a time. Claude Code may stop background jobs when
   memory runs low while a session is idle.
-- Nothing is committed; branch `bugatti-w16-engine`.
+- Work is committed on branch `bugatti-w16-engine` (see `git log -- .`); nothing has been pushed.

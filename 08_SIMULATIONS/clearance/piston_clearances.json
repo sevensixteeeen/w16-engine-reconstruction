@@ -1,0 +1,1760 @@
+{
+ "source": "<project root>",
+ "crown_tilt_axis_deg": 16.012071341827998,
+ "pocket_depth_mm": 2.2,
+ "crown_rise_axis_mm": 6.491188152714433,
+ "deck_height_mm": 237.07878552706754,
+ "head_face_height_mm": 238.07878552706754,
+ "phaser_half_range_deg": {
+  "in": 26.0,
+  "ex": 11.0
+ },
+ "tolerance_feature_mm": 0.03,
+ "piston_to_valve": [
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 1.89,
+   "theta_deg_after_gas_exchange_tdc": 8.55,
+   "lift_mm": 3.645,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -30.02,
+    29.1
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 3.67,
+   "theta_deg_after_gas_exchange_tdc": 1.45,
+   "lift_mm": 0.159,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    -27.03,
+    -32.01,
+    30.81
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": 26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 3.756,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    -26.67,
+    -32.22,
+    30.75
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 1.89,
+   "theta_deg_after_gas_exchange_tdc": 8.55,
+   "lift_mm": 3.645,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -30.02,
+    29.1
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 3.67,
+   "theta_deg_after_gas_exchange_tdc": 1.45,
+   "lift_mm": 0.159,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    27.03,
+    -32.01,
+    30.81
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": 26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 3.756,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    26.67,
+    -32.22,
+    30.75
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": -11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.977,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    5.09,
+    41.46
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.902,
+   "theta_deg_after_gas_exchange_tdc": -1.5,
+   "lift_mm": 0.093,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    5.1,
+    41.46
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": 11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.24,
+   "theta_deg_after_gas_exchange_tdc": -6.25,
+   "lift_mm": 1.046,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    5.21,
+    41.49
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": -11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.977,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    5.09,
+    41.46
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.902,
+   "theta_deg_after_gas_exchange_tdc": -1.5,
+   "lift_mm": 0.093,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    5.1,
+    41.46
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": 11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.24,
+   "theta_deg_after_gas_exchange_tdc": -6.25,
+   "lift_mm": 1.046,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    5.21,
+    41.49
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 7.822,
+   "theta_deg_after_gas_exchange_tdc": 8.85,
+   "lift_mm": 3.687,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    2.98,
+    40.86
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.741,
+   "theta_deg_after_gas_exchange_tdc": 2.45,
+   "lift_mm": 0.196,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    2.71,
+    40.78
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": 26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.889,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    2.69,
+    40.77
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 7.822,
+   "theta_deg_after_gas_exchange_tdc": 8.85,
+   "lift_mm": 3.687,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    2.98,
+    40.86
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.741,
+   "theta_deg_after_gas_exchange_tdc": 2.45,
+   "lift_mm": 0.196,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    2.71,
+    40.78
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": 26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.889,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    2.69,
+    40.77
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 5.445,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -28.68,
+    29.48
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 5.372,
+   "theta_deg_after_gas_exchange_tdc": -1.45,
+   "lift_mm": 0.092,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -28.65,
+    29.49
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": 11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 4.738,
+   "theta_deg_after_gas_exchange_tdc": -5.95,
+   "lift_mm": 1.017,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -28.37,
+    29.57
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 5.445,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -28.68,
+    29.48
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 5.372,
+   "theta_deg_after_gas_exchange_tdc": -1.45,
+   "lift_mm": 0.092,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -28.65,
+    29.49
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": 11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 4.738,
+   "theta_deg_after_gas_exchange_tdc": -5.95,
+   "lift_mm": 1.017,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -28.37,
+    29.57
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 1.887,
+   "theta_deg_after_gas_exchange_tdc": 8.6,
+   "lift_mm": 3.652,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -30.02,
+    29.1
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 3.67,
+   "theta_deg_after_gas_exchange_tdc": 1.45,
+   "lift_mm": 0.159,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    -27.03,
+    -32.01,
+    30.81
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": 26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 3.756,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    -26.67,
+    -32.22,
+    30.75
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 1.887,
+   "theta_deg_after_gas_exchange_tdc": 8.6,
+   "lift_mm": 3.652,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -30.02,
+    29.1
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 3.67,
+   "theta_deg_after_gas_exchange_tdc": 1.45,
+   "lift_mm": 0.159,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    27.03,
+    -32.01,
+    30.81
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": 26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 3.756,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    26.67,
+    -32.22,
+    30.75
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": -11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.977,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    5.09,
+    41.46
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.902,
+   "theta_deg_after_gas_exchange_tdc": -1.5,
+   "lift_mm": 0.093,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    5.1,
+    41.46
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": 11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.241,
+   "theta_deg_after_gas_exchange_tdc": -6.2,
+   "lift_mm": 1.042,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    5.21,
+    41.49
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": -11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.977,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    5.09,
+    41.46
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.902,
+   "theta_deg_after_gas_exchange_tdc": -1.5,
+   "lift_mm": 0.093,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    5.1,
+    41.46
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "kind": "ex",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": 11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.241,
+   "theta_deg_after_gas_exchange_tdc": -6.2,
+   "lift_mm": 1.042,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    5.21,
+    41.49
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 7.825,
+   "theta_deg_after_gas_exchange_tdc": 8.8,
+   "lift_mm": 3.68,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    2.98,
+    40.86
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.741,
+   "theta_deg_after_gas_exchange_tdc": 2.45,
+   "lift_mm": 0.196,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    2.71,
+    40.78
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": -1,
+   "shift_deg": 26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.889,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    19.0,
+    2.69,
+    40.77
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 7.825,
+   "theta_deg_after_gas_exchange_tdc": 8.8,
+   "lift_mm": 3.68,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    2.98,
+    40.86
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.741,
+   "theta_deg_after_gas_exchange_tdc": 2.45,
+   "lift_mm": 0.196,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    2.71,
+    40.78
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "in",
+   "valve": "short",
+   "side": 1,
+   "shift_deg": 26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 10.889,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "crown plane",
+   "piston_point": [
+    -19.0,
+    2.69,
+    40.77
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 5.445,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -28.68,
+    29.48
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 5.372,
+   "theta_deg_after_gas_exchange_tdc": -1.45,
+   "lift_mm": 0.092,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -28.65,
+    29.49
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": 11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 4.737,
+   "theta_deg_after_gas_exchange_tdc": -6.0,
+   "lift_mm": 1.022,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -28.37,
+    29.57
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 5.445,
+   "theta_deg_after_gas_exchange_tdc": -0.0,
+   "lift_mm": 0.0,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -28.68,
+    29.48
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": 0.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 5.372,
+   "theta_deg_after_gas_exchange_tdc": -1.45,
+   "lift_mm": 0.092,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -28.65,
+    29.49
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "kind": "ex",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": 11.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 4.737,
+   "theta_deg_after_gas_exchange_tdc": -6.0,
+   "lift_mm": 1.022,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -28.37,
+    29.57
+   ],
+   "at_grid_edge": false,
+   "required_mm": 2.0
+  }
+ ],
+ "pocket_depth_sweep_outer_long_intake_full_advance": [
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 1.6,
+   "min_clearance_mm": 1.29,
+   "theta_deg_after_gas_exchange_tdc": 8.55,
+   "lift_mm": 3.645,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -30.19,
+    29.67
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 1.6,
+   "min_clearance_mm": 1.29,
+   "theta_deg_after_gas_exchange_tdc": 8.55,
+   "lift_mm": 3.645,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -30.19,
+    29.67
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 1.89,
+   "theta_deg_after_gas_exchange_tdc": 8.55,
+   "lift_mm": 3.645,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -30.02,
+    29.1
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.2,
+   "min_clearance_mm": 1.89,
+   "theta_deg_after_gas_exchange_tdc": 8.55,
+   "lift_mm": 3.645,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -30.02,
+    29.1
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.4,
+   "min_clearance_mm": 2.09,
+   "theta_deg_after_gas_exchange_tdc": 8.55,
+   "lift_mm": 3.645,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    -19.0,
+    -29.97,
+    28.9
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.4,
+   "min_clearance_mm": 2.09,
+   "theta_deg_after_gas_exchange_tdc": 8.55,
+   "lift_mm": 3.645,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket floor",
+   "piston_point": [
+    19.0,
+    -29.97,
+    28.9
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.6,
+   "min_clearance_mm": 2.104,
+   "theta_deg_after_gas_exchange_tdc": 6.45,
+   "lift_mm": 3.352,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    -33.55,
+    -25.09,
+    32.8
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 2.6,
+   "min_clearance_mm": 2.104,
+   "theta_deg_after_gas_exchange_tdc": 6.45,
+   "lift_mm": 3.352,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    33.55,
+    -25.09,
+    32.8
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 3.0,
+   "min_clearance_mm": 2.104,
+   "theta_deg_after_gas_exchange_tdc": 6.45,
+   "lift_mm": 3.352,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    -33.55,
+    -25.09,
+    32.8
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 3.0,
+   "min_clearance_mm": 2.104,
+   "theta_deg_after_gas_exchange_tdc": 6.45,
+   "lift_mm": 3.352,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    33.55,
+    -25.09,
+    32.8
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": -1,
+   "shift_deg": -26.0,
+   "pocket_depth": 4.0,
+   "min_clearance_mm": 2.104,
+   "theta_deg_after_gas_exchange_tdc": 6.45,
+   "lift_mm": 3.352,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    -33.55,
+    -25.09,
+    32.8
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  },
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "kind": "in",
+   "valve": "long",
+   "side": 1,
+   "shift_deg": -26.0,
+   "pocket_depth": 4.0,
+   "min_clearance_mm": 2.104,
+   "theta_deg_after_gas_exchange_tdc": 6.45,
+   "lift_mm": 3.352,
+   "valve_feature": "rim edge (face / margin)",
+   "piston_feature": "pocket rim edge (wall / crown plane)",
+   "piston_point": [
+    33.55,
+    -25.09,
+    32.8
+   ],
+   "at_grid_edge": false,
+   "required_mm": 1.5
+  }
+ ],
+ "crown_to_head_tdc": [
+  {
+   "bank": 1,
+   "cyl": 1,
+   "row": "outer",
+   "crown_top_above_joint_face_mm": 11.247,
+   "crown_plane_to_roof_plane_axial_min_mm": 2.949,
+   "axial_min_at_piston_xy": [
+    -0.0,
+    -42.57
+   ],
+   "axial_min_at_head_local": [
+    -264.5,
+    0.66,
+    -1.86
+   ],
+   "piston top": {
+    "min_mm": 0.43,
+    "head_feature": "chamber wall (bore cylinder in the head)",
+    "piston_feature": "crown edge (crown plane / top land)",
+    "piston_point": [
+     42.57,
+     -0.0,
+     40.0
+    ],
+    "head_local": [
+     -221.5,
+     44.461,
+     4.691
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": -8.771
+   },
+   "crown faces": {
+    "min_mm": 0.43,
+    "head_feature": "chamber wall (bore cylinder in the head)",
+    "piston_feature": "crown edge (crown plane / top land)",
+    "piston_point": [
+     40.0,
+     -14.57,
+     35.82
+    ],
+    "head_local": [
+     -224.096,
+     29.327,
+     2.467
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": -6.632
+   },
+   "crown faces to chamber surfaces without the bore-cylinder wall and joint face": {
+    "min_mm": 2.77,
+    "head_feature": "roof / chamber-wall edge",
+    "piston_feature": "crown plane",
+    "piston_point": [
+     0.0,
+     -42.24,
+     27.88
+    ],
+    "head_local": [
+     -264.5,
+     0.595,
+     0.927
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": 0.0
+   },
+   "other_parts": {
+    "seat insert in -1": {
+     "min_mm": 1.822,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "valve in -1 (closed)": {
+     "min_mm": 3.756,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "seat insert in +1": {
+     "min_mm": 1.822,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "valve in +1 (closed)": {
+     "min_mm": 3.756,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "seat insert ex -1": {
+     "min_mm": 9.917,
+     "piston_feature": "crown plane"
+    },
+    "valve ex -1 (closed)": {
+     "min_mm": 10.977,
+     "piston_feature": "crown plane"
+    },
+    "seat insert ex +1": {
+     "min_mm": 9.917,
+     "piston_feature": "crown plane"
+    },
+    "valve ex +1 (closed)": {
+     "min_mm": 10.977,
+     "piston_feature": "crown plane"
+    },
+    "spark plug": {
+     "min_mm": 8.16,
+     "piston_feature": "crown plane"
+    }
+   }
+  },
+  {
+   "bank": 1,
+   "cyl": 2,
+   "row": "inner",
+   "crown_top_above_joint_face_mm": 11.247,
+   "crown_plane_to_roof_plane_axial_min_mm": 2.949,
+   "axial_min_at_piston_xy": [
+    -0.0,
+    -42.57
+   ],
+   "axial_min_at_head_local": [
+    -191.5,
+    -0.66,
+    -1.86
+   ],
+   "piston top": {
+    "min_mm": 0.43,
+    "head_feature": "chamber wall (bore cylinder in the head)",
+    "piston_feature": "crown edge (crown plane / top land)",
+    "piston_point": [
+     42.57,
+     -0.0,
+     40.0
+    ],
+    "head_local": [
+     -234.5,
+     -44.461,
+     4.691
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": -8.771
+   },
+   "crown faces": {
+    "min_mm": 0.43,
+    "head_feature": "chamber wall (bore cylinder in the head)",
+    "piston_feature": "crown edge (crown plane / top land)",
+    "piston_point": [
+     -39.03,
+     17.0,
+     44.88
+    ],
+    "head_local": [
+     -152.078,
+     -62.123,
+     7.287
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": -11.266
+   },
+   "crown faces to chamber surfaces without the bore-cylinder wall and joint face": {
+    "min_mm": 2.77,
+    "head_feature": "roof / chamber-wall edge",
+    "piston_feature": "crown plane",
+    "piston_point": [
+     0.0,
+     -42.24,
+     27.88
+    ],
+    "head_local": [
+     -191.5,
+     -0.595,
+     0.927
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": 0.0
+   },
+   "other_parts": {
+    "seat insert in -1": {
+     "min_mm": 9.829,
+     "piston_feature": "crown plane"
+    },
+    "valve in -1 (closed)": {
+     "min_mm": 10.889,
+     "piston_feature": "crown plane"
+    },
+    "seat insert in +1": {
+     "min_mm": 9.829,
+     "piston_feature": "crown plane"
+    },
+    "valve in +1 (closed)": {
+     "min_mm": 10.889,
+     "piston_feature": "crown plane"
+    },
+    "seat insert ex -1": {
+     "min_mm": 3.798,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "valve ex -1 (closed)": {
+     "min_mm": 5.445,
+     "piston_feature": "pocket floor"
+    },
+    "seat insert ex +1": {
+     "min_mm": 3.798,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "valve ex +1 (closed)": {
+     "min_mm": 5.445,
+     "piston_feature": "pocket floor"
+    },
+    "spark plug": {
+     "min_mm": 8.16,
+     "piston_feature": "crown plane"
+    }
+   }
+  },
+  {
+   "bank": 2,
+   "cyl": 16,
+   "row": "outer",
+   "crown_top_above_joint_face_mm": 11.247,
+   "crown_plane_to_roof_plane_axial_min_mm": 2.949,
+   "axial_min_at_piston_xy": [
+    -0.0,
+    -42.57
+   ],
+   "axial_min_at_head_local": [
+    -264.5,
+    0.66,
+    -1.86
+   ],
+   "piston top": {
+    "min_mm": 0.43,
+    "head_feature": "chamber wall (bore cylinder in the head)",
+    "piston_feature": "crown edge (crown plane / top land)",
+    "piston_point": [
+     42.57,
+     -0.0,
+     40.0
+    ],
+    "head_local": [
+     -221.5,
+     44.461,
+     4.691
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": -8.771
+   },
+   "crown faces": {
+    "min_mm": 0.43,
+    "head_feature": "chamber wall (bore cylinder in the head)",
+    "piston_feature": "crown edge (crown plane / top land)",
+    "piston_point": [
+     40.0,
+     -14.57,
+     35.82
+    ],
+    "head_local": [
+     -224.096,
+     29.327,
+     2.467
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": -6.632
+   },
+   "crown faces to chamber surfaces without the bore-cylinder wall and joint face": {
+    "min_mm": 2.77,
+    "head_feature": "roof / chamber-wall edge",
+    "piston_feature": "crown plane",
+    "piston_point": [
+     0.0,
+     -42.24,
+     27.88
+    ],
+    "head_local": [
+     -264.5,
+     0.595,
+     0.927
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": 0.0
+   },
+   "other_parts": {
+    "seat insert in -1": {
+     "min_mm": 1.822,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "valve in -1 (closed)": {
+     "min_mm": 3.756,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "seat insert in +1": {
+     "min_mm": 1.822,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "valve in +1 (closed)": {
+     "min_mm": 3.756,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "seat insert ex -1": {
+     "min_mm": 9.917,
+     "piston_feature": "crown plane"
+    },
+    "valve ex -1 (closed)": {
+     "min_mm": 10.977,
+     "piston_feature": "crown plane"
+    },
+    "seat insert ex +1": {
+     "min_mm": 9.917,
+     "piston_feature": "crown plane"
+    },
+    "valve ex +1 (closed)": {
+     "min_mm": 10.977,
+     "piston_feature": "crown plane"
+    },
+    "spark plug": {
+     "min_mm": 8.16,
+     "piston_feature": "crown plane"
+    }
+   }
+  },
+  {
+   "bank": 2,
+   "cyl": 15,
+   "row": "inner",
+   "crown_top_above_joint_face_mm": 11.247,
+   "crown_plane_to_roof_plane_axial_min_mm": 2.949,
+   "axial_min_at_piston_xy": [
+    -0.0,
+    -42.57
+   ],
+   "axial_min_at_head_local": [
+    -191.5,
+    -0.66,
+    -1.86
+   ],
+   "piston top": {
+    "min_mm": 0.43,
+    "head_feature": "chamber wall (bore cylinder in the head)",
+    "piston_feature": "crown edge (crown plane / top land)",
+    "piston_point": [
+     42.57,
+     -0.0,
+     40.0
+    ],
+    "head_local": [
+     -234.5,
+     -44.461,
+     4.691
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": -8.771
+   },
+   "crown faces": {
+    "min_mm": 0.43,
+    "head_feature": "chamber wall (bore cylinder in the head)",
+    "piston_feature": "crown edge (crown plane / top land)",
+    "piston_point": [
+     -39.03,
+     17.0,
+     44.88
+    ],
+    "head_local": [
+     -152.078,
+     -62.123,
+     7.287
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": -11.266
+   },
+   "crown faces to chamber surfaces without the bore-cylinder wall and joint face": {
+    "min_mm": 2.77,
+    "head_feature": "roof / chamber-wall edge",
+    "piston_feature": "crown plane",
+    "piston_point": [
+     0.0,
+     -42.24,
+     27.88
+    ],
+    "head_local": [
+     -191.5,
+     -0.595,
+     0.927
+    ],
+    "radial_from_bore_axis": 43.0,
+    "above_roof_plane": 0.0
+   },
+   "other_parts": {
+    "seat insert in -1": {
+     "min_mm": 9.829,
+     "piston_feature": "crown plane"
+    },
+    "valve in -1 (closed)": {
+     "min_mm": 10.889,
+     "piston_feature": "crown plane"
+    },
+    "seat insert in +1": {
+     "min_mm": 9.829,
+     "piston_feature": "crown plane"
+    },
+    "valve in +1 (closed)": {
+     "min_mm": 10.889,
+     "piston_feature": "crown plane"
+    },
+    "seat insert ex -1": {
+     "min_mm": 3.798,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "valve ex -1 (closed)": {
+     "min_mm": 5.445,
+     "piston_feature": "pocket floor"
+    },
+    "seat insert ex +1": {
+     "min_mm": 3.798,
+     "piston_feature": "pocket rim edge (wall / crown plane)"
+    },
+    "valve ex +1 (closed)": {
+     "min_mm": 5.445,
+     "piston_feature": "pocket floor"
+    },
+    "spark plug": {
+     "min_mm": 8.16,
+     "piston_feature": "crown plane"
+    }
+   }
+  }
+ ],
+ "run_s": 66.0
+}

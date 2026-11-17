@@ -22,6 +22,7 @@ from build123d import Align, Box, Cylinder, Location, Pos, Rot, export_step, imp
 
 from ..params import P, MATERIALS
 from .. import layout as L
+from ..analysis import cycle as CY
 from ..cad import block as B, cranktrain as CT, head as H
 from ..cad.common import MAT, ROOT, bank_plane, head_plane
 
@@ -277,7 +278,9 @@ def picture(m, cell=None, point=None, title="", path="", view=(1, -1, 0.6), clim
 
 
 def peak(m, vm, frac=0.999):
-    """Peak and 99.9th-percentile (volume-weighted) element von Mises stress and the location of the peak."""
+    """Peak and 99.9th-percentile element von Mises stress and the location of the peak.  The percentile is taken over the
+    element values unweighted - every element counts once whatever its volume, so locally refined regions weigh more.  Kept
+    unweighted so that the results stay comparable with the earlier runs (the docstring said volume-weighted until D-043)."""
     i = int(np.argmax(vm))
     c = m.p[:, m.t[:, i]].mean(axis=1)
     return float(vm[i]), float(np.quantile(vm, frac)), c.tolist()
@@ -343,6 +346,81 @@ def case_rod():
 
 
 PISTON_H = dict(gas=0.9e-3, gallery=2.5e-3, undercrown=0.5e-3)       # W/mm2K, EST film coefficients (sensitivity: see piston_sensitivity)
+# D-043 load-model guards of the piston case (see piston_checks).  Limits as fractions: gas force and gas-side heat against
+# their targets, side force and point-support reaction against the gas force, loaded areas against PISTON_AREA_REF.
+PISTON_LIMITS = dict(force=0.03, side=0.01, heat=0.03, area=0.05)
+# Loaded areas measured on the D-040 piston (tag pre-D041: 1.6 mm valve pockets, crown tilt 15.76 deg; same mesh settings;
+# the old and the new selection rule give the same facets there).  D-042 (2.2 mm pockets): crown +0.1 %, chamber +1.7 %
+# (deeper pocket walls).  An area change beyond PISTON_LIMITS["area"] fails the case: if a geometry change explains it,
+# re-measure both areas and record the decision and the reason here.
+PISTON_AREA_REF = dict(basis="D-040 piston (tag pre-D041, 81,998 tets)", crown_mm2=5912.6, chamber_mm2=10829.1)
+
+
+class FECheckError(RuntimeError):
+    """A load-model check failed: the case is not reported (the runner writes <case>_FAILED.json)."""
+
+
+def piston_checks(m, pinfo, crown, chamber, p_d, q_p, q_cal):
+    """D-043 guards on the piston load model, evaluated on the facet selections before any solve (seconds; the solve
+    takes ~45 min).  crown: gas-side thermal set; chamber: pressure set (crown, valve pockets, top land); q_cal: gas-side
+    flux at the cycle-model wall temperature (W/mm2), so that q_cal * crown area is the heat the boundary condition applies.
+    The case fails (FECheckError) if
+      - the gas force differs from the design pressure on the bore area by more than PISTON_LIMITS["force"] (the annulus
+        that the top-land relief opens is not loaded: -2.0 % by design, D-040), or the side force exceeds
+        PISTON_LIMITS["side"] of it;
+      - the applied gas-side heat differs from the cycle-model piston heat by more than PISTON_LIMITS["heat"] (-2.0 %, same
+        annulus).  The solved heat is lower again (D-040: -10 %) because the crown runs hotter than the cycle model's
+        560 K wall - a result, not an input, so it is not checked;
+      - a loaded area differs from PISTON_AREA_REF by more than PISTON_LIMITS["area"];
+      - a selected facet lies at or below the top of the top-ring groove (ring-groove flank or second land)."""
+    lim, ref = PISTON_LIMITS, PISTON_AREA_REF
+    e = ElementTetP1()
+    fb_ch, fb_cr = FacetBasis(m, e, facets=chamber), FacetBasis(m, e, facets=crown)
+    F = np.array([-p_d * float((fb_ch.normals[i] * fb_ch.dx).sum()) for i in range(3)])      # pressure against the outward normal
+    a_ch, a_cr = float(fb_ch.dx.sum()), float(fb_cr.dx.sum())
+    F_exp = p_d * math.pi * (P.bore / 2) ** 2
+    z_groove = pinfo["g1"] + P.ring1_h                                                      # top of the top-ring groove
+    z_mid = lambda fc: m.p[2, m.facets[:, fc]].mean(axis=0)
+    chk = dict(gas_force_N=F.tolist(), gas_force_expected_N=F_exp, gas_force_dev=float(-F[2] / F_exp - 1.0),
+               side_force_frac=float(math.hypot(F[0], F[1]) / F_exp),
+               heat_applied_W=q_cal * a_cr, heat_target_W=q_p, heat_dev=float(q_cal * a_cr / q_p - 1.0),
+               crown_area_mm2=a_cr, chamber_area_mm2=a_ch, area_ref=ref,
+               crown_area_dev=a_cr / ref["crown_mm2"] - 1.0, chamber_area_dev=a_ch / ref["chamber_mm2"] - 1.0,
+               min_facet_height_above_top_groove_mm=float(min(z_mid(chamber).min(), z_mid(crown).min()) - z_groove), limits=lim)
+    bad = []
+    if abs(chk["gas_force_dev"]) > lim["force"]:
+        bad.append(f"gas force {-F[2]:.0f} N vs {F_exp:.0f} N ({chk['gas_force_dev']:+.1%})")
+    if chk["side_force_frac"] > lim["side"]:
+        bad.append(f"side force ({F[0]:.0f}, {F[1]:.0f}) N ({chk['side_force_frac']:.1%} of the gas force)")
+    if abs(chk["heat_dev"]) > lim["heat"]:
+        bad.append(f"gas-side heat {q_cal * a_cr:.0f} W vs {q_p:.0f} W ({chk['heat_dev']:+.1%})")
+    for k in ("crown", "chamber"):
+        if abs(chk[k + "_area_dev"]) > lim["area"]:
+            bad.append(f"{k} area {chk[k + '_area_mm2']:.0f} mm2 vs {ref[k + '_mm2']:.0f} ({chk[k + '_area_dev']:+.1%}; geometry change? see PISTON_AREA_REF)")
+    if chk["min_facet_height_above_top_groove_mm"] < 0.01:
+        bad.append(f"facet at or below the top-ring groove top ({chk['min_facet_height_above_top_groove_mm']:+.3f} mm)")
+    if bad:
+        raise FECheckError("piston load checks failed: " + "; ".join(bad))
+    return chk
+
+
+def piston_solve_checks(s, F_exp, what):
+    """D-043: a solved piston case must carry the gas load and nothing else - the assembled force within
+    PISTON_LIMITS["force"] of F_exp, side force and point-support reaction within PISTON_LIMITS["side"] of it."""
+    lim = PISTON_LIMITS
+    F, Rp = s["applied"], s["point_reaction"]
+    chk = dict(gas_force_dev=float(-F[2] / F_exp - 1.0), side_force_frac=float(math.hypot(F[0], F[1]) / F_exp),
+               support_reaction_frac=float(np.linalg.norm(Rp) / F_exp))
+    bad = []
+    if abs(chk["gas_force_dev"]) > lim["force"]:
+        bad.append(f"gas force {-F[2]:.0f} N vs {F_exp:.0f} N")
+    if chk["side_force_frac"] > lim["side"]:
+        bad.append(f"side force ({F[0]:.0f}, {F[1]:.0f}) N")
+    if chk["support_reaction_frac"] > lim["side"]:
+        bad.append(f"point-support reaction ({Rp[0]:.0f}, {Rp[1]:.0f}, {Rp[2]:.0f}) N")
+    if bad:
+        raise FECheckError(f"piston {what}: solved load checks failed: " + "; ".join(bad))
+    return chk
 
 
 def case_piston(thermal_only=False):
@@ -355,13 +433,18 @@ def case_piston(thermal_only=False):
     ta = math.tan(math.radians(P.crown_tilt_axis))
     r = P.bore / 2
     nrm = np.array([0.0, -math.sin(math.radians(P.crown_tilt_axis)), math.cos(math.radians(P.crown_tilt_axis))])
-    # crown = facets on the crown plane (and the valve-pocket floors) facing along the crown normal - the side wall is excluded
-    crown = facets_by_normal(m, facets(m, lambda x: (np.abs(x[2] - (ch + x[1] * ta)) < 2.2) & (np.hypot(x[0], x[1]) < r - 0.2)), nrm, 0.9)
+    cos_t = math.cos(math.radians(P.crown_tilt_axis))
+    depth = lambda x: (ch + x[1] * ta - x[2]) * cos_t                # depth below the crown plane, normal to it
+    # D-043: the chamber-side band reaches 0.5 mm below the valve-pocket floors.  It was a fixed 2.2 mm (measured vertically
+    # for the crown set) - right for the 1.6 mm pockets; with the 2.2 mm pockets of D-042 the floors fell outside and carried
+    # neither gas pressure nor gas-side heat (run of 2026-11-17 23:21: 58.4 kN + 5.3 kN sideways instead of 76.8 kN, 3.7
+    # instead of 5.4 kW).  The top-ring groove is 5 mm (vertical) below the low edge of the crown, far below the band.
+    band = P.piston_valve_pocket_depth + 0.5
+    # crown = facets on the crown plane and the valve-pocket floors facing along the crown normal - the side wall is excluded
+    crown = facets_by_normal(m, facets(m, lambda x: (np.abs(depth(x)) < band) & (np.hypot(x[0], x[1]) < r - 0.2)), nrm, 0.9)
     pinb = facets(m, lambda x: (np.hypot(x[1], x[2]) < P.pin_dia_piston / 2 + 0.06) & (np.abs(x[0]) > 10))
     pin_up = facets(m, lambda x: (np.hypot(x[1], x[2]) < P.pin_dia_piston / 2 + 0.06) & (np.abs(x[0]) > 10) & (x[2] > 0))
     dg0, dg1 = pinfo["gallery_depth"]                                # gallery depth below the crown plane, normal to it
-    cos_t = math.cos(math.radians(P.crown_tilt_axis))
-    depth = lambda x: (ch + x[1] * ta - x[2]) * cos_t
     gal = facets(m, lambda x: (np.hypot(x[0], x[1]) > P.gallery_r_in - 0.2) & (np.hypot(x[0], x[1]) < P.gallery_r_out + 0.2)
                  & (depth(x) > dg0 - 0.2) & (depth(x) < dg1 + 0.2))
     under = facets(m, lambda x: (x[2] < ch + x[1] * ta - 5.0) & (np.hypot(x[0], x[1]) < r - 4.0) & (np.hypot(x[1], x[2]) > P.pin_dia_piston / 2 + 0.5))
@@ -381,7 +464,7 @@ def case_piston(thermal_only=False):
     # modes, so it carries no load (its reaction is reported as a check) and does not restrain the thermal growth.
     r_tl = r - P.piston_clear_dia / 2 - P.piston_top_land_relief     # turned-down top land (D-040)
     land = facets_radial(m, facets(m, lambda x: (np.hypot(x[0], x[1]) > r_tl - 0.2) & (x[2] > pinfo["g1"] + P.ring1_h + 0.05)), axis=2)
-    chamber = np.union1d(facets(m, lambda x: (depth(x) < 2.2) & (np.hypot(x[0], x[1]) < r - 0.2)), land)
+    chamber = np.union1d(facets(m, lambda x: (depth(x) < band) & (np.hypot(x[0], x[1]) < r - 0.2)), land)
     # the pin bears on the bores from the boss inner faces to its ends (|x| <= pin_length / 2, inside the circlip grooves);
     # the bore cut continues through the pin ends (assembly passage) but carries no pin there
     pin_brg = facets_radial(m, facets(m, lambda x: (np.hypot(x[1], x[2]) < P.pin_dia_piston / 2 + 0.06) & (np.abs(x[0]) > 10)
@@ -393,11 +476,21 @@ def case_piston(thermal_only=False):
     sup = dict(pressures=[(chamber, p_d)], balance=(pin_brg, fn_pin, 2), points=pts, factor_cache={})
     n_brg, n_crown = np.unique(m.facets[:, pin_brg]), np.unique(m.facets[:, crown])
     rec["facet_counts"].update(chamber=int(len(chamber)), top_land=int(len(land)), pin_bearing=int(len(pin_brg)))
+    # gas-side thermal data (cycle-mean), needed by the checks below and by the thermal case
+    q_p = R["energy"]["wall_parts"][1] * 1e3 / 16                                   # W per piston (cycle model)
+    a_cr = math.pi * r * r / math.cos(math.radians(P.crown_tilt_axis))
+    h_g = PISTON_H["gas"]                                                            # W/mm2K (EST cycle-mean gas-side coefficient)
+    T_w = CY.A["T_wall_piston"]                                                      # K, gas-side piston wall temperature of the cycle model
+    T_g = T_w + q_p / a_cr / h_g                                                     # effective gas temperature: the cycle-model heat at that wall temperature
+    F_exp = p_d * math.pi * r * r
+    rec["checks"] = piston_checks(m, pinfo, crown, chamber, p_d, q_p, h_g * (T_g - T_w))      # D-043: before any solve
+    print("piston checks", json.dumps(rec["checks"], default=str), flush=True)
     if not thermal_only:
         s = solve_elastic(m, mt, None, **sup)
+        rec["checks"]["solved_gas"] = piston_solve_checks(s, F_exp, "gas")
         pk, p999, loc = peak(m, s["vm"])
         uz_ref = s["U"][2][n_brg].mean()                                 # crown deflection relative to the pin-bore tops
-        rec["results"]["gas_pressure"] = dict(applied_force_N=s["applied"].tolist(), expected_force_N=p_d * math.pi * r * r,
+        rec["results"]["gas_pressure"] = dict(applied_force_N=s["applied"].tolist(), expected_force_N=F_exp,
                                               pin_reaction_N=s["balance_force"].tolist(), support_reaction_N=s["point_reaction"].tolist(),
                                               peak_bearing_pressure_MPa=p0_unit * s["balance_scale"], vm_max_MPa=pk, vm_p999_MPa=p999,
                                               vm_max_location=loc, crown_deflection_mm=float(np.abs(s["U"][2][n_crown] - uz_ref).max()),
@@ -405,10 +498,6 @@ def case_piston(thermal_only=False):
         picture(m, cell=s["vm"], title="von Mises (gas load)", units="[MPa]", path=os.path.join(OUT, "piston_gas_vm.png"), view=(1, -1, -0.5), clim=(0, p999))
         progress("piston", rec, "gas_pressure")
     # steady thermal: crown gas side (cycle-mean), under-crown oil jet, ring belt / skirt to the liner, pin bore
-    q_p = R["energy"]["wall_parts"][1] * 1e3 / 16                                   # W per piston (cycle model)
-    a_cr = math.pi * r * r / math.cos(math.radians(P.crown_tilt_axis))
-    h_g = PISTON_H["gas"]                                                            # W/mm2K (EST cycle-mean gas-side coefficient)
-    T_g = 560.0 + q_p / a_cr / h_g                                                   # effective gas temperature reproducing the model heat flow
     h_gal, h_uc = PISTON_H["gallery"], PISTON_H["undercrown"]                        # W/mm2K: shaker-cooled gallery / splash under the crown (EST)
     T, flows = solve_thermal(m, mt["k"], robin=[(crown, h_g, T_g), (gal, h_gal, 400.0), (under, h_uc, 400.0), (side, 1.1e-3, 430.0), (pinb, 0.5e-3, 420.0)])
     rec["inputs"].update(q_piston_W=q_p, h_gas=h_g * 1e6, T_gas_eff_K=T_g, h_gallery=h_gal * 1e6, h_undercrown=h_uc * 1e6, T_oil_K=400.0,
@@ -440,6 +529,7 @@ def case_piston(thermal_only=False):
     # gas + thermal: same support model as the gas case (see above)
     s2 = solve_elastic(m, mt, None, thermal=T - 293.15, **sup)
     sup["factor_cache"].clear()                                          # release the factorisation
+    rec["checks"]["solved_gas_thermal"] = piston_solve_checks(s2, F_exp, "gas + thermal")
     pk, p999, loc = peak(m, s2["vm"])
     rec["results"]["gas_plus_thermal"] = dict(vm_max_MPa=pk, vm_p999_MPa=p999, vm_max_location=loc, T_at_vm_max_C=T_at(loc),
                                               support_reaction_N=s2["point_reaction"].tolist(),
