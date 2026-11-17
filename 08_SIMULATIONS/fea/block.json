@@ -1,0 +1,66 @@
+{
+ "case": "cylinder block slice, cylinder 3",
+ "material": {
+  "name": "AlSi7Mg0.3-T6 (A356)",
+  "E": 72000.0,
+  "nu": 0.33,
+  "alpha": 2.15e-05,
+  "k": 0.15,
+  "yield_": 230,
+  "fatigue": 90,
+  "rho": 2680
+ },
+ "mesh": {
+  "nodes": 29021,
+  "tets": 115879,
+  "h_max": 5.0,
+  "quality_gamma_min": 0.005944210482006116,
+  "quality_gamma_mean": 0.7627984074224914,
+  "quality_below_0p1": 17,
+  "volume_mm3": 1699319.865777496
+ },
+ "element": "P1 tetrahedra",
+ "inputs": {
+  "p_design_MPa": 13.5
+ },
+ "facet_counts": {
+  "base": 923,
+  "symmetry": 4209,
+  "bore_loaded": 1328,
+  "jacket": 6861
+ },
+ "results": {
+  "gas_pressure": {
+   "vm_max_MPa": 185.11448332008277,
+   "vm_p999_MPa": 122.83771164500448,
+   "vm_max_location": [
+    -69.25195305197774,
+    195.16542528943324,
+    128.07298345701818
+   ],
+   "dofs": 87063,
+   "solve_s": 23.605368614196777,
+   "applied_force_check_N": [
+    51.67646484204593,
+    6338.118323366913,
+    -8259.996615081554
+   ],
+   "max_displacement_mm": 0.16357211109320927,
+   "plausible": true
+  },
+  "thermal": {
+   "T_bore_max_C": 188.1251228498533,
+   "T_bore_mean_C": 124.99800775061243,
+   "T_max_C": 188.1251228498533,
+   "heat_to_jacket_W": 5941.115958719089,
+   "jacket_facets": 6861,
+   "q_top_W_mm2": 0.5179857958433718
+  },
+  "thermal_expansion": {
+   "bore_radial_growth_mean_um": 57.34986568055373,
+   "bore_out_of_round_um": 511.07672525210546,
+   "note": "thermal growth with the same supports as the gas case (split plane fixed, cut faces symmetric); includes bending of the bank, so out-of-round is an upper bound"
+  }
+ },
+ "boundary_conditions": "100 mm slice centred on cylinder 3 (contains its complete bore wall ring); crank-axis split plane fixed; the two cut faces (x = cyl. 3 +/- 50 mm) are symmetry planes (axial displacement fixed); design pressure on the upper 50 mm of the bore of cylinder 3 only; no head clamp load, no bolt preload. A first 73 mm slice (narrower than the bore) had no complete hoop ring and gave a meaningless 95 mm deflection - rejected"
+}

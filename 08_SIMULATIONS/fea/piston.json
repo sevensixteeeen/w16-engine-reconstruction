@@ -1,0 +1,153 @@
+{
+ "case": "piston",
+ "material": {
+  "name": "AlSi12CuMgNi (forged 4032-T6)",
+  "E": 79000.0,
+  "nu": 0.33,
+  "alpha": 1.95e-05,
+  "k": 0.14,
+  "yield_": 315,
+  "fatigue": 110,
+  "rho": 2700
+ },
+ "mesh": {
+  "nodes": 19863,
+  "tets": 81998,
+  "h_max": 4.0,
+  "quality_gamma_min": 1.95852276221207e-05,
+  "quality_gamma_mean": 0.7515567020099293,
+  "quality_below_0p1": 56,
+  "volume_mm3": 165235.45264937603
+ },
+ "results": {
+  "gas_pressure": {
+   "applied_force_N": [
+    -3.9590915119107767e-13,
+    -1.796767105871022e-12,
+    -76817.29182544583
+   ],
+   "expected_force_N": 78418.86502258162,
+   "pin_reaction_N": [
+    0.0,
+    0.0,
+    76817.29182544583
+   ],
+   "support_reaction_N": [
+    5.429869887052519e-10,
+    3.072431198347658e-10,
+    3.7396929997157713e-10
+   ],
+   "peak_bearing_pressure_MPa": 85.25382444261449,
+   "vm_max_MPa": 181.79171630359153,
+   "vm_p999_MPa": 105.38935856591505,
+   "vm_max_location": [
+    11.769411103941412,
+    -18.544581334530434,
+    10.882134747803963
+   ],
+   "crown_deflection_mm": 0.0900151629736911,
+   "dofs": 405429,
+   "solve_s": 2708.326000928879,
+   "T_at_vm_max_C": 248.15298540764002
+  },
+  "thermal": {
+   "T_max_C": 431.4793535655649,
+   "T_crown_mean_C": 379.87386453770273,
+   "T_top_ring_groove_C": 267.6481976690136,
+   "T_min_C": 172.19258319127368,
+   "heat_in_crown_W": 5363.343892433417,
+   "heat_to_gallery_W": 3253.762086107261,
+   "heat_to_undercrown_W": 854.7982319673871,
+   "heat_to_liner_W": 1125.679981693817,
+   "heat_to_pin_W": 129.10359266483005,
+   "energy_balance_error_pct": 2.271259293862702e-12,
+   "T_max_location": [
+    0.31893686854775183,
+    -4.532031491696387,
+    38.72076584422601
+   ]
+  },
+  "thermal_sensitivity": [
+   {
+    "case": "gallery 1,500 W/m2K",
+    "T_max_C": 469.63653498332235,
+    "T_crown_mean_C": 421.7374137513822,
+    "T_top_ring_groove_C": 303.4036643538302
+   },
+   {
+    "case": "gallery 4,000 W/m2K",
+    "T_max_C": 395.88524019601005,
+    "T_crown_mean_C": 340.5430367297613,
+    "T_top_ring_groove_C": 234.81411441184554
+   },
+   {
+    "case": "under-crown 1,000 W/m2K",
+    "T_max_C": 411.3695546357187,
+    "T_crown_mean_C": 368.59451417663774,
+    "T_top_ring_groove_C": 254.4550559257866
+   },
+   {
+    "case": "gallery 4,000 + under-crown 1,000 W/m2K",
+    "T_max_C": 381.39793208811545,
+    "T_crown_mean_C": 333.50731315161704,
+    "T_top_ring_groove_C": 226.3332788581841
+   }
+  ],
+  "gas_plus_thermal": {
+   "vm_max_MPa": 285.39677912658544,
+   "vm_p999_MPa": 138.30733294240392,
+   "vm_max_location": [
+    11.769411103941412,
+    -18.544581334530434,
+    10.882134747803963
+   ],
+   "T_at_vm_max_C": 248.15298540764002,
+   "support_reaction_N": [
+    1.2641901914189901e-08,
+    4.340788339884938e-09,
+    -4.185940483125705e-09
+   ],
+   "max_displacement_mm": 0.38950116700716714,
+   "radial_growth_max_mm": 0.27398888388595166,
+   "top_land_radial_growth_max_mm": 0.3306702962150013,
+   "top_land_cold_clearance_mm": 0.43000000000000005
+  },
+  "fatigue_estimate": {
+   "note": "gas load from zero to the design pressure every cycle: alternating stress = half the 99.9th-percentile gas-case stress, against the room-temperature fatigue limit (no mean-stress or temperature correction - the hot strength at the boss and ring belt is lower)",
+   "sigma_a_MPa": 52.69467928295752,
+   "fatigue_limit_MPa": 110,
+   "factor": 2.0874972861932974
+  }
+ },
+ "inputs": {
+  "p_design_MPa": 13.5,
+  "q_piston_W": 5988.2642671185595,
+  "h_gas": 900.0,
+  "T_gas_eff_K": 1662.365036446151,
+  "h_gallery": 2500.0,
+  "h_undercrown": 500.0,
+  "T_oil_K": 400.0,
+  "h_ring_skirt": 1100.0,
+  "T_liner_K": 430.0
+ },
+ "facet_counts": {
+  "crown": 2589,
+  "gallery": 3134,
+  "under_crown": 10040,
+  "pin_upper": 799,
+  "chamber": 4913,
+  "top_land": 1964,
+  "pin_bearing": 576
+ },
+ "design": {
+  "gallery_area_mm2": 86.39999999999998,
+  "gallery_z": [
+   15.867419604813145,
+   44.390185471883726
+  ],
+  "crown_thk": 11.0,
+  "ring_belt_inner_r": 22.0,
+  "mass_kg": 0.44572410148034086
+ },
+ "boundary_conditions": "gas and gas + thermal: design gas pressure on all chamber-side surfaces above the top ring (crown, valve pockets, top land; ring-groove and second-land pressures neglected); pin reaction as a cosine bearing pressure on the upper half of both pin bores, scaled to balance the gas load; statically determinate 3-2-1 point support (bore bottoms, skirt bottom) - no restraint of the thermal growth. Thermal: cycle-mean gas side, oil gallery 2,500 W/m2K and under-crown splash 500 W/m2K at 127 degC, ring belt and skirt to the liner. No skirt contact, no pin deformation"
+}

@@ -1,0 +1,46 @@
+{
+ "case": "crank throw 3 in bending",
+ "material": {
+  "name": "42CrMo4 QT + nitrided",
+  "E": 210000.0,
+  "nu": 0.3,
+  "alpha": 1.2e-05,
+  "k": 0.042,
+  "yield_": 900,
+  "fatigue": 520,
+  "rho": 7850
+ },
+ "mesh": {
+  "nodes": 19334,
+  "tets": 86290,
+  "h_max": 5.0,
+  "quality_gamma_min": 0.10133618809380414,
+  "quality_gamma_mean": 0.7753716993066742,
+  "quality_below_0p1": 0,
+  "volume_mm3": 504937.89047969715
+ },
+ "inputs": {
+  "force_N": 78418.86502258164,
+  "direction": "towards the crank axis (firing TDC)"
+ },
+ "results": {
+  "applied_force_check_N": [
+   0.0,
+   -43923.62411538472,
+   64959.23009895413
+  ],
+  "vm_max_MPa": 155.1477516532679,
+  "vm_p999_MPa": 125.76992569230464,
+  "vm_max_location": [
+   -136.16181791822262,
+   9.88488588341733,
+   -32.52537044234582
+  ],
+  "pin_deflection_mm": 0.01586108390476356,
+  "dofs": 406623,
+  "solve_s": 1288.758903503418,
+  "fatigue_limit_MPa": 520,
+  "factor_on_p999": 8.26906746008862
+ },
+ "boundary_conditions": "both main-journal surfaces fully fixed (stiffer than real bearings -> fillet stress over-predicted); load on the central part of the pin; pulsating load, alternating stress = half the peak"
+}

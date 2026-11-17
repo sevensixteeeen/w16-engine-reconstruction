@@ -1,0 +1,73 @@
+components: 164 parts; STEP 164, BREP 164, STL 164, 3MF 157
+sub-assembly 01 {'file': 'W16_SUBASSY_01_Crankcase_and_cylinder_block.step', 'size_mb': 13.74, 'instances': 48, 'seconds': 1.1}
+sub-assembly 02 {'file': 'W16_SUBASSY_02_Cylinder_heads.step', 'size_mb': 37.39, 'instances': 152, 'seconds': 2.8}
+sub-assembly 03 {'file': 'W16_SUBASSY_03_Piston_assemblies.step', 'size_mb': 0.57, 'instances': 112, 'seconds': 0.1}
+sub-assembly 04 {'file': 'W16_SUBASSY_04_Connecting_rods.step', 'size_mb': 0.58, 'instances': 112, 'seconds': 0.1}
+sub-assembly 05 {'file': 'W16_SUBASSY_05_Crankshaft.step', 'size_mb': 4.81, 'instances': 1, 'seconds': 0.4}
+sub-assembly 06 {'file': 'W16_SUBASSY_06_Valvetrain.step', 'size_mb': 100.31, 'instances': 324, 'seconds': 14.6}
+sub-assembly 07 {'file': 'W16_SUBASSY_07_Timing_system.step', 'size_mb': 5.21, 'instances': 495, 'seconds': 0.6}
+sub-assembly 08 {'file': 'W16_SUBASSY_08_Turbochargers.step', 'size_mb': 7.2, 'instances': 32, 'seconds': 0.6}
+sub-assembly 09 {'file': 'W16_SUBASSY_09_Intake_system.step', 'size_mb': 4.5, 'instances': 24, 'seconds': 0.4}
+sub-assembly 10 {'file': 'W16_SUBASSY_10_Exhaust_system.step', 'size_mb': 3.74, 'instances': 18, 'seconds': 0.2}
+sub-assembly 11 {'file': 'W16_SUBASSY_11_Fuel_injection_and_ignition.step', 'size_mb': 0.28, 'instances': 68, 'seconds': 0.0}
+sub-assembly 12 {'file': 'W16_SUBASSY_12_Lubrication_system.step', 'size_mb': 0.39, 'instances': 6, 'seconds': 0.0}
+sub-assembly 13 {'file': 'W16_SUBASSY_13_Cooling_system.step', 'size_mb': 0.71, 'instances': 14, 'seconds': 0.1}
+sub-assembly 14 {'file': 'W16_SUBASSY_14_Accessory_system.step', 'size_mb': 0.9, 'instances': 39, 'seconds': 0.1}
+sub-assembly 15 {'file': 'W16_SUBASSY_15_Fasteners_and_interfaces.step', 'size_mb': 0.4, 'instances': 154, 'seconds': 0.1}
+master {'file': 'W16_MASTER_ASSEMBLY.step', 'size_mb': 185.18, 'seconds': 22.6}
+{
+ "cyl1": {
+  "v_tdc_cc": 62.50109747996173,
+  "v_above_crown_cc": 59.28044331723952,
+  "v_pockets_cc": 2.751950696604995,
+  "v_crevice_cc": 0.4687034661172098,
+  "cr": 8.992775076919068
+ },
+ "cyl2": {
+  "v_tdc_cc": 62.50109752721748,
+  "v_above_crown_cc": 59.28044336449387,
+  "v_pockets_cc": 2.7519506966064067,
+  "v_crevice_cc": 0.4687034661172098,
+  "cr": 8.9927750708759
+ },
+ "envelope_dressed_mm": {
+  "min": [
+   -573.0,
+   -450.0,
+   -165.0
+  ],
+  "max": [
+   403.0,
+   450.0,
+   667.0
+  ],
+  "size": [
+   976.0,
+   900.0,
+   832.0
+  ]
+ },
+ "envelope_long_block_mm": {
+  "min": [
+   -402.0,
+   -377.7185182356223,
+   -106.0
+  ],
+  "max": [
+   394.0,
+   377.7185182356223,
+   377.7185182356223
+  ],
+  "size": [
+   796.0,
+   755.4370364712446,
+   483.7185182356223
+  ]
+ },
+ "mass_total_kg": 345.7177481615331,
+ "centre_of_mass_mm": [
+  -36.312492266002955,
+  0.10180020749831377,
+  128.54278934655645
+ ]
+}

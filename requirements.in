@@ -1,0 +1,13 @@
+build123d
+numpy
+scipy
+matplotlib
+pillow
+pymupdf
+markdown
+gmsh
+scikit-fem
+meshio
+pyvista
+imageio
+imageio-ffmpeg

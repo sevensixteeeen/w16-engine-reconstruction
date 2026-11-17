@@ -1,0 +1,17 @@
+{'group': '01', 'name': 'Crankcase and cylinder block', 'part_numbers': 7, 'instances': 48, 'mass_kg': 97.73}
+{'group': '02', 'name': 'Cylinder heads', 'part_numbers': 7, 'instances': 152, 'mass_kg': 43.87}
+{'group': '03', 'name': 'Piston assemblies', 'part_numbers': 5, 'instances': 112, 'mass_kg': 9.56}
+{'group': '04', 'name': 'Connecting rods', 'part_numbers': 5, 'instances': 112, 'mass_kg': 6.84}
+{'group': '05', 'name': 'Crankshaft', 'part_numbers': 1, 'instances': 1, 'mass_kg': 32.49}
+{'group': '06', 'name': 'Valvetrain', 'part_numbers': 13, 'instances': 324, 'mass_kg': 17.65}
+{'group': '07', 'name': 'Timing system', 'part_numbers': 10, 'instances': 493, 'mass_kg': 5.89}
+{'group': '08', 'name': 'Turbochargers', 'part_numbers': 14, 'instances': 32, 'mass_kg': 22.43}
+{'group': '09', 'name': 'Intake system', 'part_numbers': 24, 'instances': 24, 'mass_kg': 24.66}
+{'group': '10', 'name': 'Exhaust system', 'part_numbers': 18, 'instances': 18, 'mass_kg': 17.86}
+{'group': '11', 'name': 'Fuel injection and ignition', 'part_numbers': 7, 'instances': 68, 'mass_kg': 8.86}
+{'group': '12', 'name': 'Lubrication system', 'part_numbers': 6, 'instances': 6, 'mass_kg': 9.13}
+{'group': '13', 'name': 'Cooling system', 'part_numbers': 14, 'instances': 14, 'mass_kg': 3.79}
+{'group': '14', 'name': 'Accessory system', 'part_numbers': 15, 'instances': 39, 'mass_kg': 32.7}
+{'group': '15', 'name': 'Fasteners and interfaces', 'part_numbers': 4, 'instances': 154, 'mass_kg': 11.11}
+total mass 344.6 kg; part numbers 150 ; instances 1597 ; build 321.5 s
+invalid or multi-solid: []

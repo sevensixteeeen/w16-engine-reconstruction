@@ -1,0 +1,73 @@
+{
+ "case": "connecting rod",
+ "material": {
+  "name": "Ti-6Al-4V",
+  "E": 114000.0,
+  "nu": 0.34,
+  "alpha": 8.6e-06,
+  "k": 0.0067,
+  "yield_": 880,
+  "fatigue": 500,
+  "rho": 4430
+ },
+ "mesh": {
+  "nodes": 4875,
+  "tets": 16899,
+  "h_max": 4.2,
+  "quality_gamma_min": 0.020679649601998317,
+  "quality_gamma_mean": 0.7529724138373886,
+  "quality_below_0p1": 1,
+  "volume_mm3": 74418.1372985145
+ },
+ "element": "P2 tetrahedra",
+ "results": {
+  "compression_design_gas_force": {
+   "force_N": 78418.86502258164,
+   "applied_force_check_N": [
+    0.0,
+    0.0,
+    -78412.20755980116
+   ],
+   "peak_bearing_pressure_MPa": 158.92306641350098,
+   "vm_max_MPa": 391.1367767806621,
+   "vm_p999_MPa": 356.5637486845538,
+   "vm_max_location": [
+    2.950816246679113,
+    -2.239616514002898,
+    131.4080785447892
+   ],
+   "max_axial_displacement_mm": 0.27779531392829987,
+   "dofs": 92202,
+   "solve_s": 16.52445149421692,
+   "yield_factor_on_p999": 2.468001874129167
+  },
+  "tension_overspeed_inertia": {
+   "force_N": 23537.4136118102,
+   "applied_force_check_N": [
+    0.0,
+    0.0,
+    23534.95855356644
+   ],
+   "peak_bearing_pressure_MPa": 59.49122419900608,
+   "vm_max_MPa": 591.5728605282435,
+   "vm_p999_MPa": 488.8179507727665,
+   "vm_max_location": [
+    6.456104893570831,
+    16.167172924599818,
+    30.304604455064567
+   ],
+   "max_axial_displacement_mm": 0.47458593327945525,
+   "dofs": 92202,
+   "solve_s": 15.704889059066772,
+   "yield_factor_on_p999": 1.8002612191488025
+  },
+  "fatigue_estimate": {
+   "note": "alternating stress taken as half the sum of the two p99.9 stresses (conservative, locations differ)",
+   "sigma_a_MPa": 422.69084972866017,
+   "fatigue_limit_MPa": 500,
+   "factor": 1.1828976196692387
+  }
+ },
+ "inputs": {},
+ "boundary_conditions": "big-end bore half fixed (loaded half); cosine bearing pressure on the loaded half of the small-end bore; no bolt preload, no contact"
+}

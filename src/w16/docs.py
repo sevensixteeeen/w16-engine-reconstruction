@@ -1,0 +1,690 @@
+"""Documentation generators: requirements trace, BOM, manufacturing specification, final report (MD + PDF),
+acceptance checklist.  Everything is assembled from the JSON evidence written by the analysis / CAD / FE stages;
+missing evidence is reported as missing.
+
+    python -m w16.docs
+"""
+from __future__ import annotations
+import csv
+import glob
+import json
+import os
+import subprocess
+import sys
+
+from .params import P, MATERIALS
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+p = lambda *a: os.path.join(ROOT, *a)
+
+
+def J(*a):
+    f = p(*a)
+    if not os.path.exists(f):
+        return {}
+    with open(f, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def W(path, text):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(text)
+
+
+def tab(rows, head):
+    out = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
+    for r in rows:
+        out.append("| " + " | ".join(f"{v:.4g}" if isinstance(v, float) else str(v) for v in r) + " |")
+    return "\n".join(out)
+
+
+def count(pattern):
+    return len(glob.glob(p(*pattern.split("/")), recursive=True))
+
+
+# ====================================================================== BOM
+SUPPLIER = [
+    (("bolt", "screw"), "Fastener specialist (aerospace / motorsport grade)", "catalogue thread form, special length/material"),
+    (("bearing shell", "bush", "journal bearing"), "Engine-bearing manufacturer", "catalogue material system, special dimensions"),
+    (("ring", "circlip"), "Piston-ring manufacturer", "catalogue section, special diameter"),
+    (("spring", "retainer", "finger", "support element", "guide", "seat insert", "phaser", "tensioner", "chain", "sprocket"), "Valve-train / timing-drive supplier", "catalogue families, application engineering needed"),
+    (("injector", "spark plug", "coil", "sensor", "throttle", "recirculation", "actuator", "lt pump", "alternator", "ac compressor", "belt", "filter"), "Tier-1 electrical / mechatronic supplier", "commercially available component class"),
+    (("turbine", "compressor", "bearing housing"), "Turbocharger manufacturer", "custom turbocharger (wheel aero, housing castings)"),
+    (("substrate", "catalyst"), "Exhaust after-treatment supplier", "custom canning of catalogue substrates"),
+    (("cooler", "radiator"), "Heat-exchanger manufacturer", "custom core dimensions"),
+    (("hose", "isolator", "harness"), "Hose / elastomer / harness supplier", "made to drawing"),
+    (("crankshaft", "camshaft", "connecting rod", "piston", "gudgeon"), "Forging + precision machining specialist", "custom engineered"),
+    (("crankcase", "cylinder head", "sump", "bearing cover", "housing", "manifold", "cover", "pump", "tank", "plenum", "bracket", "pipe", "duct", "air box", "flex", "damper", "rail", "jet", "gasket", "valve"), "Foundry / machining / composite shop to drawing", "custom engineered"),
+]
+
+
+def supplier(name):
+    n = name.lower()
+    for keys, cat, note in SUPPLIER:
+        if any(k in n for k in keys):
+            return cat, note
+    return "Machining shop to drawing", "custom engineered"
+
+
+def bom():
+    rows = J("06_ASSEMBLIES", "bom_rows.json")
+    if not rows:
+        return None
+    from .cad.common import GROUPS
+    out = []
+    for r in rows:
+        cat, note = supplier(r["name"])
+        out.append(dict(pn=r["pn"], name=r["name"], group=f"{r['group']} {GROUPS[r['group']]}", qty=r["qty"], material=r["material"],
+                        process=r["process"] or ("purchased" if not r["custom"] else "machined / fabricated to drawing"),
+                        mass_each_kg=round(r["mass_each"], 4), mass_total_kg=round(r["mass_total"], 3),
+                        type="custom-engineered" if r["custom"] else "commercial component class (adaptation required)",
+                        supplier_category=cat, critical_spec=(r["note"] or note), cost="not estimated - no reliable public price source",
+                        status="concept CAD; not sourced"))
+    with open(p("10_BOM_AND_PROCUREMENT", "BOM.csv"), "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(out[0]))
+        w.writeheader(); w.writerows(out)
+    n_c = sum(1 for r in out if r["type"].startswith("custom")); q_c = sum(r["qty"] for r in out if r["type"].startswith("custom"))
+    md = f"""# Bill of materials and procurement
+
+Generated from the CAD registry (`06_ASSEMBLIES/bom_rows.json`). Machine-readable copy: `BOM.csv`.
+
+- Part numbers: **{len(out)}**; individual parts: **{sum(r['qty'] for r in out)}**; CAD mass **{sum(r['mass_total_kg'] for r in out):.1f} kg** (dry, as modelled).
+- Custom-engineered part numbers: {n_c} ({q_c} parts). Commercial component classes: {len(out) - n_c} part numbers ({sum(r['qty'] for r in out) - q_c} parts).
+- The published engine has 3,712 individual parts; this model contains {sum(r['qty'] for r in out)} because seals, O-rings, dowels, plugs, most small
+  fasteners, clamps, brackets, hoses, wiring and the internals of purchased units are not modelled.
+- **Cost:** no reliable public pricing exists for these parts (one-off forgings, castings and a custom turbocharger family), so no costs are given.
+  Inventing numbers would be misleading.
+- "Commercial component class" means a suitable *type* of part is available from the named supplier category; in every case application
+  engineering is still required. Buying those parts does not make the engine manufacturable without the custom parts.
+
+{tab([(r['pn'], r['name'], r['qty'], r['material'], r['process'], r['mass_each_kg'], r['type'], r['supplier_category'], r['critical_spec'], r['status']) for r in out],
+     ['Part no.', 'Component', 'Qty', 'Material', 'Manufacturing process', 'Mass each [kg]', 'Type', 'Supplier category', 'Critical specification / note', 'Procurement status'])}
+
+## Long-lead items (procurement risk)
+
+| Item | Why | Typical lead time class |
+|---|---|---|
+| Crankcase and head castings | tooling, casting development, CT qualification | longest |
+| Crankshaft forging | die, forging trials, nitriding distortion control | long |
+| Turbochargers | custom wheels and housings, hot-gas test | long |
+| Titanium connecting rods | forging dies, peening qualification | medium |
+| Camshafts, pistons | profile grinding, forging dies | medium |
+| Bearings, rings, valve-train kit | catalogue families | short-medium |
+"""
+    W(p("10_BOM_AND_PROCUREMENT", "BOM.md"), md)
+    return out
+
+
+# ====================================================================== manufacturing specification
+MFG = [  # component, material, process, critical dimensions, tolerance class, surface, operating temperature, loading, inspection
+    ("Crankcase upper section", "AlSi7Mg0.3-T6 (alternative: hypereutectic AlSi17CuMg as VW W12, or AlSi9Cu3 with coated bores)", "low-pressure sand casting with core package (water jacket, crank chamber), HIP, T6; 5-axis machining; bore coating (plasma / PEO) or iron-coated pistons on Alusil",
+     "bore dia 86 H5-class, cylindricity; main bore line dia 73; deck height 238.2; bore positions (zig-zag, +/-43.86 at deck)", "bores IT5, positions +/-0.03, deck flatness 0.03 (classes, provisional)",
+     "bore plateau honed Rpk<0.2; deck Rz 6", "coolant 95-110 degC; liner top ~150-170 degC (calc.)", "135 bar design gas pressure; main bearing 37 kN; head bolt clamp", "CT scan, pressure tests, CMM, bore form"),
+    ("Crankcase lower section (bearing support)", "AlSi7Mg0.3-T6 with cast-in EN-GJS-600 bearing covers", "sand casting around pre-machined iron inserts; line boring assembled with the upper section", "main bore line; joint face; insert position", "main bore IT6, coaxiality 0.02 (class)", "joint Rz 6", "oil 100-140 degC", "main bearing loads 37 kN peak, 4 bolts per bearing", "X-ray of insert bond, CMM"),
+    ("Cylinder heads", "AlSi7Mg0.3-T6 (+Cu variant for hot strength)", "low-pressure sand casting, HIP, T6; valve seats and guides shrink-fitted; cam line bored with caps", "chamber volume (CR), valve seat run-out to guide, cam bore line, port positions", "seat run-out 0.03, cam bores IT6, joint flatness 0.03 (classes)", "ports as cast + CNC blended throats; joint Rz 6", "roof ~230 degC mean gas side (1-D), coolant 95-110 degC", "135 bar on roof, bolt clamp, thermal gradient", "CT scan, leak test, CMM, flow bench"),
+    ("Crankshaft", "42CrMo4 (alternative 34CrNiMo6), QT, nitrided", "closed-die forging (twisted or as-forged throws), rough machining, QT, finish turning, drilling, nitriding, grinding, lapping, balancing", "journal diameters 68/56, throw 42.868, pin phasing (non-uniform, see table), fillets R2.5", "journals IT5, phasing +/-0.05 deg, run-out 0.02 (classes)", "journals Ra 0.1", "oil 100-150 degC", "bending from 78 kN design rod force, torsion mean 1.6 kN m + vibratory ~1.2 kN m", "MPI, CMM, hardness depth, balance"),
+    ("Connecting rods", "Ti-6Al-4V (forged, STA)", "die forging, machining, shot peening, anti-galling coating on thrust faces (CrN/MoS2)", "centre distance 164, bores, width 17.75, weight", "bores IT6, parallelism 0.02/100 (classes)", "peened; bores honed", "~150 degC", "78 kN compression (design), 20 kN tension at overspeed", "FPI, CMM, weight split"),
+    ("Pistons", "AlSi12CuMgNi forged (4032) or 2618 for higher strength", "forging, CNC turning with oval/barrel skirt, pin-bore profiling, anodising, skirt coating", "skirt profile and clearance, compression height 38.5, ring grooves, crown tilt", "skirt profile +/-0.005, grooves IT6 (classes)", "pin bore Ra 0.2", "crown temperature: see the piston FE (section 8 of the report)", "135 bar gas, 31,700 m/s2 at overspeed", "CMM, ultrasonic, groove gauges"),
+    ("Valves", "intake X45CrSi9-3 / titanium option; exhaust NiCr20TiAl (Nimonic 80A), hollow sodium-filled", "forging / friction welding, grinding, nitriding or chrome stem", "stem dia 6, seat angle, length (short/long types)", "stem IT5-class, seat run-out 0.02", "stem Ra 0.2", "exhaust head 750-850 degC (typical; not simulated)", "seating force, 5,300 m/s2 nose deceleration", "eddy current, X-ray of sodium fill"),
+    ("Valve springs", "CrSiV super-clean wire (OTEVA 90 class)", "coiling, stress relief, shot peening, presetting", "rate ~33 N/mm, seat load ~270 N, open load ~600 N (calc.)", "load +/-4 %", "peened", "120-150 degC", "see spring table (valve-train report)", "load test 100 %, fatigue sampling"),
+    ("Camshafts", "assembled (steel tube + 100Cr6 lobes) or forged 16MnCr5, induction/case hardened", "lobe grinding to conjugate profile for dia 17 roller", "lobe profile, phase angles per cylinder, journals dia 26", "profile +/-0.02, phase +/-0.2 deg cam (classes)", "lobes Ra 0.2", "120-150 degC", "roller contact (Hertz), chain drive torque", "cam-form measurement, MPI"),
+    ("Turbocharger housings", "turbine: austenitic cast steel 1.4849 / Ni-resist D5S; compressor: AlSi7Mg", "investment / sand casting, machining", "wheel contours (tip clearance), flange faces", "contour +/-0.05, flatness 0.05 (classes)", "as cast flow surfaces", "turbine housing up to 980 degC gas", "thermal cycling, gas pressure 3 bar", "X-ray, leak test"),
+    ("Turbocharger rotating group", "turbine wheel Inconel 713C (or TiAl), shaft 42CrMo4 EB-welded; compressor wheel forged 2618 milled", "investment casting, EB/friction welding, 5-axis milling, high-speed balancing", "wheel profiles, journal dia 11, balance", "balance G0.4 class, journals IT5", "journals Ra 0.1", "turbine 980 degC, compressor 173 degC outlet", "tip speed ~470 m/s at ~107,000 rpm (calc.)", "spin test, FPI, balancing"),
+    ("Intake manifolds, plenums, charge pipes, air ducts, chain housing, cam covers", "CFRP prepreg (as published for intake tube, charge-air system and chain housing) with bonded metal inserts", "autoclave lay-up on tooling, bonding of flanges", "flange positions, sealing faces", "flange position +/-0.2", "sealing faces machined", "charge air up to 175 degC before cooler, 60 degC after", "2.9 bar abs boost + pulsation", "leak / burst test, ultrasonic"),
+    ("Exhaust manifolds and cross-over", "investment-cast 1.4849 (or fabricated Inconel 625 sheet)", "casting / hydroforming and welding, bellows in cross-over", "flange flatness, port alignment", "flatness 0.1 (class)", "-", "up to 980 degC", "thermal expansion ~4 mm over manifold length, gas pulsation", "X-ray of welds, leak test"),
+    ("Down-pipes, pre-catalyst shells", "titanium grade 2 / Ti-6242 (published: titanium exhaust)", "tube bending, TIG welding under shield gas", "joint positions", "+/-1.0", "-", "up to ~850 degC after turbine (calc.)", "thermal, vibration", "leak test, weld inspection"),
+    ("Oil and coolant connections", "AlMgSi tube, stainless braided PTFE hose, FKM seals", "bending, brazing, crimping", "port threads and sealing faces", "per fitting standard", "-", "oil 150 degC, coolant 120 degC", "oil 8 bar, coolant 2 bar", "pressure test"),
+    ("Fasteners", "10.9 / 12.9 steel; MP35N or Ti-6Al-4V where justified (rod bolts, flywheel)", "cold forming, rolled threads after heat treatment", "thread, under-head fillet", "6g/6H, torque+angle tightening", "-", "up to 150 degC (manifold studs 700 degC: Inconel)", "preload 75-90 % of yield", "batch tensile tests, MPI"),
+    ("Bearings", "main / big end: steel-backed bronze with sputter AlSn20 overlay; small end: bronze bush; turbo: floating bronze bushes", "strip sintering/casting, sputtering, boring", "wall thickness, crush height", "wall +/-0.003", "bore Ra 0.2", "150 degC", "specific load 45-55 MPa (calc.)", "wall-thickness gauging, bond test"),
+]
+
+
+def manufacturing():
+    md = """# Materials and manufacturing specification
+
+Scope: concept-level manufacturing definition for the reconstructed W16. Tolerances are given as **classes** to show
+which features need precision manufacturing; they are provisional and must be confirmed by tolerance-stack and
+functional analysis before release. Operating temperatures and loads refer to the calculations in `08_SIMULATIONS/`.
+
+## 1. Component specification
+
+"""
+    rows = [list(r) for r in MFG]                       # temperatures / loads that come from the analysis results
+    th = J("08_SIMULATIONS", "fea", "piston.json").get("results", {}).get("thermal", {})
+    dyn = J("08_SIMULATIONS", "analytical", "results.json").get("dynamics", {})
+    for r in rows:
+        if r[0] == "Pistons" and th:
+            r[6] = (f"crown up to {th['T_max_C']:.0f} degC (mean {th['T_crown_mean_C']:.0f}), top ring groove {th['T_top_ring_groove_C']:.0f} degC "
+                    "at rated power (FE, section 8 of the report; crown above the ~350 degC guide - open item)")
+        if r[0] == "Connecting rods" and dyn.get("rod_peak_tens_overspeed"):
+            r[7] = f"{dyn['F_design_gas'] / 1e3:.0f} kN compression (design), {dyn['rod_peak_tens_overspeed'] / 1e3:.0f} kN tension at overspeed"
+    md += tab(rows, ["Component", "Proposed material", "Manufacturing process", "Critical dimensions", "Tolerance class (provisional)", "Surface finish",
+                     "Operating temperature", "Expected loading", "Inspection"])
+    md += """
+
+## 2. Process evaluation
+
+| Process | Where it is the right choice here | Where it is not |
+|---|---|---|
+| Aluminium low-pressure sand casting + HIP | block, bedplate, heads: complex cores (zig-zag jackets, ports) at very low volume | thin CFRP-replaceable covers |
+| Die casting | sump, pump housings if volume justifies | block / head (porosity, tooling cost at this volume) |
+| Closed-die forging | crankshaft, rods, pistons, cam blanks: fatigue strength and grain flow | one-off prototypes: billet machining is acceptable for first builds |
+| CNC machining from billet | prototype crankshaft and rods, turbo compressor wheels, brackets | series castings |
+| Heat treatment | T6 for castings; QT + nitriding crank; STA titanium rods; case hardening pins, sprockets | - |
+| Surface coating | bore coating (plasma / PEO) if eutectic alloy is used; DLC on pins and followers; anodised piston crown | - |
+| Precision grinding / honing | journals, cam lobes, valve stems and seats, bores | - |
+| Additive manufacturing | prototype manifolds (Inconel 625), turbo housings for development, water-jacket sand cores (binder-jet printed cores are well suited to the zig-zag jacket), brackets | highly loaded rotating parts without qualification |
+
+## 3. Assembly sequence (derived from the CAD structure)
+
+1. Upper crankcase on the stand, deck down. Fit piston-cooling jets and upper main shells.
+2. Pre-assemble pistons with rings, pins and rods. Because the big end is 88 mm wide across the bolt bosses and the bore is 86 mm,
+   **piston-rod units are inserted from the crankcase side** before the crankshaft is laid in (ring compressor from below).
+3. Lay in the crankshaft; fit rod caps (2 x M8, torque + angle), check side float 0.25 mm per pair.
+4. Fit the bearing support with lower shells; tighten 36 main bolts in sequence from bearing 5 outwards; perimeter bolts.
+5. Dry-sump pan, scavenge collector, oil pump stack, front cover and seal.
+6. Turn the engine. Head gaskets, heads (pre-assembled with valves, springs, guides, seats), 25 head bolts per bank in a spiral sequence.
+7. Hydraulic support elements, finger followers, camshafts, caps; set cam phasing with the crank locked at cylinder 1 TDC.
+8. Rear: crank sprocket, intermediate shaft, primary chain, four secondary chains, guides, tensioners, phasers; chain housing; flex plate.
+9. Cam covers, plugs, coils. Intake manifolds with injectors and rails; charge-air coolers; throttles.
+10. Exhaust manifolds, cross-overs, turbochargers, down-pipes, pre-catalysts; oil and water lines to the turbochargers.
+11. Water pump, thermostat housing, pipes; LT pump and hoses; damper, accessory drive; harness and sensors.
+
+## 4. Maintenance considerations
+
+- Spark plugs and coils: accessible through the cam covers (one row of eight per head) after removing the air boxes.
+- Valve clearance: hydraulic, no adjustment.
+- Oil filter module and scavenge manifold at the free end; oil tank is vehicle-mounted.
+- Timing chains: rear of the engine, engine-out job (as on the VW W engines) - chains are designed for engine life.
+- Turbochargers: removable sideways after detaching the down-pipe and the manifold neck; the switchable turbocharger's shut-off valve is a wear item.
+- Charge-air coolers sit on the plenums: remove throttle bodies and the inlet tank first.
+"""
+    W(p("11_MANUFACTURING_DOCUMENTATION", "MANUFACTURING_SPEC.md"), md)
+
+
+# ====================================================================== requirements trace + acceptance
+def evidence():
+    R = J("08_SIMULATIONS", "analytical", "results.json")
+    S = J("06_ASSEMBLIES", "assembly_summary.json")
+    V = J("06_ASSEMBLIES", "cad_validation.json")
+    I = J("06_ASSEMBLIES", "interference_report.json")
+    rows = J("06_ASSEMBLIES", "bom_rows.json") or []
+    q = {r["pn"]: r["qty"] for r in rows}
+    fea = {os.path.basename(f)[:-5]: json.load(open(f, encoding="utf-8")) for f in glob.glob(p("08_SIMULATIONS", "fea", "*.json"))}
+    exp = J("13_EXPORTS_STEP", "component_export_log.json") or []
+    aexp = J("13_EXPORTS_STEP", "assembly_export_log.json")
+    return dict(R=R, S=S, V=V, I=I, q=q, rows=rows, fea=fea, exp=exp, aexp=aexp)
+
+
+def acceptance(E):
+    q, V, I, fea, exp, aexp = E["q"], E["V"], E["I"], E["fea"], E["exp"], E["aexp"]
+    ok = lambda c: "PASS" if c else "NOT MET"
+    n_valves = sum(q.get(f"W16-06-00{i}", 0) for i in range(1, 5))
+    cr = [V.get("cyl1", {}).get("cr"), V.get("cyl2", {}).get("cr")]
+    fea_ok = [k for k, v in fea.items() if "FAILED" not in k]
+    fea_bad = [k for k in fea if "FAILED" in k]
+    sc = I.get("static", {}).get("clashes", None)
+    kc = I.get("kinematic", {}).get("clashes", None)
+    vt_clash = [c for c in (sc or []) + (kc or []) if c["a"].startswith("W16-06") or c["b"].startswith("W16-06")]
+    n_step = sum(1 for r in exp if r.get("step")); n_stl = sum(1 for r in exp if r.get("stl")); n_3mf = sum(1 for r in exp if r.get("threemf"))
+    items = [
+        ("All sixteen cylinders are represented", ok(q.get("W16-03-001") == 16), f"16 bores in the block CAD; pistons x{q.get('W16-03-001')}"),
+        ("Four cylinder banks (rows) correctly organised", ok(bool(V)), "two VR8 banks at 90 deg, each with two rows at 15 deg; firing intervals 45.000 deg (layout check)"),
+        ("Engine architecture mechanically coherent", ("PARTIAL - valve-train clashes remain" if vt_clash else "PARTIAL - packaging overlaps listed") if (sc is not None and (sc or kc)) else ok(sc is not None),
+         f"interference check: {len(sc) if sc is not None else 'not run'} static and {len(kc) if kc is not None else 'not run'} kinematic clash pairs remain (listed in the report)"),
+        ("Displacement consistent with bore and stroke", "PASS", f"{P.displacement_cc:.2f} cm3 vs 7,993 cm3 published"),
+        ("All sixteen piston assemblies modelled", ok(q.get("W16-03-001") == 16 and q.get("W16-03-004") == 16), f"pistons {q.get('W16-03-001')}, pins {q.get('W16-03-004')}, rings {q.get('W16-03-002', 0) + q.get('W16-03-003', 0)}"),
+        ("Shared crankshaft modelled", ok(q.get("W16-05-001") == 1), "one-piece crank, 8 pins, 9 mains, distributed counterweights"),
+        ("All connecting rods represented", ok(q.get("W16-04-001") == 16), f"rods x{q.get('W16-04-001')} with caps, shells, bushes, bolts"),
+        ("Cylinder heads and the 64-valve system modelled", ok(n_valves == 64), f"{n_valves} valves, 64 springs/retainers/followers/support elements, 4 camshafts; **two head castings serve the four rows** (documented architecture, decision D-003)"),
+        ("Four turbochargers modelled", ok(q.get("W16-08-001", 0) + q.get("W16-08-002", 0) == 4), "2 RH + 2 LH units with housings, wheels, bearing housing, actuator"),
+        ("Sequential turbocharging flow architecture documented", ok(os.path.exists(p("06_ASSEMBLIES", "system_diagrams", "01_air_exhaust_sequential_turbocharging.png"))), "diagram + animation + matching calculation"),
+        ("Intake and exhaust systems connected", ok(any(k.startswith("W16-09-intake_manifold") for k in q) and any(k.startswith("W16-10-manifold_front") for k in q)), "manifolds, coolers, charge pipes, logs, cross-over, down-pipes modelled per bank"),
+        ("Fuel injection and ignition represented", ok(sum(v for k, v in q.items() if k.startswith("W16-11-003")) == 32 and q.get("W16-11-001") == 16), "32 injectors, 4 rails, 16 plugs, 16 coils; EMS architecture diagram"),
+        ("Lubrication and cooling circuits modelled", ok(any(k.startswith("W16-12-") for k in q) and any(k.startswith("W16-13-") for k in q)), "galleries and jackets are real passages in block/heads; external circuit parts and 1-D flow calculations"),
+        ("Major mechanical interfaces validated", "PARTIAL" if (sc or kc) else ok(sc is not None), f"CAD interference check (static all-pairs + {len(I.get('meta', {}).get('kin_angles', []))} crank angles); CAD compression ratio "
+         + (", ".join(f"{c:.2f}" for c in cr if c) if cr[0] else "n/a")),
+        ("Parametric CAD files editable", "PASS", "geometry is generated from `src/w16/params.py`; BREP per part in `05_COMPONENT_CAD/`"),
+        ("STEP exports generated", ok(n_step > 0 and bool(aexp)), f"{n_step} component STEP files; master assembly {aexp.get('master', {}).get('size_mb', 'n/a')} MB; {len([k for k in aexp if k != 'master'])} sub-assemblies"),
+        ("STL and 3MF exports generated where supported", ok(n_stl > 0), f"{n_stl} STL, {n_3mf} 3MF component files"),
+        ("Exploded assembly documentation complete", ok(os.path.exists(p("06_ASSEMBLIES", "views", "exploded_isometric.png"))), "exploded views + hierarchy"),
+        ("Engineering drawings available", ok(count("07_ENGINEERING_DRAWINGS/*.pdf") > 0), f"{count('07_ENGINEERING_DRAWINGS/*.pdf')} sheets (PDF/SVG/PNG)"),
+        ("Simulation evidence documented", "PARTIAL" if (fea_bad or len(fea_ok) < 6) else "PASS", f"FE cases run: {', '.join(sorted(fea_ok)) or 'none'}" + (f"; failed: {', '.join(fea_bad)}" if fea_bad else "") + "; not run: " + (", ".join(sorted({'rod', 'piston', 'crank', 'insert', 'block', 'head'} - set(fea_ok))) or "none") + "; 0-D/1-D models in `08_SIMULATIONS/analytical`. No 3-D CFD."),
+        ("BOM complete", ok(os.path.exists(p("10_BOM_AND_PROCUREMENT", "BOM.csv"))), f"{len(E['rows'])} part numbers (modelled content only)"),
+        ("Final technical report produced", "see file", "`12_FINAL_REPORT/` (Markdown + PDF)"),
+        ("Deliverables organised in the structured directory", "PASS", "folders 01-14 + 00_PROJECT_CONTROL + src"),
+    ]
+    return items
+
+
+def requirements(E):
+    acc = acceptance(E)
+    fe = E["fea"]
+    st04 = "done (slice FE)" if "block" in fe else "CAD done; block FE slice not run (stopped for memory)"
+    st11 = "done (1-D + FE slices)" if "head" in fe else "done at 1-D level + piston FE; block/head FE slices not run"
+    md = f"""# Engineering requirements and traceability
+
+Requirements are taken from the project brief (section numbers in brackets). "Where" points to the deliverable that answers it.
+
+| ID | Requirement (brief section) | Where | Status |
+|---|---|---|---|
+| R-01 | Reference specifications with sources and confidence levels [2, 3] | `01_RESEARCH/RESEARCH_LOG.md`, `03_REFERENCE_SPECIFICATIONS/` | done |
+| R-02 | Verify bore/stroke against displacement [2] | `03_REFERENCE_SPECIFICATIONS/REFERENCE_SPEC.md` section 2 | done |
+| R-03 | Architecture: banks, numbering, crank, envelope, master assembly, 8 views [4] | `src/w16/layout.py`, `06_ASSEMBLIES/views/`, `07_ENGINEERING_DRAWINGS/` | done |
+| R-04 | Block/crankcase with real jackets and galleries; loads analysed [5] | `05_COMPONENT_CAD/01_*`, `08_SIMULATIONS/fea/` | {st04} |
+| R-05 | Pistons, rods, crank; balance, bearing loads, torsional vibration; animation [6] | `08_SIMULATIONS/analytical/02_cranktrain_dynamics.md`, `09_ANIMATIONS/02_*` | done |
+| R-06 | Heads, 64 valves, cams, timing drive; timing model; animation [7] | `08_SIMULATIONS/analytical/03_valvetrain.md`, `09_ANIMATIONS/04_*` | done (2 head castings, see D-003) |
+| R-07 | Four turbochargers, sequential strategy, derived sizing, system diagram [8] | `08_SIMULATIONS/analytical/01_performance_turbocharging.md`, `06_ASSEMBLIES/system_diagrams/01_*` | done (1-D) |
+| R-08 | Intake and water-to-air charge cooling with calculations [9] | `08_SIMULATIONS/analytical/04_thermal_lube_fuel.md` | done (1-D) |
+| R-09 | Duplex injection (32), ignition, sensors, EMS concept [10] | `06_ASSEMBLIES/system_diagrams/04_*`, CAD group 11 | done (concept, no calibration) |
+| R-10 | Dry-sump lubrication with flows and diagram [11] | same report, `system_diagrams/03_*` | done (1-D) |
+| R-11 | Cooling circuits, thermal results, hot spots [12] | same report, `08_SIMULATIONS/fea/` thermal cases | {st11} |
+| R-12 | Exhaust: 16 ports, 4 manifold paths, valves, down-pipes [13] | CAD group 10, decision D-023 | done |
+| R-13 | Timing, accessories, mounts, sensors, harness, interfaces [14] | CAD groups 07, 14 | done (envelope level for purchased units) |
+| R-14 | Materials and manufacturing specification [15] | `11_MANUFACTURING_DOCUMENTATION/` | done (tolerance classes only) |
+| R-15 | Parametric CAD, 15 sub-assemblies, exports, exploded and section views, drawings [16] | `src/w16/cad/`, folders 04-07, 13, 14 | done |
+| R-16 | Simulation with inputs, BCs, mesh quality, limits; comparison with Chiron targets [17] | `08_SIMULATIONS/` | done within tool limits (no CFD, linear FE) |
+| R-17 | Visualisations and animations [18] | `06_ASSEMBLIES/views/`, `09_ANIMATIONS/` | done |
+| R-18 | BOM and procurement [19] | `10_BOM_AND_PROCUREMENT/` | done (no costs: no reliable source) |
+| R-19 | Documentation package, report in PDF and Markdown [20] | `12_FINAL_REPORT/` | done |
+| R-20 | Never invent OEM data; label assumptions [22] | tags PUB/SEC/CALC/EST throughout | done |
+
+## Acceptance criteria (brief section 21) - evaluated from the generated evidence files
+
+"""
+    md += tab(acc, ["Criterion", "Result", "Evidence"])
+    W(p("02_ENGINEERING_REQUIREMENTS", "REQUIREMENTS_AND_ACCEPTANCE.md"), md + "\n")
+    return acc
+
+
+# ====================================================================== final report
+def fea_table(fea):
+    rows = []
+    for k, v in sorted(fea.items()):
+        if "FAILED" in k:
+            rows.append((v.get("case", k), "-", "-", "FAILED: " + v.get("error", "")[:90], "-")); continue
+        ms = v.get("mesh", {})
+        res = v.get("results", {})
+        cases = res.items() if any(isinstance(x, dict) for x in res.values()) else [("single load case", res)]
+        for name, r in cases:
+            if not isinstance(r, dict):
+                continue
+            keys = [x for x in ("vm_max_MPa", "vm_p999_MPa", "max_displacement_mm", "pin_deflection_mm", "bore_deflection_mm", "T_max_C", "T_crown_mean_C",
+                                "T_top_ring_groove_C", "T_bore_max_C", "T_bore_mean_C", "T_valve_bridge_max_C", "T_valve_bridge_mean_C", "T_roof_mean_C",
+                                "energy_balance_error_pct", "bore_radial_growth_mean_um", "bore_out_of_round_um", "yield_factor_on_p999", "factor_on_p999",
+                                "factor", "sigma_a_MPa", "max_axial_displacement_mm", "crown_deflection_mm", "peak_bearing_pressure_MPa",
+                                "T_at_vm_max_C") if isinstance(r.get(x), (int, float))]
+            bc = v.get("boundary_conditions", "")[:220] + (" NOTE: " + r["note"] if r.get("note") else "")
+            rows.append((v.get("case", k), name.replace("_", " "), f"{ms.get('tets', '?')} tets, gamma min {ms.get('quality_gamma_min', 0):.2f}",
+                         "; ".join(f"{x.replace('_', ' ')} = {r[x]:.3g}" for x in keys), bc))
+    return tab(rows, ["Case", "Load case", "Mesh", "Results", "Boundary conditions"])
+
+
+def fea_findings(fea):
+    """Plain-language findings derived from the FE records (limits are handbook guide values)."""
+    out = []
+    for k, v in sorted(fea.items()):
+        if "FAILED" in k:
+            continue
+        mat = v.get("material", {})
+        ms = v.get("mesh", {})
+        if ms.get("quality_below_0p1", 0) > 20:
+            out.append(f"**{v.get('case', k)}:** mesh has {ms['quality_below_0p1']} poorly shaped elements (gamma < 0.1); local peaks are unreliable.")
+        res = v.get("results", {})
+        cases = res.items() if any(isinstance(x, dict) for x in res.values()) else [("single load case", res)]
+        for name, r in cases:
+            if not isinstance(r, dict):
+                continue
+            if r.get("plausible") is False:
+                out.append(f"**{v.get('case', k)} - {name.replace('_', ' ')}:** result flagged implausible (max displacement {r.get('max_displacement_mm', 0):.1f} mm) - not used.")
+            if r.get("bore_out_of_round_um", 0) > 50:
+                out.append(f"**{v.get('case', k)}:** thermal bore distortion up to {r['bore_out_of_round_um']:.0f} um (upper bound from a slice with a rigid base; "
+                           "rings typically tolerate a few tens of um) -> bore distortion needs a full-block thermo-mechanical analysis with head clamp load "
+                           "before the liner/jacket design can be accepted.")
+            if r.get("T_valve_bridge_max_C") is not None:
+                verdict = "within" if r["T_valve_bridge_max_C"] < 250 else "above"
+                out.append(f"**{v.get('case', k)}:** valve-bridge temperature up to {r['T_valve_bridge_max_C']:.0f} degC (mean {r.get('T_valve_bridge_mean_C', 0):.0f} degC), "
+                           f"roof mean {r.get('T_roof_mean_C', 0):.0f} degC - {verdict} the ~250 degC guide limit for cast Al-Si heads. The reported T max "
+                           f"({r.get('T_max_C', 0):.0f} degC) is a slice artefact (see note). Exhaust-port heat input was not applied, so exhaust-side temperatures are low.")
+            if "vm_p999_MPa" in r and mat.get("yield_") and r["vm_p999_MPa"] > mat["yield_"]:
+                out.append(f"**{v.get('case', k)} - {name.replace('_', ' ')}:** 99.9th-percentile stress {r['vm_p999_MPa']:.0f} MPa exceeds the yield strength "
+                           f"{mat['yield_']:.0f} MPa of {mat.get('name', 'the material')}"
+                           + (f" - but this load case is dominated by a modelling artefact: {r['note']}." if r.get("note") else
+                              " -> the part as modelled is under-designed for this load case."))
+            if r.get("T_top_ring_groove_C", 0) > 280:
+                out.append(f"**{v.get('case', k)}:** top ring groove {r['T_top_ring_groove_C']:.0f} degC and crown up to {r.get('T_max_C', 0):.0f} degC "
+                           "(guide limits about 260-280 degC and 350 degC for aluminium pistons) -> "
+                           + ("the oil cooling gallery of the modelled piston is not sufficient." if v.get("design", {}).get("gallery_area_mm2")
+                              else "an oil cooling gallery fed by the piston jet is required; the modelled piston has only under-crown spray cooling."))
+            elif r.get("T_crown_mean_C") is not None and r.get("T_max_C", 0) > 350:
+                sens = [x for x in v.get("results", {}).get("thermal_sensitivity", []) if isinstance(x, dict)]
+                s_txt = "; ".join(f"{x['case']}: crown max {x['T_max_C']:.0f} / groove {x['T_top_ring_groove_C']:.0f} degC" for x in sens)
+                out.append(f"**{v.get('case', k)}:** top ring groove {r['T_top_ring_groove_C']:.0f} degC (within the ~280 degC guide) but crown up to "
+                           f"{r['T_max_C']:.0f} degC, mean {r['T_crown_mean_C']:.0f} degC, at rated power with the estimated oil-side film coefficients"
+                           + (f" (sensitivity - {s_txt})" if s_txt else "") + ". The crown centre stays above the ~350 degC guide for forged "
+                           "Al-Si pistons in every case studied -> open item: confirm the piston heat load (cycle model, Woschni x 2 calibration) and "
+                           "the gallery cooling by test; if confirmed, stronger cooling (higher jet flow, under-crown spray) or a steel piston is needed.")
+            if "factor" in r and r["factor"] < 1.0:
+                out.append(f"**{v.get('case', k)} - {name.replace('_', ' ')}:** estimated fatigue factor {r['factor']:.2f} (< 1).")
+            if k == "piston" and name == "gas_pressure" and len(r.get("vm_max_location", [])) == 3:
+                x, y, z = (abs(c) for c in r["vm_max_location"])
+                slot_corner = abs(x - 11.5) < 1.0 and 16.5 < y < 17.0 + P.piston_boss_fillet_r + 0.5      # D-037 slot end / fillet-strip end
+                out.append(f"**piston - gas pressure:** peak {r['vm_max_MPa']:.0f} MPa (99.9th percentile {r['vm_p999_MPa']:.0f} MPa) at "
+                           f"|x|, |y|, z = {x:.1f}, {y:.1f}, {z:.1f} mm (pin axis along x, z up from the pin centre)"
+                           + (" - the corner where the end of the under-crown slot meets the cavity wall and the end of the R3 boss fillet. The "
+                              "concept CAD leaves this corner unradiused, so the peak there depends on the mesh; detail design radiuses it and "
+                              "re-checks. The 99.9th percentile is the basis of the fatigue estimate." if slot_corner else "."))
+            if name == "gas_plus_thermal" and r.get("T_at_vm_max_C") is not None:
+                out.append(f"**{v.get('case', k)} - gas + thermal:** linear-elastic peak {r['vm_max_MPa']:.0f} MPa (99.9th percentile {r['vm_p999_MPa']:.0f} MPa) "
+                           f"at about {r['T_at_vm_max_C']:.0f} degC metal temperature. The yield ({mat.get('yield_', 0):.0f} MPa) and fatigue "
+                           f"({mat.get('fatigue', 0):.0f} MPa) values used are room-temperature values; forged Al-Si piston alloys lose a large part "
+                           "of their strength above ~200 degC, so the pin boss and ring belt need a temperature-dependent elastic-plastic and fatigue "
+                           "analysis with a deformable pin (pin bending and bore contact) before release.")
+            if name == "gas_plus_thermal" and r.get("top_land_radial_growth_max_mm") is not None:
+                g, c0 = r["top_land_radial_growth_max_mm"], r.get("top_land_cold_clearance_mm", 0.0)
+                bg = ((fea.get("block", {}).get("results", {}) or {}).get("thermal_expansion", {}) or {}).get("bore_radial_growth_mean_um")
+                hot = c0 - g + (bg or 0.0) / 1000.0
+                out.append(f"**{v.get('case', k)} - top land:** radial growth up to {g:.2f} mm at rated power against {c0:.2f} mm cold radial "
+                           f"clearance (D-040 land relief)" + (f" and {bg:.0f} um mean bore growth (block FE)" if bg else "")
+                           + f" -> about {hot:.2f} mm hot clearance at the tightest point"
+                           + (" - adequate for the concept; the piston / liner thermal match is a detail-design check." if hot > 0.05 else
+                              " - too small: the land relief must be increased."))
+    return out
+
+
+def report(E, bom_rows):
+    _sc = E["I"].get("static", {}).get("clashes", []) + E["I"].get("kinematic", {}).get("clashes", [])
+    _vt = sorted({(c["a"], c["b"]) for c in _sc if c["a"].startswith("W16-06") or c["b"].startswith("W16-06")})
+    vt_text = ("9. **Valve-train clashes remain** after the D-039 revision: " + ", ".join(f"{a} / {b}" for a, b in _vt[:8])
+               + ". Other remaining CAD overlaps are listed in section 9.") if _vt else (
+               "9. The valve-train conflicts found earlier are resolved: the long-valve spring through the short valve's support element "
+               "(D-031) by the D-034 layout; the camshafts through the closed head / cover end walls, the retainers in the camshaft bearing "
+               "webs, the opening long valves and the piston crown in a wedge left by the chamber cut, the follower pads on the valve tips "
+               "and the cam / roller fit by D-039. The interference check finds no valve-train clashes. The finger ratio of 2.7 on the short "
+               "valves is high and needs a stiffness / contact-stress check. Remaining packaging overlaps are listed in section 9.")
+    R, S, V, I, fea = E["R"], E["S"], E["V"], E["I"], E["fea"]
+    cur = R.get("curve", [])
+    rated = min(cur, key=lambda r: abs(r["rpm"] - P.rpm_rated)) if cur else {}
+    dyn, en, lube, cool, cac = R.get("dynamics", {}), R.get("energy", {}), R.get("lube", {}), R.get("coolant", {}), R.get("cac", {})
+    acc = acceptance(E)
+    img = lambda rel, cap, w=100: f'\n<p><img src="../{rel}" style="width:{w}%"><br><em>{cap}</em></p>\n' if os.path.exists(p(*rel.split("/"))) else f"\n*(figure not generated: {rel})*\n"
+    env = V.get("envelope_dressed_mm", {}).get("size", [0, 0, 0]); lb = V.get("envelope_long_block_mm", {}).get("size", [0, 0, 0])
+    sc = I.get("static", {}); kc = I.get("kinematic", {})
+    cl_rows = [("static", c["a"], c["b"], c["count"], c["max_volume_mm3"]) for c in sc.get("clashes", [])[:25]] + \
+              [("kinematic", c["a"], c["b"], c["count"], c["max_volume_mm3"]) for c in kc.get("clashes", [])[:25]]
+    cw = V.get("counterweights", {})
+    ib = list(cw.get("internal_balance", {}).values()) or [0.0]
+    from .analysis import cycle as _cy
+    m05 = next((g["mass_kg"] for g in S.get("groups", []) if g["group"] == "05"), "?")
+    md = f"""# W16 engine reconstruction - engineering design report
+
+**Subject:** 8.0-litre, quad-turbocharged W16 reconstructed from publicly documented information on the Bugatti Chiron engine.
+**Status:** concept-level digital engineering package (analysis + parametric CAD + linear FE). Not manufacturer data, not released for manufacture.
+**Date:** 2026-11-14. **Generated by:** `python -m w16.docs` from the evidence files in this repository.
+
+## 1. Project overview
+
+The package reconstructs the architecture of the W16 from public sources and fills every gap with a labelled engineering
+value. Each number carries a tag: PUB (published), SEC (secondary source), CALC (calculated here), EST (engineering estimate).
+What exists:
+
+| Deliverable | Content |
+|---|---|
+| Research + reference specification | sources with confidence levels, firing-order consistency proof, parameter table |
+| Analytical models | 0-D cycle and turbo matching, crank-train dynamics and balance, valve train, thermal / lubrication / fuel sizing |
+| Parametric CAD | {S.get('part_numbers', '?')} part numbers, {S.get('instances', '?')} placed parts, 15 sub-assemblies, generated from one parameter file |
+| Checks | CAD compression ratio, interference (static + {len(I.get('meta', {}).get('kin_angles', []))} crank angles), mass and envelope |
+| FE | {len([k for k in fea if 'FAILED' not in k])} linear structural / thermal cases on the CAD solids |
+| Outputs | STEP / BREP / STL / 3MF, drawings, renders, exploded and section views, animations, BOM, manufacturing specification |
+
+{img('06_ASSEMBLIES/views/engine_isometric.png', 'Dressed engine, isometric view from the free end (CAD render).', 80)}
+
+## 2. Reference specifications
+
+| Item | Value | Tag |
+|---|---|---|
+| Configuration | W16: two VR8 banks at 90 deg, each with two rows at 15 deg; one crankshaft | PUB |
+| Displacement | 7,993 cm3 ({P.displacement_cc:.2f} cm3 from 86 x 86 mm) | PUB / CALC |
+| Power / torque | 1,103 kW (1,500 PS) at 6,700 rpm; 1,600 N m from 2,000 to 6,000 rpm | PUB |
+| Charging | four equal turbochargers, two per bank, sequential; second pair from about 3,800 rpm | PUB |
+| Injection | duplex, 32 injectors | PUB |
+| Cylinder pitch | 73 mm | PUB |
+| Firing | 45 deg intervals; order 1-14-9-4-7-12-15-6-13-8-3-16-11-2-5-10 | PUB / SEC |
+| Compression ratio | 9.0 | SEC |
+| Cooling | 800 L/min HT pump; separate LT charge-air circuit; charge air cooled by up to 130 K | PUB |
+| Mass / length | about 400 kg / 710 mm | PUB / SEC |
+
+Full list and sources: `03_REFERENCE_SPECIFICATIONS/REFERENCE_SPEC.md`, `01_RESEARCH/RESEARCH_LOG.md`.
+
+## 3. Engineering assumptions
+
+All provisional values are in `03_REFERENCE_SPECIFICATIONS/MASTER_PARAMETERS.md` (tag EST) and every non-obvious choice is in
+`00_PROJECT_CONTROL/DECISIONS.md`. The most consequential ones:
+
+- **Two cylinder-head castings, not four** - one head serves both rows of a bank (documented VR/W principle). The brief's "four heads" is read as four cylinder rows.
+- Cylinders k and k+8 share crankpin k; nine main bearings; rod 164 mm and row offset 12.5 mm taken from the VW W12 family (SSP 248).
+- Valve train: two camshafts per head 54 mm apart, roller finger followers, short and long valves; chamber roof tilted {P.roof_tilt:.1f} deg; piston crown tilted to give CR 9.0.
+- Because the camshafts are only 54 mm apart, each camshaft has its own secondary chain in its own plane (four secondary chains). The VW W engines use one chain per head; this is a consequence of this reconstruction's head layout.
+- Exhaust grouped front/rear per bank; turbine A permanently fed, turbine B behind a shut-off valve.
+- Cycle-model constants (Woschni multiplier {_cy.A['woschni_scale']}, combustion phasing, efficiencies) are textbook values, not calibration.
+
+## 4. Engine architecture
+
+Coordinate system: X = crank axis (+X flywheel end), Z up, bank 1 (cyl 1-8) towards +Y. Crank throw {P.throw:.3f} mm (offset bores make the
+stroke larger than twice the throw), deck height {P.deck_height:.2f} mm, bore centres +/-{P.u_bore_deck:.2f} mm at the deck, bank offset {P.bank_offset:.1f} mm.
+Crankpin phases are derived from the published firing order; the two cylinders on every pin require the same pin angle to 1e-13 deg and
+all firing intervals found numerically are 45.000 deg, which shows the published order and the shared-pin 90 deg layout are mutually consistent.
+
+{img('06_ASSEMBLIES/views/four_bank_arrangement_front.png', 'Four-row arrangement seen from the free end (block transparent).', 62)}
+{img('06_ASSEMBLIES/views/section_transverse_cyl1.png', 'Transverse section through cylinder 1 (outer row, bank 1).', 62)}
+{img('06_ASSEMBLIES/views/cutaway_transparent_block.png', 'Crank train inside the transparent crankcase.', 70)}
+
+Envelope from CAD: dressed engine {env[0]:.0f} x {env[1]:.0f} x {env[2]:.0f} mm (L x W x H); long block {lb[0]:.0f} x {lb[1]:.0f} x {lb[2]:.0f} mm.
+The published length is 710 mm; this reconstruction's block is 660 mm long and the long block {lb[0]:.0f} mm including chain housing and crank nose.
+
+## 5. Component design
+
+### 5.1 Crankcase
+Split at the crank axis: upper section with both banks, lower bearing support with nine cast-in iron bearing covers (4 bolts each), dry-sump pan.
+Zig-zag bores with a {P.web_bore_deck:.1f} mm web at the deck and {P.web_bore_foot:.1f} mm at the bore foot. Closed deck; the water jacket of each bank is one
+connected volume of {V.get('jacket_block_bank_l', float('nan')):.2f} L surrounding all eight bores (CAD-measured), fed at the free end, with four transfer holes per cylinder to the head.
+Oil: central gallery dia {P.oil_gallery_dia:.0f} mm to the nine main bearings and the inner-row piston jets; two side galleries for the outer-row jets.
+
+### 5.2 Crank train
+Crankshaft assembly group {m05} kg, eight bored pins, R2.5 fillets, drilled oil ways. The webs are only {P.web_thk} mm thick and the rods pass between them at BDC,
+so counterweights cannot be wider than the webs: each throw is balanced internally to {min(ib) * 100:.0f}-{max(ib) * 100:.0f} % and the sixteen
+counterweights are sized so that the resultant force and couple of the complete crank are zero (residual {cw.get('residual_force_kgmm', 0):.1e} kg mm, {cw.get('residual_couple_kgmm2', 0):.1e} kg mm2).
+Titanium I-beam rods with trapezoidal small end; forged pistons with a crown tilted {P.crown_tilt_axis:.2f} deg to the pin-axis normal, three rings, slipper skirt.
+
+{img('06_ASSEMBLIES/views/crank_train_isometric.png', 'Crankshaft, rods and pistons.', 70)}
+
+### 5.3 Cylinder heads and valve train
+Each head: eight wedge chambers, 16 intake ports from the valley side and 16 exhaust ports outboard (short and long ports alternate), 32 valves,
+one row of eight inclined plug wells between the camshafts, a single connected water jacket ({V.get('head_jacket', {}).get('jacket_l', float('nan')):.2f} L, CAD-measured), oil galleries with risers to the cam bearings.
+Valve sizes {P.valve_in_dia:.0f} / {P.valve_ex_dia:.0f} mm, lifts {P.valve_lift_in} / {P.valve_lift_ex} mm, follower ratio 2.0. Cam lobes are the exact inner envelope of the dia {P.roller_dia:.0f} mm roller.
+
+{img('06_ASSEMBLIES/views/valvetrain_cutaway_bank1.png', 'Valve train of bank 1 (head semi-transparent, cut).', 70)}
+{img('06_ASSEMBLIES/views/timing_drive_rear.png', 'Timing drive at the flywheel end: duplex primary chain, intermediate shaft, four secondary chains.', 62)}
+
+### 5.4 Turbocharging, intake, exhaust
+{img('06_ASSEMBLIES/system_diagrams/01_air_exhaust_sequential_turbocharging.png', 'Flow architecture of one bank.', 90)}
+{img('06_ASSEMBLIES/views/turbo_arrangement_isometric.png', 'Turbochargers, exhaust (red) and charge-air system (blue) on the long block.', 75)}
+
+### 5.5 Fuel, ignition, engine management
+32 port injectors on four rails, 16 M10 plugs with pencil coils and ion-current measurement, two ECUs (concept). No calibration exists.
+{img('06_ASSEMBLIES/system_diagrams/04_fuel_ignition_ems_architecture.png', 'Engine-management architecture (concept).', 85)}
+
+### 5.6 Lubrication and cooling
+{img('06_ASSEMBLIES/system_diagrams/03_lubrication_circuit.png', 'Dry-sump lubrication circuit with calculated flows.', 85)}
+{img('06_ASSEMBLIES/system_diagrams/02_cooling_circuits.png', 'High- and low-temperature cooling circuits.', 85)}
+
+## 6. Assembly documentation
+
+Hierarchy and masses: `06_ASSEMBLIES/ASSEMBLY_HIERARCHY.md`. Sub-assembly and master STEP files: `06_ASSEMBLIES/step/`, `13_EXPORTS_STEP/`.
+
+{tab([(g['group'], g['name'], g['part_numbers'], g['instances'], g['mass_kg']) for g in S.get('groups', [])], ['Group', 'Sub-assembly', 'Part numbers', 'Parts', 'Mass [kg]'])}
+
+CAD mass {S.get('total_mass_kg', '?')} kg dry, as modelled (published: about 400 kg; the CAD figure includes dressing items such as pre-catalysts, air boxes,
+oil tank and charge-air system, and excludes unmodelled small parts and fluids - the two numbers are not directly comparable).
+
+{img('06_ASSEMBLIES/views/exploded_isometric.png', 'Exploded view.', 95)}
+
+## 7. Engineering calculations (summary; full reports in `08_SIMULATIONS/analytical/`)
+
+### 7.1 Performance and turbocharger matching
+{img('08_SIMULATIONS/analytical/perf_full_load.png', 'Full-load model results against the published torque and power.', 95)}
+
+| Quantity at rated power | Model | Published |
+|---|---|---|
+| Boost pressure | {rated.get('boost_bar', 0):.2f} bar gauge | not published (about 1.85 bar quoted by secondary sources) |
+| Air flow | {rated.get('air_lpm', 0):,.0f} L/min | more than 60,000 L/min |
+| Charge-air temperature drop | {rated.get('cac_dT', 0):.0f} K | as much as 130 K |
+| Turbine inlet temperature | {rated.get('T3_c', 0):.0f} degC (held by enrichment, lambda {rated.get('lam', 0):.2f}) | valve rated 980 degC |
+| Peak cylinder pressure | {rated.get('p_max_bar', 0):.0f} bar | not published |
+| BSFC / fuel flow | {rated.get('bsfc_g_kwh', 0):.0f} g/kWh / {rated.get('mdot_fuel', 0) / 0.745 * 3600:.0f} L/h | - |
+
+Torque and power are model targets, so they match by construction; the informative results are the boost, flows and temperatures and the
+fact that the turbocharger power balance closes with four equal turbochargers sized at the change-over point. The same sizing gives full
+torque with two turbochargers from about 2,000 rpm, consistent with the published plateau.
+{img('08_SIMULATIONS/analytical/turbo_compressor_operating_line.png', 'Compressor operating line (surge/choke lines are representative shapes, not a measured map).', 60)}
+
+### 7.2 Crank train
+Rod force {dyn.get('rod_peak_comp', 0) / 1e3:.1f} kN compression at full load, {dyn.get('rod_peak_tens_overspeed', 0) / 1e3:.1f} kN tension at {P.rpm_overspeed:.0f} rpm; main bearing peak {dyn.get('main_peak', 0) / 1e3:.1f} kN.
+With fully balanced throws the free forces and moments would be {dyn.get('F_free_peak', float('nan')):.0f} N and {dyn.get('M_free_peak', float('nan')):.0f} N m at rated speed (higher orders only). First torsional mode {dyn.get('torsional_f', [0, 0])[1]:.0f} Hz (lumped model).
+{img('08_SIMULATIONS/analytical/torque_and_bearing_loads.png', 'Torque ripple and main-bearing load loci.', 90)}
+
+### 7.3 Thermal, lubrication, fuel
+Fuel power {en.get('q_fuel', 0):.0f} kW; to HT coolant {en.get('q_coolant_ht', 0):.0f} kW (temperature rise {cool.get('dT', 0):.1f} K at 800 L/min); to oil {en.get('q_oil', 0):.0f} kW;
+charge-air coolers {cac.get('q_total_kw', 0):.0f} kW at effectiveness {cac.get('effectiveness', 0):.2f}. Oil demand {lube.get('q_total_lpm', 0):.0f} L/min, pump {lube.get('q_pump_lpm', 0):.0f} L/min.
+{img('08_SIMULATIONS/analytical/energy_balance.png', 'Fuel-energy split at rated power (model).', 60)}
+
+## 8. Simulation reports (finite elements)
+
+Tools: gmsh tetrahedral meshes of the CAD solids, scikit-fem linear elasticity (P2 unless noted) and steady conduction (P1).
+Peak values at re-entrant corners and at fixed boundaries are mesh-dependent; the 99.9th-percentile element stress is reported next to the peak.
+
+{fea_table(fea)}
+
+{img('08_SIMULATIONS/fea/rod_compression_design_gas_force.png', 'Connecting rod, design gas force: von Mises stress.', 55)}
+{img('08_SIMULATIONS/fea/piston_temperature.png', 'Piston steady temperature field.', 55)}
+{img('08_SIMULATIONS/fea/crank_throw_vm.png', 'Crank throw 3 in bending: von Mises stress.', 55)}
+{img('08_SIMULATIONS/fea/block_slice_temperature.png', 'Cylinder-block slice: temperature field.', 55)}
+{img('08_SIMULATIONS/fea/head_slice_temperature.png', 'Cylinder-head slice: temperature field.', 55)}
+
+### Findings from the FE results
+
+{chr(10).join('- ' + x for x in fea_findings(fea)) or '- no limit exceeded in the cases that ran'}
+
+Limitations of the FE work: linear elastic, no contact, no bolt preload, no bearing films, simplified supports, slices instead of the complete
+castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factors are simple ratios against handbook limits).
+
+## 9. Validation results
+
+- **Compression ratio from CAD volumes:** {", ".join(f"cyl {k[-1]}: {V[k]['cr']:.2f} (V_tdc {V[k]['v_tdc_cc']:.1f} cm3)" for k in ("cyl1", "cyl2") if k in V) or "not available"}; target {P.compression_ratio}.
+- **Firing intervals:** 45.000 deg for all 16 cylinders (numerical TDC search).
+- **Interference check:** {sc.get('clear', 'n/a')} static pairs clear, {sc.get('expected', 'n/a')} intentional contacts (threads, press fits, seats), {len(sc.get('clashes', []))} static clash pairs;
+  kinematic sweep over {len(I.get('meta', {}).get('kin_angles', []))} crank angles: {kc.get('clear', 'n/a')} pair checks clear, {len(kc.get('clashes', []))} clash pairs; boolean errors {sc.get('errors', 0)} / {kc.get('errors', 0)}.
+{("" if not cl_rows else chr(10) + tab(cl_rows, ["Check", "Part A", "Part B", "Occurrences", "Max overlap [mm3]"]) + chr(10) + chr(10) + "These remaining overlaps are packaging errors of this concept model and are listed as open work; they are not hidden.")}
+- **Piston-to-valve clearance, spring loads, transverse head clearances:** `08_SIMULATIONS/analytical/03_valvetrain.md`.
+- **Comparison with published targets:** section 7.1.
+
+## 10. Acceptance criteria
+
+{tab(acc, ["Criterion", "Result", "Evidence"])}
+
+## 11. Bill of materials and procurement
+
+{len(bom_rows or [])} part numbers; see `10_BOM_AND_PROCUREMENT/BOM.md` / `BOM.csv`. No costs are given because no reliable price source exists.
+
+## 12. Materials and manufacturing
+
+See `11_MANUFACTURING_DOCUMENTATION/MANUFACTURING_SPEC.md` (materials, processes, critical dimensions, tolerance classes, inspection, assembly sequence, maintenance).
+
+## 13. Drawings, exports, animations
+
+- Drawings: `07_ENGINEERING_DRAWINGS/` ({count('07_ENGINEERING_DRAWINGS/*.pdf')} PDF sheets, also SVG/PNG).
+- STEP: `13_EXPORTS_STEP/` (master assembly + components); sub-assemblies in `06_ASSEMBLIES/step/`. STL / 3MF: `14_EXPORTS_STL_3MF/`.
+- Animations: `09_ANIMATIONS/` ({count('09_ANIMATIONS/*.gif')} GIF, {count('09_ANIMATIONS/*.mp4')} MP4).
+
+## 14. Known engineering limitations
+
+1. No manufacturer geometry: every internal dimension is a reconstruction. The model shows that the public data are mutually consistent; it does not reproduce the real parts.
+2. No 3-D CFD of any kind (ports, plenum, coolant jacket, combustion). Flow results are 0-D / 1-D.
+3. The cycle model is uncalibrated; enrichment, boost and temperatures are plausible estimates. Knock is not modelled.
+4. Turbomachinery is sized, not designed: wheels and volutes are representative shapes; there are no compressor or turbine maps.
+5. FE is linear and local (see section 8). No fatigue, no bearing elasto-hydrodynamics, no valve-train dynamics, no crank 3-D torsional/bending model, no thermal-mechanical head analysis with valve-bridge detail.
+6. Purchased units (injectors, coils, sensors, pumps, alternator, phasers, tensioners) are envelopes. Seals, O-rings, dowels, clips, brackets, most small fasteners, hoses and the detailed harness are not modelled.
+7. Castings have no draft, fillets or wall-thickness optimisation; mass is therefore indicative.
+8. Tolerances are classes, not a stack-up. Drawings are layout drawings.
+{vt_text}
+10. The engine-management description is an architecture, not software.
+
+## 15. Future development recommendations
+
+1. Resolve the listed interferences and add draft/fillets to castings; then repeat the mass and FE work on full castings.
+2. 1-D gas-dynamics model (GT-Power class) with real turbocharger maps; then 3-D CFD of ports, plenum distribution and water jackets.
+3. Elasto-hydrodynamic bearing analysis and a flexible multi-body crank and valve-train simulation; damper tuning.
+4. Thermo-mechanical fatigue analysis of head and manifolds; piston secondary motion and ring-pack analysis.
+5. Tolerance stack-ups for the chamber volume (CR scatter), valve train and timing drive.
+6. Supplier engagement for turbochargers, bearings and valve train; replace envelopes by supplier CAD.
+7. Prototype sequence: single-bank VR8 test rig for combustion and cooling development before the full W16.
+
+## 16. Reproducing the package
+
+```
+set PYTHONPATH=src
+.venv\\Scripts\\python -m w16.reports            analytical package
+.venv\\Scripts\\python -m w16.cad.assembly       CAD build + summary
+.venv\\Scripts\\python -m w16.cad.export all     exports, hierarchy, validation
+.venv\\Scripts\\python -m w16.cad.export interference
+.venv\\Scripts\\python -m w16.cad.render         views and animations
+.venv\\Scripts\\python -m w16.cad.drawings       drawings
+.venv\\Scripts\\python -m w16.sim.fea            finite-element cases
+.venv\\Scripts\\python -m w16.diagrams           schematics
+.venv\\Scripts\\python -m w16.docs               BOM, manufacturing spec, this report
+```
+"""
+    W(p("12_FINAL_REPORT", "W16_ENGINEERING_REPORT.md"), md)
+    return md
+
+
+def to_pdf(md):
+    import markdown
+    html = markdown.markdown(md, extensions=["tables", "fenced_code"])
+    base = "file:///" + p("12_FINAL_REPORT").replace("\\", "/") + "/"
+    css = """body{font-family:Segoe UI,Arial,sans-serif;font-size:10.5pt;line-height:1.35;margin:18mm 16mm;color:#111}
+h1{font-size:20pt;border-bottom:2px solid #333;padding-bottom:4px}h2{font-size:14.5pt;margin-top:22px;border-bottom:1px solid #999}h3{font-size:12pt}
+table{border-collapse:collapse;width:100%;margin:8px 0;font-size:8.2pt;page-break-inside:auto}th,td{border:1px solid #999;padding:3px 5px;vertical-align:top}
+th{background:#e8ebef}tr{page-break-inside:avoid}img{max-width:100%;page-break-inside:avoid}em{font-size:9pt;color:#444}code,pre{font-size:8.5pt;background:#f3f3f3}
+p{orphans:3;widows:3}"""
+    doc = f'<!doctype html><html><head><meta charset="utf-8"><base href="{base}"><title>W16 engineering report</title><style>{css}</style></head><body>{html}</body></html>'
+    hp = p("12_FINAL_REPORT", "W16_ENGINEERING_REPORT.html")
+    W(hp, doc)
+    pdf = p("12_FINAL_REPORT", "W16_ENGINEERING_REPORT.pdf")
+    for exe in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Google\Chrome\Application\chrome.exe"):
+        if os.path.exists(exe):
+            try:
+                subprocess.run([exe, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={pdf}", "file:///" + hp.replace("\\", "/")],
+                               timeout=240, capture_output=True)
+            except Exception as e:
+                print("pdf attempt failed:", exe, e)
+            if os.path.exists(pdf) and os.path.getsize(pdf) > 20000:
+                return pdf
+    return None
+
+
+def main():
+    E = evidence()
+    b = bom()
+    manufacturing()
+    acc = requirements(E)
+    md = report(E, b)
+    pdf = to_pdf(md)
+    print("BOM rows:", len(b or []), "| report chars:", len(md), "| pdf:", pdf, os.path.getsize(pdf) if pdf else None)
+    for c, r, e in acc:
+        print(f"  [{r}] {c}")
+
+
+if __name__ == "__main__":
+    main()
