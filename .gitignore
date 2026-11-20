@@ -8,3 +8,7 @@ __pycache__/
 13_EXPORTS_STEP/
 14_EXPORTS_STL_3MF/
 06_ASSEMBLIES/step/
+
+# logs of the full regeneration (run_regeneration.cmd -> tools/regenerate_d042.py)
+regen_logs/
+regen_logs_console.log

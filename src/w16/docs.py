@@ -12,6 +12,8 @@ import os
 import subprocess
 import sys
 
+import numpy as np
+
 from .params import P, MATERIALS
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -140,7 +142,7 @@ MFG = [  # component, material, process, critical dimensions, tolerance class, s
 ]
 
 
-def manufacturing():
+def manufacturing(E=None):
     md = """# Materials and manufacturing specification
 
 Scope: concept-level manufacturing definition for the reconstructed W16. Tolerances are given as **classes** to show
@@ -153,10 +155,17 @@ functional analysis before release. Operating temperatures and loads refer to th
     rows = [list(r) for r in MFG]                       # temperatures / loads that come from the analysis results
     th = J("08_SIMULATIONS", "fea", "piston.json").get("results", {}).get("thermal", {})
     dyn = J("08_SIMULATIONS", "analytical", "results.json").get("dynamics", {})
+    H = (E or {}).get("hot")
     for r in rows:
+        if r[0] == "Pistons":
+            r[3] = r[3].replace("compression height 38.5", f"compression height {P.comp_height:.1f}")      # was fixed text (38.5 before D-040)
         if r[0] == "Pistons" and th:
             r[6] = (f"crown up to {th['T_max_C']:.0f} degC (mean {th['T_crown_mean_C']:.0f}), top ring groove {th['T_top_ring_groove_C']:.0f} degC "
-                    "at rated power (FE, section 8 of the report; crown above the ~350 degC guide - open item)")
+                    "at rated power (FE, section 8 of the report; crown above the ~350 degC guide - open item)"
+                    + (("; hot fatigue " + {"fails": "**FAILS**", "below target": "**below the 1.5 target**", "meets target": "meets the 1.5 target"}[hot_status(H)]
+                        + f" with 4032-T6 lower-bound strength (factor {H['worst']:.2f}-{H['best']:.2f})"
+                        + (" - **piston material / cooling OPEN**" if hot_status(H) != "meets target" else "") + " (report section 8.1)")
+                       if H else "; hot fatigue not evaluated - **piston thermal design OPEN** (report section 8.1)"))
         if r[0] == "Connecting rods" and dyn.get("rod_peak_tens_overspeed"):
             r[7] = f"{dyn['F_design_gas'] / 1e3:.0f} kN compression (design), {dyn['rod_peak_tens_overspeed'] / 1e3:.0f} kN tension at overspeed"
     md += tab(rows, ["Component", "Proposed material", "Manufacturing process", "Critical dimensions", "Tolerance class (provisional)", "Surface finish",
@@ -211,10 +220,65 @@ def evidence():
     I = J("06_ASSEMBLIES", "interference_report.json")
     rows = J("06_ASSEMBLIES", "bom_rows.json") or []
     q = {r["pn"]: r["qty"] for r in rows}
-    fea = {os.path.basename(f)[:-5]: json.load(open(f, encoding="utf-8")) for f in glob.glob(p("08_SIMULATIONS", "fea", "*.json"))}
+    fea = {}
+    for f in glob.glob(p("08_SIMULATIONS", "fea", "*.json")):
+        v = json.load(open(f, encoding="utf-8"))
+        if "case" in v:          # FE case records and their _FAILED records; post-processing records (no "case") are read separately
+            fea[os.path.basename(f)[:-5]] = v
     exp = J("13_EXPORTS_STEP", "component_export_log.json") or []
     aexp = J("13_EXPORTS_STEP", "assembly_export_log.json")
-    return dict(R=R, S=S, V=V, I=I, q=q, rows=rows, fea=fea, exp=exp, aexp=aexp)
+    E = dict(R=R, S=S, V=V, I=I, q=q, rows=rows, fea=fea, exp=exp, aexp=aexp)
+    E["hot"] = piston_hot(E, J("08_SIMULATIONS", "fea", "piston_section_fatigue.json"))
+    return E
+
+
+HOT_REGIONS = [("crown_above_gallery", "Crown above the oil gallery"), ("section", "Crown section under the long-valve pockets"),
+               ("ring_belt_top_groove", "Ring belt at the top ring groove"), ("pin_bosses", "Pin bosses"),
+               ("slot_end_corner", "Slot-end corner under the crown (unradiused in the concept CAD)")]
+
+
+def piston_hot(E, h):
+    """Piston hot-fatigue verdict from 08_SIMULATIONS/fea/piston_section_fatigue.json (tools/piston_section_fatigue.py:
+    temperature-dependent strength, 4032-T6 after 10,000 h at temperature = lower bound).  None if the record is missing or
+    belongs to another piston FE run than fea/piston.json."""
+    pis = E["fea"].get("piston", {})
+    if not h or not pis or "fatigue" not in h:
+        return None
+    rep = h.get("reproduction", {}).get("gas_pressure.vm_max_MPa", {})
+    if abs(rep.get("production", -1.0) - pis.get("results", {}).get("gas_pressure", {}).get("vm_max_MPa", -2.0)) > 1e-6:
+        return None                                       # stale: evaluated on a different piston FE run
+    t_tab, u_tab = zip(*h["uts_table_degC_MPa"])
+    sf_rt, u_rt = h["fatigue_strength_rt_MPa"], u_tab[0]
+    uts = lambda T: float(np.interp(T, t_tab, u_tab))
+    t_oil = pis.get("inputs", {}).get("T_oil_K", 400.0) - 273.15
+    secs = h.get("section_under_long_valve_pockets", {})
+    sec = min(secs.values(), key=lambda s: s["fatigue"]["min_factor"]) if secs else None
+    rows = []
+    for key, label in HOT_REGIONS:
+        f = sec["fatigue"] if key == "section" and sec else h["fatigue"].get(key)
+        if not f:
+            continue
+        need = 1.5 * f["sigma_a_MPa"] * u_rt / sf_rt               # UTS needed for factor 1.5 (sigma_f scales with UTS)
+        t_need = float(np.interp(-need, [-u for u in u_tab], t_tab)) if need <= u_rt else None
+        rows.append(dict(key=key, label=label, T=f["T_C"], sa=f["sigma_a_MPa"], sf=f["sigma_f_T_MPa"], n=f["min_factor"],
+                         n_goodman=f["min_factor_goodman"], T_need=t_need, n_rt=sf_rt / f["sigma_a_MPa"], frac_need=1.5 * f["sigma_a_MPa"] / sf_rt))
+    if not rows:
+        return None
+    gt = pis["results"].get("gas_plus_thermal", {})
+    rod = E["fea"].get("rod", {}).get("results", {})
+    m_rec = (E["R"].get("dynamics", {}) or {}).get("m_rec")
+    rod_f = rod_d50 = None
+    if rod.get("fatigue_estimate") and m_rec:
+        c = rod["compression_design_gas_force"]["vm_p999_MPa"]; t = rod["tension_overspeed_inertia"]["vm_p999_MPa"]
+        lim = rod["fatigue_estimate"]["fatigue_limit_MPa"]
+        rod_f = lim / (0.5 * (c + t))
+        rod_d50 = rod_f - lim / (0.5 * (c + t * (m_rec + 0.05) / m_rec))      # tension scales with the reciprocating mass
+    sens = pis["results"].get("thermal_sensitivity", [])
+    return dict(rows=rows, worst=min(r["n"] for r in rows), best=max(r["n"] for r in rows), fails=min(r["n"] for r in rows) < 1.0,
+                n_rt=pis["results"].get("fatigue_estimate", {}).get("factor"), sec=sec, source=h.get("source", ""),
+                method=h.get("method", ""), t_oil=t_oil, uts=uts, gt=gt, rod_f=rod_f, rod_d50=rod_d50, m_rec=m_rec,
+                best_cooling=min(sens, key=lambda s: s["T_crown_mean_C"]) if sens else None,
+                T_crown=pis["results"].get("thermal", {}).get("T_crown_mean_C"))
 
 
 def acceptance(E):
@@ -255,6 +319,14 @@ def acceptance(E):
         ("Final technical report produced", "see file", "`12_FINAL_REPORT/` (Markdown + PDF)"),
         ("Deliverables organised in the structured directory", "PASS", "folders 01-14 + 00_PROJECT_CONTROL + src"),
     ]
+    if "piston" in fea:                    # engineering check added 2026-11-20 (not one of the brief's section 21 criteria)
+        H = E.get("hot")
+        st = hot_status(H) if H else None
+        items.append(("Piston at operating temperature: hot fatigue (engineering check added 2026-11-20, not in brief section 21)",
+                      {"fails": "NOT MET - OPEN", "below target": "NOT MET - OPEN", "meets target": "PASS", None: "OPEN - not evaluated"}[st],
+                      (f"factor {H['worst']:.2f}-{H['best']:.2f} with 4032-T6 strength after 10,000 h at temperature (section 8.1); "
+                       f"the room-temperature factor {H['n_rt']:.2f} is not an acceptance measure") if H else
+                      "no temperature-dependent evaluation of the current piston FE; the room-temperature factor is not an acceptance measure"))
     return items
 
 
@@ -316,14 +388,22 @@ def fea_table(fea):
                                 "factor", "sigma_a_MPa", "max_axial_displacement_mm", "crown_deflection_mm", "peak_bearing_pressure_MPa",
                                 "T_at_vm_max_C") if isinstance(r.get(x), (int, float))]
             bc = v.get("boundary_conditions", "")[:220] + (" NOTE: " + r["note"] if r.get("note") else "")
+            res_txt = "; ".join(f"{x.replace('_', ' ')} = {r[x]:.3g}" for x in keys)
+            if k == "piston" and name == "fatigue_estimate":
+                res_txt += " - **room-temperature limit: NOT an acceptance measure** (hot fatigue: section 8.1)"
             rows.append((v.get("case", k), name.replace("_", " "), f"{ms.get('tets', '?')} tets, gamma min {ms.get('quality_gamma_min', 0):.2f}",
-                         "; ".join(f"{x.replace('_', ' ')} = {r[x]:.3g}" for x in keys), bc))
+                         res_txt, bc))
     return tab(rows, ["Case", "Load case", "Mesh", "Results", "Boundary conditions"])
 
 
-def fea_findings(fea):
-    """Plain-language findings derived from the FE records (limits are handbook guide values)."""
+def fea_findings(fea, H=None):
+    """Plain-language findings derived from the FE records (limits are handbook guide values).  H: piston hot-fatigue
+    evaluation (piston_hot), None if there is none for the current piston FE."""
     out = []
+    if "piston" in fea:
+        out.append("**piston - hot fatigue:** " + (hot_verdict(H) + "." if H else
+                   "no temperature-dependent evaluation for the current piston FE; the room-temperature fatigue factor is **not an "
+                   "acceptance measure** and **piston thermal design is an OPEN item** (section 8.1)."))
     for k, v in sorted(fea.items()):
         if "FAILED" in k:
             continue
@@ -378,9 +458,12 @@ def fea_findings(fea):
             if name == "gas_plus_thermal" and r.get("T_at_vm_max_C") is not None:
                 out.append(f"**{v.get('case', k)} - gas + thermal:** linear-elastic peak {r['vm_max_MPa']:.0f} MPa (99.9th percentile {r['vm_p999_MPa']:.0f} MPa) "
                            f"at about {r['T_at_vm_max_C']:.0f} degC metal temperature. The yield ({mat.get('yield_', 0):.0f} MPa) and fatigue "
-                           f"({mat.get('fatigue', 0):.0f} MPa) values used are room-temperature values; forged Al-Si piston alloys lose a large part "
-                           "of their strength above ~200 degC, so the pin boss and ring belt need a temperature-dependent elastic-plastic and fatigue "
-                           "analysis with a deformable pin (pin bending and bore contact) before release.")
+                           f"({mat.get('fatigue', 0):.0f} MPa) values in the FE record are room-temperature values; "
+                           + ("with temperature-dependent strength the stress exceeds even the hot tensile strength and the piston fails hot "
+                              "fatigue (section 8.1), so" if (k == "piston" and H) else "forged Al-Si piston alloys lose a large part of their "
+                              "strength above ~200 degC, so")
+                           + " the pin boss, ring belt and crown need a temperature-dependent elastic-plastic and fatigue analysis with a "
+                           "deformable pin (pin bending and bore contact) before release.")
             if name == "gas_plus_thermal" and r.get("top_land_radial_growth_max_mm") is not None:
                 g, c0 = r["top_land_radial_growth_max_mm"], r.get("top_land_cold_clearance_mm", 0.0)
                 bg = ((fea.get("block", {}).get("results", {}) or {}).get("thermal_expansion", {}) or {}).get("bore_radial_growth_mean_um")
@@ -391,6 +474,90 @@ def fea_findings(fea):
                            + (" - adequate for the concept; the piston / liner thermal match is a detail-design check." if hot > 0.05 else
                               " - too small: the land relief must be increased."))
     return out
+
+
+def hot_status(H):
+    """'fails' (factor < 1), 'below target' (< 1.5) or 'meets target' for the piston hot-fatigue evaluation."""
+    return "fails" if H["worst"] < 1.0 else ("below target" if H["worst"] < 1.5 else "meets target")
+
+
+def slot_note(H):
+    """Wording for the unradiused slot-end corner, from its factor against the room-temperature limit (target 1.5):
+    'misses the 1.5 target' for 1.0 <= factor < 1.5, 'fails' only below 1.0; '' if it meets the target or is not evaluated."""
+    s = next((r for r in (H or {}).get("rows", []) if r["key"] == "slot_end_corner"), None)
+    if not s or s["n_rt"] >= 1.5:
+        return ""
+    word = "misses the 1.5 target" if s["n_rt"] >= 1.0 else "fails even against the room-temperature fatigue limit"
+    return (f"{word} (room-temperature factor {s['n_rt']:.2f}" + (", above 1.0 but below the 1.5 target" if s["n_rt"] >= 1.0 else "")
+            + ", whatever the crown temperature) at a corner the concept CAD leaves unradiused, so the value is mesh-dependent: it needs a "
+            "real radius and a mesh-converged re-check")
+
+
+def hot_verdict(H):
+    """One-line verdict for the summary, the FE findings and the limitations list."""
+    st = hot_status(H)
+    what = {"fails": "**the piston FAILS hot fatigue**", "below target": "**the piston does not reach the 1.5 hot-fatigue target**",
+            "meets target": "the piston meets the 1.5 hot-fatigue target"}[st]
+    return (f"{what} with temperature-dependent strength (4032-T6 lower-bound data after 10,000 h at temperature: factor "
+            f"{H['worst']:.2f}-{H['best']:.2f} over the hot regions); the room-temperature fatigue factor {H['n_rt']:.2f} is **not an "
+            "acceptance measure**" + ("; **piston thermal design is an OPEN item**" if st != "meets target" else "") + " (section 8.1)")
+
+
+def hot_fatigue_md(H):
+    """Section 8.1 of the report: piston hot fatigue (from fea/piston_section_fatigue.json)."""
+    if not H:
+        return ("### 8.1 Piston hot fatigue\n\nNo temperature-dependent fatigue evaluation for the current piston FE "
+                "(`tools/piston_section_fatigue.py` not run on it): the room-temperature factor in the FE table is **not an acceptance "
+                "measure** and **piston thermal design is an OPEN item**.\n")
+    rows = [(r["label"], f"{r['T']:.0f}", f"{r['sa']:.1f}", f"{r['sf']:.1f}", f"{r['n']:.2f}", f"{r['n_goodman']:.2f}",
+             (f"{r['T_need']:.0f}" + (f" (below the {H['t_oil']:.0f} degC oil)" if r["T_need"] < H["t_oil"] else "")) if r["T_need"] is not None
+             else f"none: room-temperature factor {r['n_rt']:.2f} (target 1.5)") for r in H["rows"]]
+    s, gt = H["sec"], H["gt"]
+    crown = next((r for r in H["rows"] if r["key"] == "crown_above_gallery"), H["rows"][0])
+    slot = next((r for r in H["rows"] if r["key"] == "slot_end_corner"), None)
+    hot_frac = [r["frac_need"] for r in H["rows"] if r["key"] != "slot_end_corner"]
+    bc = H["best_cooling"]
+    st = hot_status(H)
+    head = {"fails": "**Result: the piston FAILS hot fatigue**", "below target": "**Result: the piston does not reach the 1.5 hot-fatigue target**",
+            "meets target": "**Result: the piston meets the 1.5 hot-fatigue target**"}[st]
+    md = f"""### 8.1 Piston hot fatigue - temperature-dependent strength{' (OPEN)' if st != 'meets target' else ''}
+
+{head} with temperature-dependent strength (4032-T6, lower-bound data after 10,000 h at temperature): factor
+{H['worst']:.2f}-{H['best']:.2f} over the hot regions (table). **The room-temperature fatigue factor {H['n_rt']:.2f} in the FE table is not an
+acceptance measure**: it compares with the 110 MPa room-temperature limit at metal temperatures of
+{min(r['T'] for r in H['rows']):.0f}-{max(r['T'] for r in H['rows']):.0f} degC.{' **Piston thermal design is an OPEN item.**' if st != 'meets target' else ''}
+
+{tab(rows, ["Region (governing element)", "Metal temperature [degC]", "sigma_a [MPa]", "sigma_f(T) [MPa]", "Factor", "Factor, Goodman", "Temperature for factor 1.5, lower-bound data [degC]"])}
+"""
+    if s:
+        md += (f"\nThinnest crown section, {s['thickness_mm']:.1f} mm from the pocket floors to the oil-gallery roof: {s['T_min_C']:.0f}-{s['T_max_C']:.0f} degC "
+               f"(mean {s['T_mean_C']:.0f} degC), von Mises up to {s['vm_gas_max_MPa']:.0f} MPa under gas load and {s['vm_gas_thermal_max_MPa']:.0f} MPa gas + thermal.\n")
+    if gt:
+        md += (f"\nThe linear-elastic gas + thermal stress (99.9th percentile {gt.get('vm_p999_MPa', 0):.0f} MPa, peak {gt.get('vm_max_MPa', 0):.0f} MPa at "
+               f"{gt.get('T_at_vm_max_C', 0):.0f} degC) exceeds even the hot tensile strength of the alloy (lower-bound data: "
+               f"{H['uts'](gt.get('T_at_vm_max_C', 250)):.0f} MPa at {gt.get('T_at_vm_max_C', 250):.0f} degC, {H['uts'](s['T_mean_C']) if s else H['uts'](350):.0f} MPa at "
+               f"{s['T_mean_C'] if s else 350:.0f} degC), so that result is outside the range of a linear analysis.\n")
+    md += "\nConsequences:\n" if st != "meets target" else ""
+    tn = crown["T_need"]
+    if st != "meets target" and tn is not None:
+        md += (f"- With the lower-bound data the crown would have to run at about {tn:.0f} degC or less"
+               + (f" - below the {H['t_oil']:.0f} degC oil - so cooling alone cannot reach a factor of 1.5" if tn < H["t_oil"] else "")
+               + (f" (best cooling case of the FE sensitivity, {bc['case']}: crown mean {bc['T_crown_mean_C']:.0f} degC against "
+                  f"{H['T_crown']:.0f} degC)" if bc else "")
+               + "; a hot-strength piston material or a steel crown, with measured hot fatigue data, and/or lower crown stresses are needed.\n")
+    if slot_note(H):
+        md += f"- **Slot-end corner:** {slot_note(H)} (OPEN). Its hot factor in the table is mesh-dependent for the same reason.\n"
+    if H["rod_f"] and st != "meets target":
+        md += (f"- A heavier piston loads the titanium rod: rod fatigue factor {H['rod_f']:.2f} now, about {H['rod_d50']:.3f} lower per 50 g of "
+               f"reciprocating mass ({H['m_rec']:.3f} kg now; the overspeed tension scales with it).\n")
+    md += f"\nMethod: {H['method']}\n\nSource: {H['source']}\n\n"
+    if st != "meets target":
+        md += (f"Short-exposure (upper-bound) strength data were not evaluated: the fatigue strength needed for a factor of 1.5 at the operating "
+               f"temperatures is {min(hot_frac):.2f}-{max(hot_frac):.2f} of the room-temperature value"
+               + (f" ({slot['frac_need']:.2f} at the slot-end corner)" if slot else "") + "; the project judged on 2026-11-20 that short-exposure "
+               "data cannot change the conclusion. ")
+    md += "Evaluation: `tools/piston_section_fatigue.py` -> `08_SIMULATIONS/fea/piston_section_fatigue.json`.\n"
+    return md
 
 
 def report(E, bom_rows):
@@ -417,11 +584,15 @@ def report(E, bom_rows):
     ib = list(cw.get("internal_balance", {}).values()) or [0.0]
     from .analysis import cycle as _cy
     m05 = next((g["mass_kg"] for g in S.get("groups", []) if g["group"] == "05"), "?")
+    H = E.get("hot")
+    hot_line = ("**Open item - piston:** " + (hot_verdict(H) if H else "no temperature-dependent fatigue evaluation for the current piston FE; "
+                "the room-temperature fatigue factor is **not an acceptance measure**; **piston thermal design is an OPEN item** (section 8.1)") + ".\n"
+                if "piston" in fea else "")
     md = f"""# W16 engine reconstruction - engineering design report
 
 **Subject:** 8.0-litre, quad-turbocharged W16 reconstructed from publicly documented information on the Bugatti Chiron engine.
 **Status:** concept-level digital engineering package (analysis + parametric CAD + linear FE). Not manufacturer data, not released for manufacture.
-**Date:** 2026-11-14. **Generated by:** `python -m w16.docs` from the evidence files in this repository.
+{hot_line}**Date:** 2026-11-14. **Generated by:** `python -m w16.docs` from the evidence files in this repository.
 
 ## 1. Project overview
 
@@ -574,8 +745,9 @@ Peak values at re-entrant corners and at fixed boundaries are mesh-dependent; th
 
 ### Findings from the FE results
 
-{chr(10).join('- ' + x for x in fea_findings(fea)) or '- no limit exceeded in the cases that ran'}
+{chr(10).join('- ' + x for x in fea_findings(fea, H)) or '- no limit exceeded in the cases that ran'}
 
+{hot_fatigue_md(H) if 'piston' in fea else ''}
 Limitations of the FE work: linear elastic, no contact, no bolt preload, no bearing films, simplified supports, slices instead of the complete
 castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factors are simple ratios against handbook limits).
 
@@ -619,6 +791,7 @@ See `11_MANUFACTURING_DOCUMENTATION/MANUFACTURING_SPEC.md` (materials, processes
 8. Tolerances are classes, not a stack-up. Drawings are layout drawings.
 {vt_text}
 10. The engine-management description is an architecture, not software.
+{"11. **Piston:** " + (hot_verdict(H) if H else "no temperature-dependent fatigue evaluation for the current piston FE; **piston thermal design is an OPEN item** (section 8.1)") + "." + (" The slot-end corner under the crown " + slot_note(H) + "." if slot_note(H) else " The slot-end corner under the crown is unradiused in the concept CAD: it needs a real radius and a mesh-converged re-check.") + " A cooling / material decision and a new piston FE are needed before the piston is mechanically acceptable." if 'piston' in fea else ""}
 
 ## 15. Future development recommendations
 
@@ -629,6 +802,7 @@ See `11_MANUFACTURING_DOCUMENTATION/MANUFACTURING_SPEC.md` (materials, processes
 5. Tolerance stack-ups for the chamber volume (CR scatter), valve train and timing drive.
 6. Supplier engagement for turbochargers, bearings and valve train; replace envelopes by supplier CAD.
 7. Prototype sequence: single-bank VR8 test rig for combustion and cooling development before the full W16.
+8. Piston: confirm the piston heat load (cycle-model calibration), decide crown cooling and material (hot-strength alloy or steel crown, with measured hot fatigue data; check the rod for any mass increase), radius the slot-end corner, then a temperature-dependent elastic-plastic piston FE.
 
 ## 16. Reproducing the package
 
@@ -677,7 +851,7 @@ p{orphans:3;widows:3}"""
 def main():
     E = evidence()
     b = bom()
-    manufacturing()
+    manufacturing(E)
     acc = requirements(E)
     md = report(E, b)
     pdf = to_pdf(md)

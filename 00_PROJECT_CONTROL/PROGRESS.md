@@ -5,7 +5,25 @@ _Last updated: 2026-11-18_
 Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-043) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
 
-## D-041 + D-042 — applied in the source, verified by targeted checks, NOT regenerated (awaiting approval)
+## D-041 + D-042 — applied in the source, verified by targeted checks; full regeneration approved 2026-11-20
+
+**2026-11-20 — state before the regeneration (run by the user, not by Claude Code).**
+- Regeneration approved: `run_regeneration.cmd` → `tools/regenerate_d042.py` (reports, assembly, export all, FE rod / crank /
+  insert / block / head — **not the piston**, interference with 2 static + 3 kinematic workers if the measured build peak fits
+  in RAM, else 2 / 1; render, drawings, diagrams, docs). Per-stage logs and peak RAM in `regen_logs/` (git-ignored, as is `regen_logs_console.log`); the chain stops at the
+  first failing stage. The analytical stage gives the same rated-point piston heat as the committed piston FE (95.812 kW for
+  16 pistons, checked 2026-11-20), so `fea/piston.json` stays consistent.
+- `docs.py`: the report now states that the piston **fails hot fatigue** with the 10,000 h lower-bound data, that the
+  room-temperature factor 2.05 is **not an acceptance measure**, and that **piston thermal design is OPEN** — status line under
+  the title, FE table (fatigue row), FE findings, new section 8.1 (table per region, section values, hot tensile strength,
+  consequences, method, source), limitations item 11, future work item 8, an added acceptance row (marked as not in the brief)
+  and the manufacturing-spec piston row (also: compression height now from the parameter, was fixed text 38.5).
+  `evidence()` reads only FE case records, so `piston_section_fatigue.json` is not counted as a seventh FE case. Tested
+  end-to-end (MD / HTML / PDF) on a scratch copy of the evidence files, including a missing and a stale hot-fatigue record.
+- Short-exposure strength data: dropped (decision of the user, 2026-11-20 — cannot change the conclusion).
+- **Next study, after the regeneration (no geometry changes):** piston heat input — justify or correct `woschni_scale` 2.0;
+  heat into the piston per cylinder (W and W/mm² of crown) against published ranges for high-output turbocharged SI engines,
+  with sources; crown temperature at `woschni_scale` 1.0 / 1.5 / 2.0.
 
 **Commits.** Backup of the D-040 state: commit `56f4d67`, tag `pre-D041` (branch `bugatti-w16-engine`), plus copies of
 `interference_report.json` and `cad_validation.json` in `_backup_pre-D041/`. Everything since (D-041, D-042, records, head FE,
@@ -165,6 +183,9 @@ compression height 40 mm) geometry and its output checked.
 2a. **Detail design — piston oil-ring land over the pin-bore exit 0.77 mm** (D-042; 0.97 mm in D-040; logged 2026-11-18):
    thin forged land next to the boss and the drain holes; local stress / temperature to be read from the valid D-042 piston FE;
    options and knock-on checks in DECISIONS.md (open items).
+2b. **Detail design — piston slot-end corner: misses the 1.5 target; needs a real radius and a mesh-converged re-check**
+   (logged 2026-11-20): unradiused in the concept CAD, carries the gas-case peak (171 MPa, mesh-dependent); room-temperature
+   fatigue factor 1.29 — above 1.0, below the 1.5 target, whatever the crown temperature (DECISIONS.md, open items).
 3. **Connecting rod:** fatigue factor 1.18 and yield factor 1.80 at overspeed (titanium rod).
 4. **Tight valve-gear margins:** finger ratio 2.7 on the short valves; plug well vs cam core 0.945 mm; long-valve spring
    vs short-valve support-element boss 1.175 mm; piston-cooling jet vs rod about 2.3 mm (D-036).
