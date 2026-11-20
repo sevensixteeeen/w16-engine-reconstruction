@@ -24,7 +24,40 @@ rewritten first. Nothing has been pushed. Other staged items elsewhere in the re
 1.02 / 1.40 mm); finger bodies vs camshafts ≥ 1.49 mm (short finger 1.675 / 1.722, was 0.29 / 0.51); rollers in contact; CR
 8.9998; head FE (`fea/head.json`): 9 zero-volume tets dropped, heat balance 0.0 %, valve bridge 220 / 159 degC.
 
-**Piston FE — the 23:21 run is INVALID; fixed by D-043; re-run pending (user's terminal).** The run of 2026-11-17 23:21
+**Piston FE on D-042 — VALID re-run of 2026-11-18 13:09** (user's terminal, log `08_SIMULATIONS/fea_piston_run.log`; log and
+`piston.json` identical value for value; all D-043 guards passed: gas force −2.04 %, side force and point-support reactions ~1e-10 N
+in both solved cases). Same mesh class as D-040 (81,483 tets, γ min 2.0e-5, none dropped). Solve 8,411 s (D-040 2,708 s —
+probably paging, ~5 GB free afterwards). Against D-040:
+
+| | D-042 | D-040 |
+|---|---|---|
+| Gas: peak / p99.9 | 171.2 / 107.2 MPa (slot-end corner (−11.8, −19.1, 10.6), 248 °C) | 181.8 / 105.4 (same corner) |
+| Gas + thermal: peak / p99.9 | **277.2 / 138.9 MPa** (same corner, 248 °C) | 285.4 / 138.3 |
+| Crown mean / max / top groove | 380.3 / 433.2 / 266.8 °C | 379.9 / 431.5 / 267.6 |
+| Top-land radial growth vs cold clearance | **0.331 vs 0.430 mm → 0.10 mm hot** | 0.331 vs 0.430 |
+| Crown deflection; bearing pressure | 0.093 mm; 85.3 MPa | 0.090; 85.3 |
+| Fatigue factor, room-temperature limit (FE record) | 2.05 | 2.09 |
+
+Thinnest crown section and temperature-dependent fatigue — `tools/piston_section_fatigue.py` →
+`08_SIMULATIONS/fea/piston_section_fatigue.json`. The tool re-solves the same mesh with conjugate gradients (2 GB) and stops
+unless it reproduces `piston.json`; worst difference 1.1e-10. Strength data: ASM Handbook Vol. 2 (1990), alloy 4032-T6 after
+10,000 h at temperature (UTS 380 / 345 / 255 / 90 / 55 / 35 / 22 MPa and yield 315 / 305 / 230 / 60 / 35 / 20 / 14 MPa at
+24 / 100 / 150 / 205 / 260 / 315 / 370 °C; fatigue 110 MPa at 5e8 cycles, room temperature); fatigue strength at temperature
+scaled with UTS (EST — the source has no hot fatigue data for 4032).
+- **Section under the long-valve pockets** (3.30 mm, pocket floor to gallery roof; both pockets): 319–378 °C, mean 354 °C;
+  von Mises gas 110.6 / 116.2 MPa max, 53.8 mean; gas + thermal 125.2 / 126.8 max, 68 mean (max at 356 °C).
+- **Fatigue (σa = ½ gas von Mises, against σf(T))**: section 0.13 (σa 58 MPa vs σf 7.3 MPa at 356 °C; Goodman 0.10); crown
+  above the gallery 0.10 (388 °C; 0.1-percentile 0.14); slot-end corner 0.21 (248 °C); top ring groove 0.27 (301 °C); pin
+  bosses 0.28 (267 °C). **With this data every hot region fails by a factor of 3–10.** The room-temperature factor 2.05 is not
+  a valid acceptance measure.
+- **Hot yield**: the gas + thermal stresses (139 MPa p99.9, 125 MPa in the section) are far above the hot yield of 4032-T6
+  (41 MPa at 248 °C, 16 MPa at 355 °C): the linear-elastic gas + thermal result is beyond its range (plastic shake-down).
+- Caveats: the 10,000-h data are the fully overaged lower bound, and scaling fatigue with UTS is an estimate. Real piston alloys
+  hold more hot strength, but the margin is so large that the conclusion stands: at 355–430 °C the crown is above the usable
+  range of a 4032-class alloy. The design needs a cooler crown (gallery / jet cooling — see the sensitivity: gallery 4,000 +
+  under-crown 1,000 W/m²K gives 334 °C) and/or a hot-strength piston alloy or steel crown, with measured hot fatigue data.
+
+**Piston FE (history) — the 23:21 run was INVALID; fixed by D-043.** The run of 2026-11-17 23:21
 (`08_SIMULATIONS/fea/piston.json`, committed in `46a4cfe`) reported 640 / 143 MPa and a crown of 332 degC. Cause: the facet
 band that selects the chamber side was a fixed 2.2 mm, and the D-042 pocket floors are exactly 2.2 mm deep. The floors (a third
 of the crown) got no gas pressure and no gas-side heat: 58.4 kN + 5.27 kN sideways instead of 76.8 kN; the side load went into
@@ -33,9 +66,9 @@ run printed to the console. D-043 (approved 2026-11-18) ties the band to the poc
 wrong load or heat balance, a loaded-area change or a facet on a ring groove — before the solve and again after it. Verified
 through the case code (thermal only): 76,817.3 N, no side force, heat applied 5,866 / 5,988 W (−2.04 %, the relieved top-land
 annulus, as D-040), crown 380.3 degC mean / 433.2 max, groove 266.8 degC (D-040: 379.9 / 431.5 / 267.6); coarse-mesh smoke test
-of the whole case passed. Until the re-run, no piston stress or fatigue number on D-042 exists.
+of the whole case passed.
 
-**Piston FE re-run (user, from `cmd`, nothing else running, ~52 min, ~10 GB):**
+**Piston FE run command (from `cmd`, nothing else running, ~10 GB):**
 ```
 cd <project root>
 set PYTHONPATH=src
@@ -88,8 +121,8 @@ drawings, BOM and final report. To finish, after approval: verify the piston FE;
 crank, insert, block (deck moved); interference (~7 h, faster with `E.interference(2, 3)`); render; drawings; diagrams; docs.
 
 **Open items from D-041 / D-042.**
-- Piston FE on D-042 — re-run pending (above); then the stress / temperature at the thinnest crown section (3.3 mm from the
-  outer intake pocket floor to the gallery) and a fatigue estimate with temperature-dependent strength.
+- **Piston hot fatigue fails** with temperature-dependent strength (factors 0.10–0.28, above) — the main open piston item; needs
+  a cooling / material decision before the design is mechanically acceptable.
 - Oil-ring land over the pin-bore exit 0.97 → 0.77 mm — logged as a detail-design open item (DECISIONS.md, 2026-11-18);
   crown under the pockets to the oil gallery 3.9 → 3.3 mm.
 - Finger corner walls 1.7 mm (short finger W16-06-007, long finger W16-06-013) — logged as a detail-design open item.

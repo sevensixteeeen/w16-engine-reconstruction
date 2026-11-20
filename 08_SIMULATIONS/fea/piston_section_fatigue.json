@@ -1,0 +1,270 @@
+{
+ "date": "2026-11-18",
+ "basis": "fea/piston.json (D-042 piston), re-solved with CG on the same mesh",
+ "source": "ASM Handbook Vol. 2, Properties and Selection: Nonferrous Alloys and Special-Purpose Materials (ASM International, 1990), wrought alloy 4032: typical tensile properties of 4032-T6 at elevated temperature (after 10,000 h at temperature) and fatigue strength 110 MPa at 5e8 cycles (R.R. Moore). Also tabulated in J.G. Kaufman, Properties of Aluminum Alloys: Tensile, Creep, and Fatigue Data at High and Low Temperatures (ASM International / The Aluminum Association, 1999).",
+ "uts_table_degC_MPa": [
+  [
+   24,
+   380.0
+  ],
+  [
+   100,
+   345.0
+  ],
+  [
+   150,
+   255.0
+  ],
+  [
+   205,
+   90.0
+  ],
+  [
+   260,
+   55.0
+  ],
+  [
+   315,
+   35.0
+  ],
+  [
+   370,
+   22.0
+  ]
+ ],
+ "fatigue_strength_rt_MPa": 110.0,
+ "reproduction": {
+  "gas_pressure.vm_max_MPa": {
+   "production": 171.18923995113894,
+   "re_solve": 171.18923995112985,
+   "rel_diff": 5.3179682879545e-14
+  },
+  "gas_pressure.vm_p999_MPa": {
+   "production": 107.17926060732452,
+   "re_solve": 107.17926060736742,
+   "rel_diff": 4.0034642267983145e-13
+  },
+  "gas_pressure.crown_deflection_mm": {
+   "production": 0.09298492382281923,
+   "re_solve": 0.09298492382279111,
+   "rel_diff": 3.0242475190789264e-13
+  },
+  "gas_plus_thermal.vm_max_MPa": {
+   "production": 277.16525513683104,
+   "re_solve": 277.1652551058103,
+   "rel_diff": 1.1192158311246203e-10
+  },
+  "gas_plus_thermal.vm_p999_MPa": {
+   "production": 138.89114533745632,
+   "re_solve": 138.8911453488552,
+   "rel_diff": 8.20705725601556e-11
+  },
+  "gas_plus_thermal.top_land_radial_growth_max_mm": {
+   "production": 0.33088363143813104,
+   "re_solve": 0.3308836314374564,
+   "rel_diff": 2.0388135624216375e-12
+  },
+  "thermal.T_crown_mean_C": {
+   "production": 380.3117229167958,
+   "re_solve": 380.3117229167958,
+   "rel_diff": 0.0
+  }
+ },
+ "section_under_long_valve_pockets": {
+  "pocket x -": {
+   "elements": 525,
+   "volume_mm3": 1329.9741854596787,
+   "thickness_mm": 3.3,
+   "T_min_C": 318.81993206201673,
+   "T_mean_C": 354.1899429227705,
+   "T_max_C": 378.33065940790095,
+   "vm_gas_max_MPa": 110.61294782646846,
+   "vm_gas_mean_MPa": 53.79685763029607,
+   "vm_gas_max_at": [
+    -19.2,
+    -17.62,
+    30.08
+   ],
+   "T_at_vm_gas_max_C": 355.84281503338815,
+   "vm_gas_thermal_max_MPa": 125.23299454541278,
+   "vm_gas_thermal_mean_MPa": 68.51322668352897,
+   "vm_gas_thermal_max_at": [
+    -19.2,
+    -17.62,
+    30.08
+   ],
+   "T_at_vm_gas_thermal_max_C": 355.84281503338815,
+   "fatigue": {
+    "region": "pocket x -",
+    "min_factor": 0.13266205619721214,
+    "at": [
+     -19.2,
+     -17.62,
+     30.08
+    ],
+    "T_C": 355.84281503338815,
+    "sigma_a_MPa": 55.30647391323423,
+    "sigma_f_T_MPa": 7.337070550347127,
+    "factor_0p1_percentile": null,
+    "min_factor_goodman": 0.102880778275389,
+    "goodman_at": [
+     -19.2,
+     -17.62,
+     30.08
+    ],
+    "goodman_T_C": 355.84281503338815
+   }
+  },
+  "pocket x +": {
+   "elements": 526,
+   "volume_mm3": 1345.8914938989496,
+   "thickness_mm": 3.3,
+   "T_min_C": 318.5050019997866,
+   "T_mean_C": 353.66954634459705,
+   "T_max_C": 377.6519926204181,
+   "vm_gas_max_MPa": 116.2328668895327,
+   "vm_gas_mean_MPa": 53.82006804297536,
+   "vm_gas_max_at": [
+    16.49,
+    -19.97,
+    29.41
+   ],
+   "T_at_vm_gas_max_C": 355.73958932043035,
+   "vm_gas_thermal_max_MPa": 126.84123771825716,
+   "vm_gas_thermal_mean_MPa": 68.19916640544565,
+   "vm_gas_thermal_max_at": [
+    16.49,
+    -19.97,
+    29.41
+   ],
+   "T_at_vm_gas_thermal_max_C": 355.73958932043035,
+   "fatigue": {
+    "region": "pocket x +",
+    "min_factor": 0.12636930601163238,
+    "at": [
+     16.49,
+     -19.97,
+     29.41
+    ],
+    "T_C": 355.73958932043035,
+    "sigma_a_MPa": 58.11643344476635,
+    "sigma_f_T_MPa": 7.344133362286345,
+    "factor_0p1_percentile": null,
+    "min_factor_goodman": 0.0980006862947353,
+    "goodman_at": [
+     16.49,
+     -19.97,
+     29.41
+    ],
+    "goodman_T_C": 355.73958932043035
+   }
+  }
+ },
+ "fatigue": {
+  "whole_piston": {
+   "region": "whole_piston",
+   "min_factor": 0.1037578395570684,
+   "at": [
+    0.05,
+    -20.92,
+    31.99
+   ],
+   "T_C": 388.2863760219277,
+   "sigma_a_MPa": 61.37773376756606,
+   "sigma_f_T_MPa": 6.368421052631579,
+   "factor_0p1_percentile": 0.167591192603979,
+   "min_factor_goodman": 0.0804652633299714,
+   "goodman_at": [
+    0.05,
+    -20.92,
+    31.99
+   ],
+   "goodman_T_C": 388.2863760219277
+  },
+  "crown_above_gallery": {
+   "region": "crown_above_gallery",
+   "min_factor": 0.1037578395570684,
+   "at": [
+    0.05,
+    -20.92,
+    31.99
+   ],
+   "T_C": 388.2863760219277,
+   "sigma_a_MPa": 61.37773376756606,
+   "sigma_f_T_MPa": 6.368421052631579,
+   "factor_0p1_percentile": 0.13903177978365022,
+   "min_factor_goodman": 0.0804652633299714,
+   "goodman_at": [
+    0.05,
+    -20.92,
+    31.99
+   ],
+   "goodman_T_C": 388.2863760219277
+  },
+  "ring_belt_top_groove": {
+   "region": "ring_belt_top_groove",
+   "min_factor": 0.273222726862434,
+   "at": [
+    14.9,
+    -35.97,
+    22.73
+   ],
+   "T_C": 301.4517043531073,
+   "sigma_a_MPa": 42.30144199194347,
+   "sigma_f_T_MPa": 11.557715331251865,
+   "factor_0p1_percentile": 0.2857211082090653,
+   "min_factor_goodman": 0.21188701266882634,
+   "goodman_at": [
+    14.9,
+    -35.97,
+    22.73
+   ],
+   "goodman_T_C": 301.4517043531073
+  },
+  "pin_bosses": {
+   "region": "pin_bosses",
+   "min_factor": 0.28422443166736516,
+   "at": [
+    -14.09,
+    -2.33,
+    12.34
+   ],
+   "T_C": 266.72183779777004,
+   "sigma_a_MPa": 53.526330121874224,
+   "sigma_f_T_MPa": 15.21349075812947,
+   "factor_0p1_percentile": 0.3063155988752992,
+   "min_factor_goodman": 0.22041894700734443,
+   "goodman_at": [
+    -14.09,
+    -2.33,
+    12.34
+   ],
+   "goodman_T_C": 266.72183779777004
+  },
+  "slot_end_corner": {
+   "region": "slot_end_corner",
+   "min_factor": 0.21255802546107888,
+   "at": [
+    -11.77,
+    -19.06,
+    10.62
+   ],
+   "T_C": 247.662101477185,
+   "sigma_a_MPa": 85.59461997556492,
+   "sigma_f_T_MPa": 18.1938234120975,
+   "factor_0p1_percentile": null,
+   "min_factor_goodman": 0.16484091770451015,
+   "goodman_at": [
+    -11.77,
+    -19.06,
+    10.62
+   ],
+   "goodman_T_C": 247.662101477185
+  }
+ },
+ "temperature_range": {
+  "elements_above_370C": 5583,
+  "note": "UTS held at 22 MPa above 370 degC (end of the data)"
+ },
+ "method": "sigma_a = 0.5 x gas-case element von Mises; sigma_f(T) = 110 MPa x UTS(T) / UTS(RT), UTS of 4032-T6 after 10,000 h at temperature (EST scaling); factor = sigma_f(T) / sigma_a; Goodman: 1 / (sigma_a / sigma_f(T) + sigma_m / UTS(T)) with sigma_m = sigma_a. Element means (no extrapolation to the surface); the slot-end corner is unradiused in the concept CAD, so its value is mesh-dependent."
+}
