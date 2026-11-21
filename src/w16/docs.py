@@ -162,7 +162,8 @@ functional analysis before release. Operating temperatures and loads refer to th
         if r[0] == "Pistons" and th:
             r[6] = (f"crown up to {th['T_max_C']:.0f} degC (mean {th['T_crown_mean_C']:.0f}), top ring groove {th['T_top_ring_groove_C']:.0f} degC "
                     "at rated power (FE, section 8 of the report; crown above the ~350 degC guide - open item)"
-                    + (("; hot fatigue " + {"fails": "**FAILS**", "below target": "**below the 1.5 target**", "meets target": "meets the 1.5 target"}[hot_status(H)]
+                    + (("; hot fatigue " + {"fails": "**FAILS**", "below target": "**below the 1.5 target**", "meets target": "meets the 1.5 target",
+                                            "not assessable": "**NOT ASSESSABLE with public data** (method fails even production-range crown temperatures)"}[hot_status(H)]
                         + f" with 4032-T6 lower-bound strength (factor {H['worst']:.2f}-{H['best']:.2f})"
                         + (" - **piston material / cooling OPEN**" if hot_status(H) != "meets target" else "") + " (report section 8.1)")
                        if H else "; hot fatigue not evaluated - **piston thermal design OPEN** (report section 8.1)"))
@@ -244,6 +245,7 @@ def evidence():
     exp = J("13_EXPORTS_STEP", "component_export_log.json") or []
     aexp = J("13_EXPORTS_STEP", "assembly_export_log.json")
     E = dict(R=R, S=S, V=V, I=I, q=q, rows=rows, fea=fea, exp=exp, aexp=aexp)
+    E["heat"] = J("08_SIMULATIONS", "analytical", "piston_heat_input_study.json")
     E["hot"] = piston_hot(E, J("08_SIMULATIONS", "fea", "piston_section_fatigue.json"))
     return E
 
@@ -290,11 +292,32 @@ def piston_hot(E, h):
         rod_f = lim / (0.5 * (c + t))
         rod_d50 = rod_f - lim / (0.5 * (c + t * (m_rec + 0.05) / m_rec))      # tension scales with the reciprocating mass
     sens = pis["results"].get("thermal_sensitivity", [])
-    return dict(rows=rows, worst=min(r["n"] for r in rows), best=max(r["n"] for r in rows), fails=min(r["n"] for r in rows) < 1.0,
+    prod = heat_cases(E.get("heat"), pis)
+    return dict(rows=rows, worst=min(r["n"] for r in rows), best=max(r["n"] for r in rows), fails=min(r["n"] for r in rows) < 1.0, **prod,
                 n_rt=pis["results"].get("fatigue_estimate", {}).get("factor"), sec=sec, source=h.get("source", ""),
                 method=h.get("method", ""), t_oil=t_oil, uts=uts, gt=gt, rod_f=rod_f, rod_d50=rod_d50, m_rec=m_rec,
                 best_cooling=min(sens, key=lambda s: s["T_crown_mean_C"]) if sens else None,
                 T_crown=pis["results"].get("thermal", {}).get("T_crown_mean_C"))
+
+
+def heat_cases(heat, pis):
+    """From the heat-input study (tools/piston_heat_input_study.py): the heat-consistent case of the current Woschni
+    multiplier and the case whose crown lies in the published production range, with its hot-fatigue factors (slot-end
+    corner excluded, mesh-dependent).  Empty if the study is missing or was run on another piston FE."""
+    if not heat or not pis:
+        return {}
+    rep_t = heat.get("reproduction", {}).get("T_crown_mean_C", [None, None])
+    if rep_t[1] is None or abs(rep_t[1] - pis.get("results", {}).get("thermal", {}).get("T_crown_mean_C", -1.0)) > 1e-6:
+        return {}                                          # stale: the study was run on a different piston FE
+    from .analysis import cycle as _cy
+    cons = [c for c in heat["cases"] if c["variant"] == "consistent"]
+    lo, hi = heat["production_crown_range_C"]
+    cur = next((c for c in cons if abs(c["woschni_scale"] - _cy.A["woschni_scale"]) < 1e-9), None)
+    inr = [c for c in cons if lo - 5.0 <= c["T_crown_mean_C"] <= hi]
+    pc = min(inr or cons, key=lambda c: c["T_crown_mean_C"])
+    f = [r["factor"] for k, r in pc["hot_fatigue_regions"].items() if k != "slot_end_corner"]
+    return dict(prod_case=pc, prod_in_range=bool(inr), prod_worst=min(f), prod_best=max(f), prod_range=(lo, hi),
+                cur_case=cur, heat=heat)
 
 
 def acceptance(E):
@@ -342,8 +365,10 @@ def acceptance(E):
         H = E.get("hot")
         st = hot_status(H) if H else None
         items.append(("Piston at operating temperature: hot fatigue (engineering check added 2026-11-20, not in brief section 21)",
-                      {"fails": "NOT MET - OPEN", "below target": "NOT MET - OPEN", "meets target": "PASS", None: "OPEN - not evaluated"}[st],
-                      (f"factor {H['worst']:.2f}-{H['best']:.2f} with 4032-T6 strength after 10,000 h at temperature (section 8.1); "
+                      {"fails": "NOT MET - OPEN", "below target": "NOT MET - OPEN", "meets target": "PASS", "not assessable": "NOT ASSESSABLE - OPEN",
+                       None: "OPEN - not evaluated"}[st],
+                      ((not_assessable_txt(H) + "; ") if st == "not assessable" else "")
+                      + (f"factor {H['worst']:.2f}-{H['best']:.2f} with 4032-T6 strength after 10,000 h at temperature (section 8.1); "
                        f"the room-temperature factor {H['n_rt']:.2f} is not an acceptance measure") if H else
                       "no temperature-dependent evaluation of the current piston FE; the room-temperature factor is not an acceptance measure"))
     return items
@@ -462,8 +487,8 @@ def fea_findings(fea, H=None):
                 out.append(f"**{v.get('case', k)}:** top ring groove {r['T_top_ring_groove_C']:.0f} degC (within the ~280 degC guide) but crown up to "
                            f"{r['T_max_C']:.0f} degC, mean {r['T_crown_mean_C']:.0f} degC, at rated power with the estimated oil-side film coefficients"
                            + (f" (sensitivity - {s_txt})" if s_txt else "") + ". The crown centre stays above the ~350 degC guide for forged "
-                           "Al-Si pistons in every case studied -> open item: confirm the piston heat load (cycle model, Woschni x 2 calibration) and "
-                           "the gallery cooling by test; if confirmed, stronger cooling (higher jet flow, under-crown spray) or a steel piston is needed.")
+                           "Al-Si pistons in every case studied -> open item: the piston heat load is bracketed in section 8.2 (Woschni x 1.0-2.0); confirm it and "
+                           "the gallery cooling by test; stronger cooling (higher jet flow, under-crown spray) and a hot-strength alloy or steel crown are needed.")
             if "factor" in r and r["factor"] < 1.0:
                 out.append(f"**{v.get('case', k)} - {name.replace('_', ' ')}:** estimated fatigue factor {r['factor']:.2f} (< 1).")
             if k == "piston" and name == "gas_pressure" and len(r.get("vm_max_location", [])) == 3:
@@ -478,8 +503,9 @@ def fea_findings(fea, H=None):
                 out.append(f"**{v.get('case', k)} - gas + thermal:** linear-elastic peak {r['vm_max_MPa']:.0f} MPa (99.9th percentile {r['vm_p999_MPa']:.0f} MPa) "
                            f"at about {r['T_at_vm_max_C']:.0f} degC metal temperature. The yield ({mat.get('yield_', 0):.0f} MPa) and fatigue "
                            f"({mat.get('fatigue', 0):.0f} MPa) values in the FE record are room-temperature values; "
-                           + ("with temperature-dependent strength the stress exceeds even the hot tensile strength and the piston fails hot "
-                              "fatigue (section 8.1), so" if (k == "piston" and H) else "forged Al-Si piston alloys lose a large part of their "
+                           + (("with temperature-dependent strength the stress exceeds even the hot tensile strength of the lower-bound data, "
+                               + ("and hot fatigue is not assessable with public data (section 8.1), so" if hot_status(H) == "not assessable"
+                                  else "and the piston fails hot fatigue (section 8.1), so")) if (k == "piston" and H) else "forged Al-Si piston alloys lose a large part of their "
                               "strength above ~200 degC, so")
                            + " the pin boss, ring belt and crown need a temperature-dependent elastic-plastic and fatigue analysis with a "
                            "deformable pin (pin bending and bore contact) before release.")
@@ -496,8 +522,25 @@ def fea_findings(fea, H=None):
 
 
 def hot_status(H):
-    """'fails' (factor < 1), 'below target' (< 1.5) or 'meets target' for the piston hot-fatigue evaluation."""
+    """'not assessable' when the method fails even a crown in the published production range (heat-input study: factors
+    < 1 with the crown at 270-310 degC - production pistons survive there, so the data cannot separate good from bad);
+    otherwise 'fails' (factor < 1), 'below target' (< 1.5) or 'meets target'."""
+    if H.get("prod_worst") is not None and H["prod_in_range"] and H["prod_worst"] < 1.0:
+        return "not assessable"
     return "fails" if H["worst"] < 1.0 else ("below target" if H["worst"] < 1.5 else "meets target")
+
+
+def not_assessable_txt(H):
+    """Status wording of the 2026-11-21 reframing (user): hot fatigue not assessable with public data."""
+    pc, cc = H["prod_case"], H.get("cur_case")
+    lo, hi = H["prod_range"]
+    t_cur = cc["T_crown_mean_C"] if cc else H["T_crown"]
+    return (f"**hot fatigue NOT ASSESSABLE with available public data** (the method fails even production-range temperatures: with "
+            f"Woschni x {pc['woschni_scale']:.1f} the crown runs at {pc['T_crown_mean_C']:.0f} degC, inside the {lo:.0f}-{hi:.0f} degC range "
+            f"of production gasoline pistons, and the factors are still {H['prod_worst']:.2f}-{H['prod_best']:.2f}); "
+            f"crown {t_cur:.0f} degC" + (f" (heat-consistent, Woschni x {cc['woschni_scale']:.1f})" if cc else "")
+            + f" is above the typical {lo:.0f}-{hi:.0f} degC range - **OPEN: cooling upgrade + hot-strength piston alloy with "
+            "manufacturer data**")
 
 
 def slot_note(H):
@@ -515,6 +558,10 @@ def slot_note(H):
 def hot_verdict(H):
     """One-line verdict for the summary, the FE findings and the limitations list."""
     st = hot_status(H)
+    if st == "not assessable":
+        return (not_assessable_txt(H) + f". With 4032-T6 lower-bound strength (10,000 h at temperature) the factors are "
+                f"{H['worst']:.2f}-{H['best']:.2f}; neither they nor the room-temperature factor {H['n_rt']:.2f} are acceptance "
+                "measures (sections 8.1, 8.2)")
     what = {"fails": "**the piston FAILS hot fatigue**", "below target": "**the piston does not reach the 1.5 hot-fatigue target**",
             "meets target": "the piston meets the 1.5 hot-fatigue target"}[st]
     return (f"{what} with temperature-dependent strength (4032-T6 lower-bound data after 10,000 h at temperature: factor "
@@ -538,7 +585,8 @@ def hot_fatigue_md(H):
     bc = H["best_cooling"]
     st = hot_status(H)
     head = {"fails": "**Result: the piston FAILS hot fatigue**", "below target": "**Result: the piston does not reach the 1.5 hot-fatigue target**",
-            "meets target": "**Result: the piston meets the 1.5 hot-fatigue target**"}[st]
+            "meets target": "**Result: the piston meets the 1.5 hot-fatigue target**",
+            "not assessable": "**Result: " + (not_assessable_txt(H).replace("**", "") if st == "not assessable" else "") + ".**\n\nEvaluated"}[st]
     md = f"""### 8.1 Piston hot fatigue - temperature-dependent strength{' (OPEN)' if st != 'meets target' else ''}
 
 {head} with temperature-dependent strength (4032-T6, lower-bound data after 10,000 h at temperature): factor
@@ -575,7 +623,70 @@ acceptance measure**: it compares with the 110 MPa room-temperature limit at met
                f"temperatures is {min(hot_frac):.2f}-{max(hot_frac):.2f} of the room-temperature value"
                + (f" ({slot['frac_need']:.2f} at the slot-end corner)" if slot else "") + "; the project judged on 2026-11-20 that short-exposure "
                "data cannot change the conclusion. ")
+    if st == "not assessable":
+        pc = H["prod_case"]
+        prs = H["heat"]["production_range_strength"]
+        md += (f"\n\n**Why not assessable:** the same data and method applied to the crown temperatures of the Woschni x {pc['woschni_scale']:.1f} case "
+               f"(crown mean {pc['T_crown_mean_C']:.0f} degC, inside the published {H['prod_range'][0]:.0f}-{H['prod_range'][1]:.0f} degC range of "
+               f"production gasoline pistons) give factors {H['prod_worst']:.2f}-{H['prod_best']:.2f} (section 8.2). At {prs[0]['T_C']:.0f}-{prs[-1]['T_C']:.0f} degC "
+               f"the lower-bound data allow sigma_f = {prs[0]['sigma_f_MPa']:.1f}-{prs[-1]['sigma_f_MPa']:.1f} MPa, so a factor of 1.5 would need a gas-load "
+               f"von Mises stress below {prs[0]['vm_gas_max_for_1p5_MPa']:.0f}-{prs[-1]['vm_gas_max_for_1p5_MPa']:.0f} MPa - production pistons run at "
+               "these temperatures, so tensile data after 10,000 h of static exposure, scaled to fatigue, cannot separate an acceptable piston "
+               "from an unacceptable one. A verdict needs measured hot fatigue data of the actual piston alloy (manufacturer data).\n\n")
     md += "Evaluation: `tools/piston_section_fatigue.py` -> `08_SIMULATIONS/fea/piston_section_fatigue.json`.\n"
+    return md
+
+
+def heat_input_md(E):
+    """Section 8.2: piston heat input, Woschni multiplier 1.0 / 1.5 / 2.0 (tools/piston_heat_input_study.py)."""
+    heat = E.get("heat")
+    if not heat:
+        return ""
+    from .analysis import cycle as _cy
+    cons = [c for c in heat["cases"] if c["variant"] == "consistent"]
+    base = next((c for c in heat["cases"] if c["variant"] == "cycle wall" and abs(c["woschni_scale"] - _cy.A["woschni_scale"]) < 1e-9), None)
+    wf = lambda c: min(r["factor"] for k, r in c["hot_fatigue_regions"].items() if k != "slot_end_corner")
+    rows = [(f"{c['woschni_scale']:.1f}", f"{c['piston_W']:,.0f}", f"{c['piston_W_mm2_crown']:.2f}", f"{100 * c['piston_share_released']:.1f} ({100 * c['piston_share_fuel']:.1f})",
+             f"{c['T_crown_mean_C']:.0f} / {c['T_max_C']:.0f}", f"{c['T_top_ring_groove_C']:.0f}", f"{c['T3_c']:.0f}" + (" (over limit)" if c["T3_c"] > c["T3_limit_c"] + 3 else ""),
+             f"{c['coolant_over_brake']:.2f}", f"{wf(c):.2f}") for c in cons]
+    lo, hi = heat["production_crown_range_C"]
+    src = {x["id"]: x for x in heat["sources"]}
+    c1 = min(cons, key=lambda c: c["woschni_scale"]); c2 = max(cons, key=lambda c: c["woschni_scale"])
+    md = f"""### 8.2 Piston heat input - Woschni multiplier (study of 2026-11-21)
+
+The piston heat comes from the cycle model's Woschni correlation, scaled by `woschni_scale` = {_cy.A['woschni_scale']:.1f}. The rated point
+({heat['rated_rpm']:.0f} rpm, {c2['power_kw']:,.0f} kW) was re-solved with multipliers 1.0 / 1.5 / 2.0 on the same hardware (turbine area and
+torque target unchanged), and the piston FE was run thermal-only with each heat input; the cycle's piston wall temperature is iterated to
+the FE crown temperature so that heat and temperature are consistent ("heat-consistent").
+
+{tab(rows, ["Woschni x", "Piston heat per cylinder [W]", "W/mm2 of crown", "% of burned (of supplied) fuel energy", "Crown mean / max [degC]", "Top ring groove [degC]", f"T3 [degC] (limit {c2['T3_limit_c']:.0f})", "Coolant heat / brake power", "Worst hot-fatigue factor (8.1 method)"])}
+
+""" + (f"""The committed piston FE (section 8) uses the cycle model's wall temperature (560 K) for the gas-side calibration: {base['piston_W']:,.0f} W
+per piston, crown mean {base['T_crown_mean_C']:.0f} degC; the heat-consistent value is {next(c for c in cons if c['woschni_scale'] == base['woschni_scale'])['T_crown_mean_C']:.0f} degC.
+""" if base else "") + f"""
+Comparison with published values:
+
+- Share of fuel energy into the piston: about 3-5 % in quiescent combustion chambers ([DieselNet, Piston Cooling]({src['DN']['url']})).
+  The model gives {100 * c1['piston_share_released']:.1f} % (x {c1['woschni_scale']:.1f}) to {100 * c2['piston_share_released']:.1f} % (x {c2['woschni_scale']:.1f}) of the burned fuel energy
+  (the model burns {100 * c2['q_released_kw'] / c2['q_fuel_kw']:.1f} % of the supplied fuel at lambda {c2['lam']:.2f}); only x {c2['woschni_scale']:.1f} comes close to the range.
+- Crown temperature: 270-310 degC at the crown centre and 200-280 degC at the top ring groove (gallery-cooled) for production gasoline
+  pistons of the 1990s (same source, MAHLE data). This engine runs at {heat['specific_power_kw_per_l']:.0f} kW/L, or
+  {heat['power_per_piston_area_MW_m2'] / 1e6:.1f} MW of brake power per m2 of piston area (DieselNet's scale: 1 MW/m2 ~ 10 kW/L), so a crown above that
+  range is plausible; x {c1['woschni_scale']:.1f} lands inside it ({c1['T_crown_mean_C']:.0f} degC), which is low for this specific power.
+- Heat flux: no published cycle-averaged piston heat flux for a turbocharged gasoline engine at full load was found. Measured peak surface
+  heat flux at wide-open throttle is 1.2-5 MW/m2 ([SAE 930217]({src['SAE930217']['url']})), of order 1-3 MW/m2 ([MIT 2.61]({src['MIT']['url']}));
+  the model's {c1['piston_W_mm2_crown']:.1f}-{c2['piston_W_mm2_crown']:.1f} MW/m2 cycle mean is plausible below those peaks (inference, not a published value).
+- Woschni-type correlations need a multiplier calibrated per engine and operating point ([review]({src['REV']['url']})).
+
+**Decision (D-045):** `woschni_scale` stays {_cy.A['woschni_scale']:.1f} - the only multiplier that comes close to the published piston heat share and
+keeps T3 at the published {c2['T3_limit_c']:.0f} degC limit (x 1.0 and x 1.5 run {c1['T3_c'] - c1['T3_limit_c']:.0f} and
+{next(c for c in cons if c['woschni_scale'] == 1.5)['T3_c'] - c1['T3_limit_c']:.0f} K over it with the enrichment already at its limit, lambda {c1['lam']:.2f});
+the uncertainty band is x 1.0-2.0 (crown {c1['T_crown_mean_C']:.0f}-{c2['T_crown_mean_C']:.0f} degC). The earlier note that the multiplier was calibrated to coolant heat of
+0.4-0.5 x brake power was wrong (the model gives {c2['coolant_over_brake']:.2f}) and is withdrawn. Whatever the multiplier, the hot-fatigue factors stay far below 1
+(table) - see 8.1 for why that check cannot give a verdict with public data.
+
+Evaluation: `tools/piston_heat_input_study.py` -> `08_SIMULATIONS/analytical/piston_heat_input_study.json`.
+"""
     return md
 
 
@@ -661,7 +772,7 @@ All provisional values are in `03_REFERENCE_SPECIFICATIONS/MASTER_PARAMETERS.md`
 - Valve train: two camshafts per head 54 mm apart, roller finger followers, short and long valves; chamber roof tilted {P.roof_tilt:.1f} deg; piston crown tilted to give CR 9.0.
 - Because the camshafts are only 54 mm apart, each camshaft has its own secondary chain in its own plane (four secondary chains). The VW W engines use one chain per head; this is a consequence of this reconstruction's head layout.
 - Exhaust grouped front/rear per bank; turbine A permanently fed, turbine B behind a shut-off valve.
-- Cycle-model constants (Woschni multiplier {_cy.A['woschni_scale']}, combustion phasing, efficiencies) are textbook values, not calibration.
+- Cycle-model constants (combustion phasing, efficiencies) are textbook values, not calibration. The Woschni multiplier {_cy.A['woschni_scale']} is an estimate justified by the published piston heat share and the T3 limit (section 8.2, D-045); band 1.0-2.0.
 
 ## 4. Engine architecture
 
@@ -771,6 +882,7 @@ Peak values at re-entrant corners and at fixed boundaries are mesh-dependent; th
 {chr(10).join('- ' + x for x in fea_findings(fea, H)) or '- no limit exceeded in the cases that ran'}
 
 {hot_fatigue_md(H) if 'piston' in fea else ''}
+{heat_input_md(E) if 'piston' in fea else ''}
 Limitations of the FE work: linear elastic, no contact, no bolt preload, no bearing films, simplified supports, slices instead of the complete
 castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factors are simple ratios against handbook limits).
 
@@ -827,7 +939,7 @@ See `11_MANUFACTURING_DOCUMENTATION/MANUFACTURING_SPEC.md` (materials, processes
 5. Tolerance stack-ups for the chamber volume (CR scatter), valve train and timing drive.
 6. Supplier engagement for turbochargers, bearings and valve train; replace envelopes by supplier CAD.
 7. Prototype sequence: single-bank VR8 test rig for combustion and cooling development before the full W16.
-8. Piston: confirm the piston heat load (cycle-model calibration), decide crown cooling and material (hot-strength alloy or steel crown, with measured hot fatigue data; check the rod for any mass increase), radius the slot-end corner, then a temperature-dependent elastic-plastic piston FE.
+8. Piston: confirm the piston heat load by test (bracketed in section 8.2), upgrade the crown cooling and choose a hot-strength piston alloy or steel crown with manufacturer hot-fatigue data (check the rod for any mass increase), radius the slot-end corner, then a temperature-dependent elastic-plastic piston FE.
 
 ## 16. Reproducing the package
 

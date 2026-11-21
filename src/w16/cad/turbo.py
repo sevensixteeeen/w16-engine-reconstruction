@@ -88,13 +88,15 @@ def assembly_parts():
     outlet = cyl_between((X_T - 10, 0, 0), (X_TO, 0, 0), S["dte"] / 2 + 14.0)
     oflange = cyl_between((X_TO, 0, 0), (X_TO + 8, 0, 0), S["dte"] / 2 + 24.0)
     disc_t = cyl_between((X_T - 14, 0, 0), (X_T + 16, 0, 0), r2t + 13.0)
-    wg_boss = cyl_between((X_T - 6, Y_IN + 4, 30.0), (X_T - 44, -8.0, 26.0), 13.0)           # by-pass duct inlet -> outlet
+    # Fix F1/F2 (2026-11-21): the by-pass boss ends inside the outlet body (X_T - 34; it ran to X_T - 44, 5 mm past the outlet
+    # face, into the down-pipe / pre-catalyst bolted there); its end (r 13 at 27.2 mm from the axis) lies within the outlet r 46.7
+    wg_boss = cyl_between((X_T - 6, Y_IN + 4, 30.0), (X_T - 34, -8.0, 26.0), 13.0)           # by-pass duct inlet -> outlet
     th = st + inlet + flange + outlet + oflange + disc_t + wg_boss
     cav_t = volute(X_T, r2t + 12.0, 19.5, 6.0, 115.0, 455.0) + cyl_between((X_T, Y_IN, 22.0), (X_T, Y_IN, Z_IN + 1), 25.0)
     cav_t = cav_t + cyl_between((X_T - 4, 0, 0), (X_T + 4, 0, 0), r2t + 16.0)                # nozzle ring passage
     cav_t = cav_t + cyl_between((X_T - 15, 0, 0), (X_T + 17, 0, 0), r2t + 0.6)               # wheel pocket
     cav_t = cav_t + cyl_between((X_TO - 1, 0, 0), (X_T - 10, 0, 0), S["dte"] / 2 + 9.0)      # exducer / outlet bore
-    cav_t = cav_t + cyl_between((X_T - 6, Y_IN + 4, 30.0), (X_T - 44, -8.0, 26.0), 9.0)      # waste-gate by-pass
+    cav_t = cav_t + cyl_between((X_T - 6, Y_IN + 4, 30.0), (X_T - 36, -8.0, 26.0), 9.0)      # waste-gate by-pass (opens into the outlet bore)
     turb_housing = th - cav_t
     # ---------------- centre housing (bearing housing, water-cooled) with oil feed/drain and water ports
     chra = cyl_between((X_T + 17, 0, 0), (X_C - 13, 0, 0), 30.0) + cyl_between((X_T + 17, 0, 0), (X_T + 24, 0, 0), r2t + 8.0) + \
@@ -113,6 +115,6 @@ def assembly_parts():
     bush = cyl_between((-7, 0, 0), (7, 0, 0), 8.95) - cyl_between((-8, 0, 0), (8, 0, 0), 5.53)
     # ---------------- waste-gate actuator (electric) with rod, mounted on the compressor housing
     act = cyl_between((-20, -52, -42), (20, -52, -42), 21.0) + box_at(-6, 6, -52, -30, -30, -18)          # bracket to the bearing housing
-    rod = cyl_between((-20, -52, -42), (X_T - 52, -40.0, -30.0), 3.0)
+    rod = cyl_between((-20, -52, -42), (X_T - 42, -40.0, -30.0), 3.0)     # Fix F3 (2026-11-21): lever end 10 mm shorter (was 1.6 mm inside the pre-catalyst can)
     return dict(comp_housing=comp_housing, turb_housing=turb_housing, chra=chra, rotor=rotor_t, comp_wheel=cw, bush=bush,
                 actuator=act + rod)

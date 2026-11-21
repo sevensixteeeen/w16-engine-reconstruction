@@ -52,8 +52,22 @@ def fillet_ring(r, rf):
     return revolve(prof, axis=Axis.X)
 
 
-def throw_solid(k, cw=None):
-    """Pin k with its two webs.  cw = (direction deg, half-angle deg) of the counterweight sectors or None."""
+def undercut_ring(r, rf):
+    """Recessed (undercut) journal fillet: the R rf fillet of fillet_ring mirrored into the web face at x = 0, as a groove
+    to subtract - the journal surface (radius r) runs straight up to the web face, so a bearing can use the full width."""
+    pts = [(0.3, r), (-rf, r)]
+    for a in np.linspace(0, 90, 7)[1:]:
+        pts.append((-rf + rf * math.sin(a * D2R), r + rf - rf * math.cos(a * D2R)))
+    pts.append((0.3, r + rf))
+    prof = Plane.XY * poly(pts)
+    from build123d import Axis
+    return revolve(prof, axis=Axis.X)
+
+
+def throw_solid(k, cw=None, pin_fillet="ring"):
+    """Pin k with its two webs.  cw = (direction deg, half-angle deg) of the counterweight sectors or None.
+    pin_fillet: "ring" - R2.5 fillet standing on the pin at each web (current); "undercut" - the same radius recessed into
+    the web (Fix A option (a), 2026-11-21, not adopted yet)."""
     psi = L.PIN_PHASE[k]
     px = L.pin_x(k)
     py, pz = _yz(psi, P.throw)
@@ -67,9 +81,14 @@ def throw_solid(k, cw=None):
     if cwp is not None:                               # counterweight sectors fused as solids (they overlap the web boss)
         body = body + ex(cwp, px - hw - P.web_thk) + ex(cwp, px + hw)
     # stress-relief fillets pin/web (R2.5)
-    fr = Pos(px - hw, py, pz) * fillet_ring(P.pin_dia / 2, 2.5)
-    fr2 = Pos(px + hw, py, pz) * Rot(Z=180) * fillet_ring(P.pin_dia / 2, 2.5)
-    body = body + fr + fr2
+    if pin_fillet == "undercut":
+        g1 = Pos(px - hw, py, pz) * undercut_ring(P.pin_dia / 2, 2.5)                  # groove into web a (towards -X)
+        g2 = Pos(px + hw, py, pz) * Rot(Z=180) * undercut_ring(P.pin_dia / 2, 2.5)     # groove into web b (towards +X)
+        body = body - g1 - g2
+    else:
+        fr = Pos(px - hw, py, pz) * fillet_ring(P.pin_dia / 2, 2.5)
+        fr2 = Pos(px + hw, py, pz) * Rot(Z=180) * fillet_ring(P.pin_dia / 2, 2.5)
+        body = body + fr + fr2
     # lightening bore through the pin (plugged in service)
     body = body - Pos(px - hw - P.web_thk - 1, py, pz) * Rot(Y=90) * Cylinder(P.pin_bore / 2, P.pin_width + 2 * P.web_thk + 2, align=CMIN)
     return body

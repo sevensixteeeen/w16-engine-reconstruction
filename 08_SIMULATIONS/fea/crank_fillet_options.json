@@ -1,0 +1,190 @@
+{
+ "date": "2026-11-21",
+ "option_b": {
+  "fillet_extent_at_shell_bore_mm": 2.1690679828121913,
+  "rod_face_to_web_mm": 0.125,
+  "shell_edge_to_web_now_mm": 0.875,
+  "shell_edge_to_web_needed_mm": 2.469067982812191,
+  "shell_clearance_mm": 0.3,
+  "narrowing_per_edge_mm": 1.594067982812191,
+  "big_end_peak_N": {
+   "2000": 47792.81697861841,
+   "3750": 49290.276295087155,
+   "6700": 37907.23938007936
+  },
+  "widths": {
+   "current (16.25 mm, clashes with the fillet)": {
+    "width_mm": 16.25,
+    "area_change_pct": 0.0,
+    "spec_load_MPa": {
+     "2000": 52.51957909738287,
+     "3750": 54.16513878581006,
+     "6700": 41.656307011076215
+    },
+    "h_min_um": {
+     "2000": 0.7645223002054061,
+     "3750": 1.0284115913965275,
+     "6700": 1.559918005915732
+    },
+    "eps": {
+     "2000": 0.9658695401694015,
+     "3750": 0.9540887682412265,
+     "6700": 0.9303608033073334
+    }
+   },
+   "narrowed on the web side only (handed position)": {
+    "width_mm": 14.655932017187808,
+    "area_change_pct": -9.8096491249981,
+    "spec_load_MPa": {
+     "2000": 58.231926794665284,
+     "3750": 60.05646752708558,
+     "6700": 46.18709940358167
+    },
+    "h_min_um": {
+     "2000": 0.6554652774137559,
+     "3750": 0.8820173666958951,
+     "6700": 1.3388294911672298
+    },
+    "eps": {
+     "2000": 0.9707381572583145,
+     "3750": 0.9606242247010761,
+     "6700": 0.9402308262871772
+    }
+   },
+   "narrowed symmetrically (one shell for both edges)": {
+    "width_mm": 13.061864034375617,
+    "area_change_pct": -19.61929824999621,
+    "spec_load_MPa": {
+     "2000": 65.33854265259681,
+     "3750": 67.38575007005025,
+     "6700": 51.82376628240155
+    },
+    "h_min_um": {
+     "2000": 0.5519923965390945,
+     "3750": 0.7430226266051436,
+     "6700": 1.1286085138624005
+    },
+    "eps": {
+     "2000": 0.9753574822973619,
+     "3750": 0.9668293470265561,
+     "6700": 0.9496156913454286
+    }
+   }
+  },
+  "note": "Ocvirk short-bearing quasi-static minimum film (dynamics.short_bearing_hmin, clearance ratio 0.0008, 4.5 mPa s) - the method of the dynamics report (2,000 rpm row is its reported value); squeeze film ignored. The rod body face clears the fillet by about 0.025 mm at the shell back radius; with a narrowed shell the big-end bore needs a side chamfer towards the web."
+ },
+ "option_a": {
+  "fe_size_fillet_mm": 1.0,
+  "cases": {
+   "ring": {
+    "variant": "ring",
+    "mesh": {
+     "nodes": 47792,
+     "tets": 238184,
+     "h_max": 5.0,
+     "quality_gamma_min": 0.22897196069965003,
+     "quality_gamma_mean": 0.7774990563075713,
+     "quality_below_0p1": 0,
+     "volume_mm3": 504982.81093557394,
+     "dropped_zero_volume_tets": 0
+    },
+    "force_N": 78418.86502258164,
+    "applied_force_check_N": [
+     0.0,
+     -43924.04425546749,
+     64959.851449693255
+    ],
+    "vm_max_MPa": 174.72835422225293,
+    "vm_p999_MPa": 142.81427026414687,
+    "vm_max_location": [
+     -126.9639828566925,
+     9.52896319613119,
+     -10.794467157528043
+    ],
+    "pin_deflection_mm": 0.015872352535189323,
+    "fillet_zone": {
+     "elements": 79648,
+     "vm_max_MPa": 174.72835422225293,
+     "vm_p999_MPa": 157.40154606651788,
+     "vm_p99_MPa": 113.64720410027101,
+     "at": [
+      -126.96,
+      9.53,
+      -10.79
+     ],
+     "fatigue_factor_on_max": 5.952096353389383
+    },
+    "webs": {
+     "elements": 31429,
+     "vm_max_MPa": 67.67042278306094,
+     "vm_p999_MPa": 59.419303089831466,
+     "vm_p99_MPa": 45.57574749092477,
+     "at": [
+      -82.99,
+      9.98,
+      -38.96
+     ],
+     "fatigue_factor_on_max": 15.368605030502774
+    },
+    "volume_mm3": 505138.75517545704,
+    "solve_s": 957.532292842865
+   },
+   "undercut": {
+    "variant": "undercut",
+    "mesh": {
+     "nodes": 48372,
+     "tets": 234579,
+     "h_max": 5.0,
+     "quality_gamma_min": 0.04038412556766723,
+     "quality_gamma_mean": 0.7759729007668315,
+     "quality_below_0p1": 9,
+     "volume_mm3": 503978.20535476785,
+     "dropped_zero_volume_tets": 0
+    },
+    "force_N": 78418.86502258164,
+    "applied_force_check_N": [
+     0.0,
+     -43924.05411911218,
+     64959.8660371682
+    ],
+    "vm_max_MPa": 232.73371047942658,
+    "vm_p999_MPa": 148.74481808619547,
+    "vm_max_location": [
+     -136.47398245590207,
+     7.663880748163556,
+     -33.142309655307564
+    ],
+    "pin_deflection_mm": 0.01809354191043013,
+    "fillet_zone": {
+     "elements": 76510,
+     "vm_max_MPa": 222.45324609718827,
+     "vm_p999_MPa": 176.26208485458665,
+     "vm_p99_MPa": 106.42342953627363,
+     "at": [
+      -129.84,
+      9.44,
+      -11.86
+     ],
+     "fatigue_factor_on_max": 4.675139690007631
+    },
+    "webs": {
+     "elements": 32711,
+     "vm_max_MPa": 78.94733194323672,
+     "vm_p999_MPa": 69.33757338245368,
+     "vm_p99_MPa": 53.677671344516845,
+     "at": [
+      -82.99,
+      9.98,
+      -38.96
+     ],
+     "fatigue_factor_on_max": 13.17333942010557
+    },
+    "volume_mm3": 504135.4572241041,
+    "solve_s": 904.7802846431732
+   }
+  },
+  "mass_change_per_throw_g": -7.8758889181207135,
+  "fillet_zone_change_pct": 27.31376489372166,
+  "web_change_pct": 16.66445796611542
+ }
+}

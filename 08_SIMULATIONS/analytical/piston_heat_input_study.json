@@ -1,0 +1,466 @@
+{
+ "date": "2026-11-21",
+ "rated_rpm": 6700.0,
+ "a_bore_mm2": 5808.804816487527,
+ "a_crown_mm2": 6043.261598424978,
+ "specific_power_kw_per_l": 137.9717686279477,
+ "power_per_piston_area_MW_m2": 11865572.102003505,
+ "production_crown_range_C": [
+  270.0,
+  310.0
+ ],
+ "production_range_strength": [
+  {
+   "T_C": 270.0,
+   "sigma_f_MPa": 14.868421052631579,
+   "sigma_a_max_for_1p5_MPa": 9.912280701754385,
+   "vm_gas_max_for_1p5_MPa": 19.82456140350877
+  },
+  {
+   "T_C": 310.0,
+   "sigma_f_MPa": 10.657894736842104,
+   "sigma_a_max_for_1p5_MPa": 7.105263157894736,
+   "vm_gas_max_for_1p5_MPa": 14.210526315789473
+  }
+ ],
+ "reproduction": {
+  "T_crown_mean_C": [
+   380.3117229167958,
+   380.3117229167958
+  ],
+  "region_T_C": {
+   "crown_above_gallery": [
+    388.2863760219277,
+    388.2863760219277
+   ],
+   "ring_belt_top_groove": [
+    301.4517043531073,
+    301.4517043531073
+   ],
+   "pin_bosses": [
+    266.72183779777004,
+    266.72183779777004
+   ],
+   "slot_end_corner": [
+    247.66210147718505,
+    247.662101477185
+   ],
+   "section": [
+    355.73958932043035,
+    355.73958932043035
+   ]
+  }
+ },
+ "cases": [
+  {
+   "woschni_scale": 1.0,
+   "variant": "cycle wall",
+   "T_wall_piston_K": 560.0,
+   "iterations": [
+    273.25
+   ],
+   "power_kw": 1102.8327789897576,
+   "lam": 0.72,
+   "T3_c": 1028.1657576152365,
+   "T3_limit_c": 980.0000000000001,
+   "p_max_bar": 102.4897933660219,
+   "q_fuel_kw": 4832.345979649447,
+   "q_released_kw": 2987.4957254485516,
+   "wall_kw": [
+    53.851388019540735,
+    48.13682393971131,
+    42.55540335317262
+   ],
+   "q_coolant_kw": 225.78117637731978,
+   "coolant_over_brake": 0.20472838736634677,
+   "piston_W": 3008.551496231957,
+   "piston_W_mm2_crown": 0.49783572119665637,
+   "piston_W_mm2_bore": 0.5179295210079327,
+   "piston_share_fuel": 0.009961377795056658,
+   "piston_share_released": 0.016112767469310407,
+   "fe_heat_in_crown_W": 3021.1230456930143,
+   "T_crown_mean_C": 273.2504159837804,
+   "T_max_C": 302.33819559809865,
+   "T_top_ring_groove_C": 210.12607881226597,
+   "hot_fatigue_regions": {
+    "crown_above_gallery": {
+     "T_C": 276.8175569127867,
+     "factor": 0.23055239439847613,
+     "sigma_a_MPa": 61.37773376756606,
+     "T_record_C": 388.2863760219277
+    },
+    "ring_belt_top_groove": {
+     "T_C": 228.9914344019404,
+     "factor": 0.5114047134567028,
+     "sigma_a_MPa": 42.30144199194347,
+     "T_record_C": 301.4517043531073
+    },
+    "pin_bosses": {
+     "T_C": 209.11097224672932,
+     "factor": 0.4725776484229859,
+     "sigma_a_MPa": 53.526330121874224,
+     "T_record_C": 266.72183779777004
+    },
+    "slot_end_corner": {
+     "T_C": 198.05721843467302,
+     "factor": 0.3748119830809261,
+     "sigma_a_MPa": 85.59461997556492,
+     "T_record_C": 247.662101477185
+    },
+    "section": {
+     "T_C": 258.4894577981564,
+     "factor": 0.2787388944126885,
+     "sigma_a_MPa": 58.11643344476635,
+     "T_record_C": 355.73958932043035
+    }
+   }
+  },
+  {
+   "woschni_scale": 1.0,
+   "variant": "consistent",
+   "T_wall_piston_K": 545.429296432721,
+   "iterations": [
+    273.25,
+    272.28,
+    272.21
+   ],
+   "power_kw": 1102.8332646302183,
+   "lam": 0.72,
+   "T3_c": 1027.8777865040051,
+   "T3_limit_c": 980.0000000000001,
+   "p_max_bar": 102.49118299657758,
+   "q_fuel_kw": 4833.245196492486,
+   "q_released_kw": 2988.0516472484687,
+   "wall_kw": [
+    53.83632824352195,
+    48.94148306866323,
+    42.54640814299905
+   ],
+   "q_coolant_kw": 226.11531547842839,
+   "coolant_over_brake": 0.2050312796415741,
+   "piston_W": 3058.842691791452,
+   "piston_W_mm2_crown": 0.506157584273476,
+   "piston_W_mm2_bore": 0.5265872737037627,
+   "piston_share_fuel": 0.01012600873305173,
+   "piston_share_released": 0.0163790619595651,
+   "fe_heat_in_crown_W": 2998.309663150131,
+   "T_crown_mean_C": 272.2099556956581,
+   "T_max_C": 301.0661366399521,
+   "T_top_ring_groove_C": 209.57519783206624,
+   "hot_fatigue_regions": {
+    "crown_above_gallery": {
+     "T_C": 275.73426283606193,
+     "factor": 0.23241024982006178,
+     "sigma_a_MPa": 61.37773376756606,
+     "T_record_C": 388.2863760219277
+    },
+    "ring_belt_top_groove": {
+     "T_C": 228.28723943635885,
+     "factor": 0.5144712785459831,
+     "sigma_a_MPa": 42.30144199194347,
+     "T_record_C": 301.4517043531073
+    },
+    "pin_bosses": {
+     "T_C": 208.5510891340781,
+     "factor": 0.4745044826113558,
+     "sigma_a_MPa": 53.526330121874224,
+     "T_record_C": 266.72183779777004
+    },
+    "slot_end_corner": {
+     "T_C": 197.57514033959654,
+     "factor": 0.3797030237432535,
+     "sigma_a_MPa": 85.59461997556492,
+     "T_record_C": 247.662101477185
+    },
+    "section": {
+     "T_C": 257.5443460415172,
+     "factor": 0.2817345967261007,
+     "sigma_a_MPa": 58.11643344476635,
+     "T_record_C": 355.73958932043035
+    }
+   }
+  },
+  {
+   "woschni_scale": 1.5,
+   "variant": "cycle wall",
+   "T_wall_piston_K": 560.0,
+   "iterations": [
+    326.9
+   ],
+   "power_kw": 1102.796665040824,
+   "lam": 0.72,
+   "T3_c": 1002.6336915122789,
+   "T3_limit_c": 980.0000000000001,
+   "p_max_bar": 103.70950354995978,
+   "q_fuel_kw": 4907.26828916548,
+   "q_released_kw": 3033.8148591286526,
+   "wall_kw": [
+    80.6448723474196,
+    72.02740555691996,
+    63.197511786964995
+   ],
+   "q_coolant_kw": 283.676256811101,
+   "coolant_over_brake": 0.2572335098606774,
+   "piston_W": 4501.712847307497,
+   "piston_W_mm2_crown": 0.7449144429691335,
+   "piston_W_mm2_bore": 0.7749809107942444,
+   "piston_share_fuel": 0.014677698734333677,
+   "piston_share_released": 0.02374152969163289,
+   "fe_heat_in_crown_W": 4197.452719423107,
+   "T_crown_mean_C": 326.89981711731605,
+   "T_max_C": 367.9295517413468,
+   "T_top_ring_groove_C": 238.53123278206056,
+   "hot_fatigue_regions": {
+    "crown_above_gallery": {
+     "T_C": 332.6756027519749,
+     "factor": 0.14536534755369926,
+     "sigma_a_MPa": 61.37773376756606,
+     "T_record_C": 388.2863760219277
+    },
+    "ring_belt_top_groove": {
+     "T_C": 265.3019391045094,
+     "factor": 0.3631780160449057,
+     "sigma_a_MPa": 42.30144199194347,
+     "T_record_C": 301.4517043531073
+    },
+    "pin_bosses": {
+     "T_C": 237.98030444656683,
+     "factor": 0.37322402438769725,
+     "sigma_a_MPa": 53.526330121874224,
+     "T_record_C": 266.72183779777004
+    },
+    "slot_end_corner": {
+     "T_C": 222.91467949849988,
+     "factor": 0.26581763019971694,
+     "sigma_a_MPa": 85.59461997556492,
+     "T_record_C": 247.662101477185
+    },
+    "section": {
+     "T_C": 307.2223891044399,
+     "factor": 0.18841959463184696,
+     "sigma_a_MPa": 58.11643344476635,
+     "T_record_C": 355.73958932043035
+    }
+   }
+  },
+  {
+   "woschni_scale": 1.5,
+   "variant": "consistent",
+   "T_wall_piston_K": 600.049817117316,
+   "iterations": [
+    326.9,
+    327.27
+   ],
+   "power_kw": 1102.798335929954,
+   "lam": 0.72,
+   "T3_c": 1003.7715320064211,
+   "T3_limit_c": 980.0000000000001,
+   "p_max_bar": 103.70441318459466,
+   "q_fuel_kw": 4903.603052457183,
+   "q_released_kw": 3031.548904032534,
+   "wall_kw": [
+    80.73715913788533,
+    68.70530650415314,
+    63.2520199189091
+   ],
+   "q_coolant_kw": 282.3440710410613,
+   "coolant_over_brake": 0.25602511523829036,
+   "piston_W": 4294.081656509571,
+   "piston_W_mm2_crown": 0.710556971028478,
+   "piston_W_mm2_bore": 0.7392366919131774,
+   "piston_share_fuel": 0.014011188460641219,
+   "piston_share_released": 0.022663433340218288,
+   "fe_heat_in_crown_W": 4205.486174104777,
+   "T_crown_mean_C": 327.26620252978137,
+   "T_max_C": 368.3774918034343,
+   "T_top_ring_groove_C": 238.72521880675941,
+   "hot_fatigue_regions": {
+    "crown_above_gallery": {
+     "T_C": 333.0570715611683,
+     "factor": 0.14494010380700165,
+     "sigma_a_MPa": 61.37773376756606,
+     "T_record_C": 388.2863760219277
+    },
+    "ring_belt_top_groove": {
+     "T_C": 265.54991278103125,
+     "factor": 0.362560956884832,
+     "sigma_a_MPa": 42.30144199194347,
+     "T_record_C": 301.4517043531073
+    },
+    "pin_bosses": {
+     "T_C": 238.1774604625175,
+     "factor": 0.37254551320671586,
+     "sigma_a_MPa": 53.526330121874224,
+     "T_record_C": 266.72183779777004
+    },
+    "slot_end_corner": {
+     "T_C": 223.08443742556466,
+     "factor": 0.2654522895147556,
+     "sigma_a_MPa": 85.59461997556492,
+     "T_record_C": 247.662101477185
+    },
+    "section": {
+     "T_C": 307.55519869336456,
+     "factor": 0.1878167945935212,
+     "sigma_a_MPa": 58.11643344476635,
+     "T_record_C": 355.73958932043035
+    }
+   }
+  },
+  {
+   "woschni_scale": 2.0,
+   "variant": "cycle wall",
+   "T_wall_piston_K": 560.0,
+   "iterations": [
+    380.31
+   ],
+   "power_kw": 1102.7966780239678,
+   "lam": 0.72,
+   "T3_c": 978.1185563426719,
+   "T3_limit_c": 980.0000000000001,
+   "p_max_bar": 104.93356374413737,
+   "q_fuel_kw": 4982.753398500212,
+   "q_released_kw": 3080.481931896668,
+   "wall_kw": [
+    107.36383755537727,
+    95.81222827389695,
+    83.44662845103566
+   ],
+   "q_coolant_kw": 341.0713380725616,
+   "coolant_over_brake": 0.3092785323616552,
+   "piston_W": 5988.2642671185595,
+   "piston_W_mm2_crown": 0.9908993958956283,
+   "piston_W_mm2_bore": 1.030894384697117,
+   "piston_share_fuel": 0.019228771847857457,
+   "piston_share_released": 0.031102999592958133,
+   "fe_heat_in_crown_W": 5368.575013333117,
+   "T_crown_mean_C": 380.3117229167958,
+   "T_max_C": 433.23054786734735,
+   "T_top_ring_groove_C": 266.8106427288386,
+   "hot_fatigue_regions": {
+    "crown_above_gallery": {
+     "T_C": 388.2863760219277,
+     "factor": 0.1037578395570684,
+     "sigma_a_MPa": 61.37773376756606,
+     "T_record_C": 388.2863760219277
+    },
+    "ring_belt_top_groove": {
+     "T_C": 301.4517043531073,
+     "factor": 0.273222726862434,
+     "sigma_a_MPa": 42.30144199194347,
+     "T_record_C": 301.4517043531073
+    },
+    "pin_bosses": {
+     "T_C": 266.72183779777004,
+     "factor": 0.28422443166736516,
+     "sigma_a_MPa": 53.526330121874224,
+     "T_record_C": 266.72183779777004
+    },
+    "slot_end_corner": {
+     "T_C": 247.66210147718505,
+     "factor": 0.21255802546107877,
+     "sigma_a_MPa": 85.59461997556492,
+     "T_record_C": 247.662101477185
+    },
+    "section": {
+     "T_C": 355.73958932043035,
+     "factor": 0.12636930601163238,
+     "sigma_a_MPa": 58.11643344476635,
+     "T_record_C": 355.73958932043035
+    }
+   }
+  },
+  {
+   "woschni_scale": 2.0,
+   "variant": "consistent",
+   "T_wall_piston_K": 648.4779996237247,
+   "iterations": [
+    380.31,
+    375.33,
+    375.59
+   ],
+   "power_kw": 1102.7994448635145,
+   "lam": 0.72,
+   "T3_c": 981.3296298644442,
+   "T3_limit_c": 980.0000000000001,
+   "p_max_bar": 104.91932396956922,
+   "q_fuel_kw": 4972.052782007841,
+   "q_released_kw": 3073.866502007076,
+   "wall_kw": [
+    107.72193053917023,
+    86.0113939699373,
+    83.65567142942668
+   ],
+   "q_coolant_kw": 337.27426076363076,
+   "coolant_over_brake": 0.30583463052556464,
+   "piston_W": 5375.712123121081,
+   "piston_W_mm2_crown": 0.8895382130275684,
+   "piston_W_mm2_bore": 0.9254420303231451,
+   "piston_share_fuel": 0.017298970413424233,
+   "piston_share_released": 0.0279814994938057,
+   "fe_heat_in_crown_W": 5265.114868315368,
+   "T_crown_mean_C": 375.59316914284364,
+   "T_max_C": 427.4616793519655,
+   "T_top_ring_groove_C": 264.3123623448646,
+   "hot_fatigue_regions": {
+    "crown_above_gallery": {
+     "T_C": 383.3735682844459,
+     "factor": 0.1037578395570684,
+     "sigma_a_MPa": 61.37773376756606,
+     "T_record_C": 388.2863760219277
+    },
+    "ring_belt_top_groove": {
+     "T_C": 298.25813526606396,
+     "factor": 0.28116962302548243,
+     "sigma_a_MPa": 42.30144199194347,
+     "T_record_C": 301.4517043531073
+    },
+    "pin_bosses": {
+     "T_C": 264.1827321689126,
+     "factor": 0.28921775506751757,
+     "sigma_a_MPa": 53.526330121874224,
+     "T_record_C": 266.72183779777004
+    },
+    "slot_end_corner": {
+     "T_C": 245.47584656593892,
+     "factor": 0.21726312454296143,
+     "sigma_a_MPa": 85.59461997556492,
+     "T_record_C": 247.662101477185
+    },
+    "section": {
+     "T_C": 351.4534472187007,
+     "factor": 0.1314154235544025,
+     "sigma_a_MPa": 58.11643344476635,
+     "T_record_C": 355.73958932043035
+    }
+   }
+  }
+ ],
+ "sources": [
+  {
+   "id": "DN",
+   "ref": "H. Jaaskelainen, 'Piston Cooling', DieselNet Technology Guide (rev. 2017.09), citing MAHLE data",
+   "url": "https://dieselnet.com/tech/combustion_piston-cool.php",
+   "used": "3-5 % of the fuel energy to the piston (quiescent chambers); typical crown-centre temperature 270-310 degC for port-injected gasoline engines and 200-280 degC top ring groove with cooling gallery (1990s engines); 1.0 MW/m2 of power per piston area ~ 10 kW/L for bore/stroke ~ 1"
+  },
+  {
+   "id": "SAE930217",
+   "ref": "SAE 930217, 'Combustion Chamber Temperature and Instantaneous Local Heat Flux Measurements in a Spark Ignition Engine' (1993)",
+   "url": "https://www.sae.org/publications/technical-papers/content/930217/",
+   "used": "peak surface heat flux 1.2-5.0 MW/m2 at wide-open throttle (2.2 L SI engine)"
+  },
+  {
+   "id": "MIT",
+   "ref": "MIT 2.61 Internal Combustion Engines, lecture 18 'Engine heat transfer'",
+   "url": "https://web.mit.edu/2.61/www/Lecture%20notes/Lec.%2018%20Heat%20transf.pdf",
+   "used": "SI engine peak heat flux of order 1-3 MW/m2"
+  },
+  {
+   "id": "REV",
+   "ref": "Review: 'Thermal modelling of modern engines: a review of empirical correlations to estimate the in-cylinder heat transfer coefficient'",
+   "url": "https://www.researchgate.net/publication/238186418",
+   "used": "Woschni-type correlations need a calibration multiplier per engine / operating point"
+  }
+ ],
+ "method": "rated point re-solved per Woschni multiplier with the baseline turbine area; piston heat = cycle-model piston wall heat / 16; piston FE thermal-only with that heat (gas-side Robin condition calibrated to it at the cycle wall temperature, oil-side coefficients unchanged); 'consistent' iterates the cycle piston wall temperature to the FE crown mean; hot-fatigue factor = sigma_f(T) / sigma_a at the governing elements of piston_section_fatigue.json, same data and scaling (sigma_a from the gas case, temperature-independent)"
+}

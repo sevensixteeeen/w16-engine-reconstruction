@@ -62,7 +62,7 @@ def chain_path(c1, r1, c2, r2, pitch):
     arc1 = r1 * (2 * math.pi - 2 * th)
     arc2 = r2 * 2 * th
     total = 2 * span + arc1 + arc2
-    n = int(round(total / pitch))
+    n = 2 * int(round(total / pitch / 2))          # even link count (no offset link); the tensioner takes up the difference
     step = total / n
     out = []
     a_na = math.atan2(na[1], na[0])
@@ -109,16 +109,99 @@ def guide_rail(a, b, n_out, x_plane, width, pitch, bow=0.0):
 
 
 def tensioner_body():
-    """Hydraulic chain tensioner (local: plunger axis +Z, plunger tip at z = 0)."""
+    """Hydraulic chain tensioner (local: plunger axis +Z, plunger tip at z = 0; local x = crank axis).  The mounting flange
+    lies in the chain plane (8 mm across it): it used to run 34 mm along the crank axis, through the neighbouring chain planes
+    (Fix B2, 2026-11-21)."""
     return Pos(0, 0, -44) * Cylinder(9.0, 36.0, align=CMIN) + Pos(0, 0, -10) * Cylinder(5.0, 10.0, align=CMIN) + \
-        Pos(0, 0, -44) * Box(34, 12, 8, align=CMIN)
+        Pos(0, 0, -44) * Box(8, 26, 8, align=(Align.CENTER, Align.CENTER, Align.MIN))
 
 
-def tensioner_location(a, b, n_out, x_plane, pitch):
+def _tens_axis(a, b, n_out, phi):
+    s = (np.array(b) - np.array(a)) / np.linalg.norm(np.array(b) - np.array(a))
+    return math.cos(math.radians(phi)) * np.array(n_out) + math.sin(math.radians(phi)) * s, s
+
+
+def _tens_tip(a, b, n_out, pitch, t, phi):
+    """Plunger tip on the back of the tensioner rail; an inclined plunger stands off by its radius x sin(phi)."""
     a, b = np.array(a), np.array(b)
-    mid = 0.5 * (a + b) + n_out * (0.41 * pitch + 0.6 + 6.0)
-    t = (b - a) / np.linalg.norm(b - a)
-    return Location(Plane(origin=(x_plane, float(mid[0]), float(mid[1])), x_dir=(1, 0, 0), z_dir=(0, float(-n_out[0]), float(-n_out[1]))))
+    return a + t * (b - a) + np.array(n_out) * (0.41 * pitch + 0.6 + 6.0 + 5.0 * math.sin(math.radians(phi)) + 0.2 * (phi > 0))
+
+
+def tensioner_location(a, b, n_out, x_plane, pitch, t=0.5, phi=0.0):
+    """Tensioner on the slack span a -> b (a at the driving sprocket), at fraction t, body inclined by phi deg from the span
+    normal towards b (the plunger still acts on the rail)."""
+    ax, _ = _tens_axis(a, b, n_out, phi)
+    tip = _tens_tip(a, b, n_out, pitch, t, phi)
+    return Location(Plane(origin=(x_plane, float(tip[0]), float(tip[1])), x_dir=(1, 0, 0), z_dir=(0, float(-ax[0]), float(-ax[1]))))
+
+
+def tensioner_footprint(a, b, n_out, pitch, t, phi, step=2.0):
+    """In-plane points of the tensioner envelope (body, plunger, flange) for clearance checks."""
+    ax, _ = _tens_axis(a, b, n_out, phi)
+    lat = np.array([-ax[1], ax[0]])
+    tip = _tens_tip(a, b, n_out, pitch, t, phi)
+    pts = []
+    for u0, u1, w in ((0.0, 10.0, 5.0), (8.0, 44.0, 9.0), (36.0, 44.0, 13.0)):
+        for u in np.arange(u0, u1 + 1e-9, step):
+            for v in np.arange(-w, w + 1e-9, step):
+                pts.append(tip + u * ax + v * lat)
+    return np.array(pts)
+
+
+def part_points(inf, pth, pitch, r_int, r_cam, c_int, c_cam):
+    """In-plane sample points with their half-size (mm) of one secondary drive: chain links, guide and tensioner rails,
+    intermediate sprocket, cam sprocket / phaser."""
+    out = [(np.array(p), 0.41 * pitch) for p, _ in pth]
+    for a, b, n in ((inf["A1"], inf["A2"], inf["na"]), (inf["B1"], inf["B2"], inf["nb"])):
+        a, b, n = np.array(a), np.array(b), np.array(n)
+        mid = 0.5 * (a + b) + n * (0.41 * pitch + 0.6 + 3.0)
+        t = (b - a) / np.linalg.norm(b - a)
+        ln = np.linalg.norm(b - a) * 0.78
+        for u in np.linspace(-ln / 2, ln / 2, int(ln / 2) + 2):
+            out.append((mid + u * t, 3.0))
+    out.append((np.array(c_int), r_int + 4.0))
+    out.append((np.array(c_cam), r_cam + 4.0))
+    return out
+
+
+R2I, R2C = None, None
+
+
+def secondary_layout(clear=3.0):
+    """The four secondary drives with their tensioner placements: list of dicts (key, x_plane, path, info, t, phi, resolved).
+    Each tensioner is placed on its slack span (B) at the first (phi, t) - smallest inclination, then t nearest 0.6 - whose
+    envelope keeps `clear` mm from every part of the other drives within axial reach (Fix B2, 2026-11-21: on each bank the
+    two loops are nested 10 mm apart, and the inner drive's tensioner used to cross the outer drive's chain and rail)."""
+    r2i, r2c = pitch_r(P2, Z_INT2), pitch_r(P2, Z_CAM)
+    drives = []
+    for (b, kind), xr in ROWS.items():
+        cy, cz = cam_axis_yz(b, kind)
+        pth, inf = chain_path(INTER, r2i, (cy, cz), r2c, P2)
+        drives.append(dict(key=(b, kind), x_plane=xr, path=pth, info=inf, cam=(cy, cz),
+                           pts=part_points(inf, pth, P2, r2i, r2c, INTER, (cy, cz))))
+    reach = 9.0 + 3.75 + 1.0                           # tensioner half-width across the plane + rail half-width + margin
+    for d in drives:
+        inf = d["info"]
+        others = [o for o in drives if o is not d and abs(o["x_plane"] - d["x_plane"]) < reach]
+        obst = [(p, r) for o in others for p, r in o["pts"]] + [(p, 9.0) for o in others if "tens_pts" in o for p in o["tens_pts"]]
+        P_o = np.array([p for p, r in obst]); R_o = np.array([r for p, r in obst])
+        dmin_at = lambda t, phi: float((np.sqrt(((tensioner_footprint(inf["B1"], inf["B2"], inf["nb"], P2, t, phi)[:, None, :]
+                                                  - P_o[None, :, :]) ** 2).sum(-1)) - R_o[None, :]).min())
+        best = None
+        for phi in (0.0, 15.0, 30.0, 45.0):            # beyond ~45 deg the plunger no longer tensions the chain
+            for t in sorted(np.linspace(0.3, 0.9, 25), key=lambda x: abs(x - 0.6)):
+                dm = dmin_at(t, phi)
+                if dm >= clear:
+                    best = (t, phi, dm)
+                    break
+            if best:
+                break
+        # no clear position (inner drive of a nested pair: the free depth inside the neighbouring loop is smaller than a
+        # hydraulic tensioner) -> keep the original mid-span perpendicular position and report it as unresolved
+        d["resolved"] = best is not None
+        d["t"], d["phi"], d["clearance"] = best if best else (0.5, 0.0, dmin_at(0.5, 0.0))
+        d["tens_pts"] = tensioner_footprint(inf["B1"], inf["B2"], inf["nb"], P2, d["t"], d["phi"])
+    return drives
 
 
 def phaser():
@@ -134,9 +217,37 @@ def intermediate_shaft():
     return Pos(XH - 24, y, z) * Rot(Y=90) * Cylinder(12.5, 65.0, align=CMIN)
 
 
+def _hull_poly(points):
+    from scipy.spatial import ConvexHull
+    pts = np.array(points)
+    h = ConvexHull(pts)
+    return poly([(float(x), float(y)) for x, y in pts[h.vertices]])
+
+
 def chain_cover():
-    """Rear chain housing (CFRP, per the published Chiron description), global frame."""
-    lower = make_hull((Circle(66.0) + Pos(INTER[0], INTER[1]) * Circle(78.0) + Pos(0, 215.0) * Circle(60.0)).edges())
+    """Rear chain housing (CFRP, per the published Chiron description), global frame.
+    Fix B1 (2026-11-21): the secondary-drive region is the convex hull, per bank, of the real chain, guide-rail, sprocket and
+    tensioner footprints plus 5 mm clearance and the 3.5 mm wall (the old outline - circles round the cam axes and a lower lobe -
+    left the chain spans and guide rails outside the housing); that region and the crank / intermediate region are 50 mm deep
+    (46.5 mm inside: 3.75 mm behind the outermost guide rail, 14 mm in front of the flex plate at XH + 64); the cam / phaser
+    region stays 64 mm deep."""
+    wall, gap = 3.5, 5.0
+    base_pts = []
+    for (c, r) in (((0.0, 0.0), 66.0), (INTER, 78.0), ((0.0, 215.0), 60.0)):
+        for a in np.linspace(0, 2 * math.pi, 48, endpoint=False):
+            base_pts.append((c[0] + r * math.cos(a), c[1] + r * math.sin(a)))
+    ring = [(math.cos(a), math.sin(a)) for a in np.linspace(0, 2 * math.pi, 12, endpoint=False)]
+    lower = None
+    for side in (1, -1):
+        pts = list(base_pts)
+        for d in secondary_layout():
+            if np.sign(d["cam"][0]) != side:
+                continue
+            for p, r in d["pts"] + [(q, 0.0) for q in d["tens_pts"]]:
+                rr = r + gap + wall
+                pts += [(p[0] + rr * cx, p[1] + rr * cy) for cx, cy in ring]
+        h = _hull_poly(pts)
+        lower = h if lower is None else lower + h
     pts = []
     for b in (1, 2):
         for k in ("in", "ex"):
@@ -147,7 +258,7 @@ def chain_cover():
         sk = sk + c
     upper = make_hull(sk.edges())
     pl = Plane(origin=(XH, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0))
-    d_lo, d_up, wall = 46.0, 64.0, 3.5
+    d_lo, d_up = 50.0, 64.0
     from build123d import offset
     shell = (extrude(pl * lower, amount=d_lo) + extrude(pl * upper, amount=d_up))
     inner = (extrude(pl * offset(lower, amount=-wall), amount=d_lo - wall) + extrude(pl * offset(upper, amount=-wall), amount=d_up - wall))

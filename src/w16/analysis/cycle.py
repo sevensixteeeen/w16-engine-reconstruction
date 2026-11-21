@@ -32,8 +32,10 @@ A = dict(
     T3_limit=P.t_exh_valve_ref_c + 273.15,       # K, turbine-inlet limit = published valve rating (PUB)
     lam_min=0.72, lam_max_fullload=0.95,
     exh_manifold_heat_loss=0.06,
-    woschni_scale=2.0,     # multiplier on the Woschni coefficient (high-BMEP SI engines; calibrated to a coolant
-                           # heat of roughly 0.4-0.5 x brake power at rated load)
+    woschni_scale=2.0,     # multiplier on the Woschni coefficient (EST, D-045): the only value of 1.0 / 1.5 / 2.0 that comes close
+                           # to the published 3-5 % of fuel energy into the piston (2.8 % of the burned fuel energy at rated
+                           # power, heat-consistent) and keeps T3 at the published limit (1.0 / 1.5 run 48 / 24 K over it at
+                           # lambda_min); uncertainty band 1.0-2.0 - tools/piston_heat_input_study.py, report section 8.2
 )
 
 

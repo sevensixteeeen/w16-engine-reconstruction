@@ -2,8 +2,34 @@
 
 _Last updated: 2026-11-21_
 
-Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-044) first. Run everything from the project root with
+Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-046) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
+
+## 2026-11-21 (later) — heat-input study (D-045), interference fixes applied (D-046), Fix A options for decision
+
+- **D-045 (recorded, report regenerated):** `woschni_scale` stays 2.0 (band 1.0-2.0); the 0.4-0.5 coolant-heat comment in
+  `cycle.py` is withdrawn. Piston status reframed: **hot fatigue NOT ASSESSABLE with available public data** (the method fails
+  even production-range crown temperatures: Woschni x 1.0, crown 272 degC, factors 0.23-0.51); crown 376 degC above the
+  typical 270-310 degC - open: cooling upgrade + hot-strength alloy with manufacturer data. Report: new section 8.2, 8.1 and
+  the acceptance row (NOT ASSESSABLE - OPEN). Study: `tools/piston_heat_input_study.py` ->
+  `08_SIMULATIONS/analytical/piston_heat_input_study.json` (reproduces the committed piston FE exactly).
+- **D-046 (applied in the source, targeted checks only; full regeneration NOT run - needs approval):** fixes B1, B2 (outer
+  drives), B3 (104 links), C, D1, D2, E (duct B), F1-F4, G. 29 of the 35 static pairs resolved
+  (`tools/check_interference_parts.py`, 2,392 pairs involving the changed groups). Open and needing a decision: inner-drive
+  tensioners (3 pairs; plane spacing), clean-air duct A vs down-pipe B (2 pairs; turbo A / B face each other 120 mm apart),
+  Fix A (1 static + the kinematic pair). Committed outputs (BREP / STEP, BOM, interference report, renders, drawings, report
+  figures) still show the pre-fix geometry until the regeneration.
+- **Fix A options (`tools/crank_fillet_options.py` -> `08_SIMULATIONS/fea/crank_fillet_options.json`), user decides:**
+  (a) undercut fillet (`cranktrain.throw_solid(pin_fillet="undercut")`, not adopted): crank throw 3, same load / supports as
+  the crank FE case, 1.0 mm mesh on both fillet circles - fillet zone max 175 -> 223 MPa (+27 %), 99.9th percentile 157 -> 176
+  MPa (+12 %), webs 68 -> 79 MPa (+17 %), pin deflection 15.9 -> 18.1 um, -7.9 g per throw; fatigue factor on the fillet max
+  6.0 -> 4.7 (42CrMo4 QT, 520 MPa; mains fixed, conservative); the undercut mesh has a few poor elements in the groove (gamma
+  min 0.04), so its single-element peak is less certain than its 99.9th percentile. (b) narrowed shell (edge 2.47 mm from the web: fillet
+  reaches 2.17 mm at the shell bore + 0.3 mm): web side only 16.25 -> 14.66 mm (-9.8 %, handed position), specific load at
+  2,000 / 3,750 rpm 52.5 / 54.2 -> 58.2 / 60.1 MPa, Ocvirk film 0.76 -> 0.66 um at 2,000 rpm; symmetric 13.06 mm (-19.6 %):
+  65.3 / 67.4 MPa, 0.55 um.
+- New tools: `tools/check_interference_parts.py` (targeted static check), `tools/crank_fillet_options.py`,
+  `tools/piston_heat_input_study.py`.
 
 ## 2026-11-21 — regeneration finished; interference check completed (D-044)
 

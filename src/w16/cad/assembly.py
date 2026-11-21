@@ -178,10 +178,15 @@ def build(alpha=0.0, systems=True):
     g_shapes = []
     spans = [("prim", pinf, TM.X_PRIM, 16.0, TM.P1)]
     ph_l = []
-    for (b, kind), xr in TM.ROWS.items():
-        cy, cz = TM.cam_axis_yz(b, kind)
-        pth, inf = TM.chain_path(TM.INTER, r2i, (cy, cz), r2c, TM.P2)
+    sec = TM.secondary_layout()
+    tens = {}
+    for d in sec:
+        (b, kind), xr, pth, inf = d["key"], d["x_plane"], d["path"], d["info"]
+        cy, cz = d["cam"]
+        tens[f"b{b}{kind}"] = (d["t"], d["phi"])
         info["chains"][f"bank{b}_{kind}"] = {k: (float(v) if not hasattr(v, "shape") else v.tolist()) for k, v in inf.items()}
+        info["chains"][f"bank{b}_{kind}"].update(tensioner_t=float(d["t"]), tensioner_phi_deg=float(d["phi"]), tensioner_clearance_mm=float(d["clearance"]),
+                                                  tensioner_resolved=bool(d["resolved"]))
         link_l += TM.chain_locations(pth, xr, 4.5)
         spans.append((f"b{b}{kind}", inf, xr, 4.5, TM.P2))
         inner_plane = xr < B.XH + 32.0
@@ -196,7 +201,7 @@ def build(alpha=0.0, systems=True):
         for g, tag in ((ga, "fixed guide"), (gb, "tensioner rail")):
             gi += 1
             A(f"W16-07-008~{gi:02d}", f"Chain {tag}", g, "polymer", "07", note=nm)
-        t_l.append(TM.tensioner_location(inf["B1"], inf["B2"], np.array(inf["nb"]), xr, p))
+        t_l.append(TM.tensioner_location(inf["B1"], inf["B2"], np.array(inf["nb"]), xr, p, *tens.get(nm, (0.5, 0.0))))
     A("W16-07-009", "Hydraulic chain tensioner", TM.tensioner_body(), "steel", "07", t_l, custom=False)
     A("W16-07-010", "Chain housing (rear cover)", cached("chain_cover", TM.chain_cover, ["cad/timing.py", "cad/block.py"]), "cfrp", "07", process="CFRP prepreg, bonded seal carrier")
 

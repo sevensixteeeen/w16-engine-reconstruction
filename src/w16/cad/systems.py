@@ -94,7 +94,7 @@ def exhaust_side(sy):
     xt = X_TB + TB.X_T
     zc = 0.5 * (z_l + Z_T + TB.Z_IN) + 2.0
     val = cyl_between((xt - 22, sy * (y_l - 8), zc), (xt + 22, sy * (y_l - 8), zc), 6.0) + \
-        cyl_between((xt + 22, sy * (y_l - 8), zc), (xt + 62, sy * (y_l - 8), zc), 20.0)
+        cyl_between((xt + 22, sy * (y_l - 8), zc + 3.0), (xt + 62, sy * (y_l - 8), zc + 3.0), 20.0)   # Fix F4 (2026-11-21): actuator 3 mm up (was 1 mm into the turbine housing)
     out["shutoff_valve"] = val
     # turbine A outlet -> pre-catalyst A (close coupled, straight out to the free end)
     xo = X_TA + TB.X_TO
@@ -167,7 +167,9 @@ def intake_side(sy):
     path = [ci_a, ci_a + np.array([14.0, 0, 0]), P3(-20.0, 400.0, 26.0, sy), P3(-10.0, 415.0, 130.0, sy), P3(-10.0, 415.0, 330.0, sy), P3(-10.0, 335.0, 404.0, sy)]
     out["air_duct_A"] = tube(path, 35.0, 32.5, bend=60.0)
     ci_b = P3(X_TB + TB.X_CI, Y_T, Z_T, sy)
-    path = [ci_b, ci_b + np.array([45.0, 0, 0]), P3(312.0, 415.0, 60.0, sy), P3(312.0, 415.0, 330.0, sy), P3(250.0, 400.0, 420.0, sy), P3(112.0, 335.0, 440.0, sy)]
+    # Fix E (2026-11-21): crosses above the charge pipe's diagonal (11 mm clear; it ran through charge pipe B, 1,487 mm3) - the
+    # outboard alternatives reach 19 mm only by widening the dressed engine by 90 mm
+    path = [ci_b, ci_b + np.array([45.0, 0, 0]), P3(312.0, 415.0, 60.0, sy), P3(312.0, 415.0, 330.0, sy), P3(260.0, 410.0, 500.0, sy), P3(112.0, 335.0, 460.0, sy)]
     out["air_duct_B"] = tube(path, 35.0, 32.5, bend=60.0)
     box = box_at(-65, 118, sy * 225, sy * 335, 400, 640) - box_at(-62, 115, sy * 228, sy * 332, 403, 637)
     box = box + (cyl_between((118, sy * 280, 590), (158, sy * 280, 590), 40.0) - cyl_between((113, sy * 280, 590), (159, sy * 280, 590), 37.0))   # snorkel
@@ -188,7 +190,9 @@ def fuel_side(sy):
     for rail, dx, top in (("P", -11.0, (158.0, 331.0)), ("S", 11.0, (176.0, 352.0))):
         r = cyl_between((min(xs) - 30, sy * top[0], top[1]), (max(xs) + 30, sy * top[0], top[1]), 9.5) - \
             cyl_between((min(xs) - 26, sy * top[0], top[1]), (max(xs) + 26, sy * top[0], top[1]), 6.5)
-        r = r + cyl_between((max(xs) + 30, sy * top[0], top[1]), (max(xs) + 62, sy * top[0], top[1]), 13.0)        # damper / pressure sensor
+        # damper / pressure sensor at the rear end; Fix D2 (2026-11-21): on the primary rail it is the rail's own diameter
+        # (r 9.5, was 13 - its lower side ran 5.8 mm into the head's rear end; now 2.8 mm clear)
+        r = r + cyl_between((max(xs) + 30, sy * top[0], top[1]), (max(xs) + 62, sy * top[0], top[1]), 9.5 if rail == "P" else 13.0)
         out[f"rail_{rail}"] = r
         for p in pts:
             a = p + n * 22.0
@@ -196,7 +200,11 @@ def fuel_side(sy):
             t = np.array([p[0] + dx, sy * top[0], top[1]])
             d = (t - tip) / np.linalg.norm(t - tip)
             ln = float(np.linalg.norm(t - tip)) - 8.0
-            inj.append((Location(Plane(origin=tuple(tip), z_dir=tuple(d))), ln))
+            # Fix D1 (2026-11-21): the connector (local +y) points away from the partner injector of the same port; with the
+            # default frame it pointed at it and overlapped its body by 1 mm (tips and spray targeting unchanged)
+            away = np.array([np.sign(dx), 0.0, 0.0])
+            xd = np.cross(away, d)
+            inj.append((Location(Plane(origin=tuple(tip), x_dir=tuple(xd / np.linalg.norm(xd)), z_dir=tuple(d))), ln))
     out["_injectors"] = inj
     return out
 
@@ -238,6 +246,9 @@ def cooling():
     ZP = 215.0
     pump = cyl_between((-372, 0, ZP), (-XH - 9.5, 0, ZP), 55.0) + cyl_between((-400, 0, ZP), (-372, 0, ZP), 16.0)
     pump = pump - cyl_between((-368, 0, ZP), (-XH - 14, 0, ZP), 48.0) - cyl_between((-401, 0, ZP), (-360, 0, ZP), 9.5)
+    # Fix C (2026-11-21): inlet boss under the volute - the inlet pipe used to end 42.9 mm from the pump axis, inside the
+    # impeller (r 44); it now ends on this boss at 56 mm (boss top 5.8 mm below the impeller's lowest point at y = 20)
+    pump = pump + cyl_between((-361, 40, ZP - 52.5), (-361, 40, ZP - 45.0), 20.0)
     out["water_pump_housing"] = pump
     imp = cyl_between((-366, 0, ZP), (-360, 0, ZP), 44.0)
     for k in range(7):
@@ -252,15 +263,18 @@ def cooling():
     for b in (1, 2):
         sy = 1 if b == 1 else -1
         a = inl[b]
-        out[f"pipe_pump_to_block_{b}"] = tube([(-361, sy * 50.0, ZP), (-361, sy * 100.0, 185.0), (-361, a[1], a[2]), (-XH + 4, a[1], a[2])], 19.0, 17.0, bend=30.0)
+        # Fix C (2026-11-21): the outlet starts radially 56 mm from the pump axis (housing r 55) - it used to start at 50 mm,
+        # inside the volute, where the impeller (r 44) sweeps
+        d0 = np.array([0.0, sy * 50.0, -30.0]) / math.hypot(50.0, 30.0)
+        out[f"pipe_pump_to_block_{b}"] = tube([(-361, 56.0 * d0[1], ZP + 56.0 * d0[2]), (-361, sy * 100.0, 185.0), (-361, a[1], a[2]), (-XH + 4, a[1], a[2])], 19.0, 17.0, bend=30.0)
         o = outl[b]
         out[f"pipe_head_to_thermostat_{b}"] = tube([(-XH + 4, o[1], o[2]), (-361, o[1], o[2]), (-361, sy * 75.0, 318.0), (-361, sy * 31.0, 318.0)], 19.0, 17.0, bend=30.0)
     th = cyl_between((-361, -31, 318), (-361, 31, 318), 30.0) + cyl_between((-361, 0, 318), (-361, 0, 400), 21.0)
     th = th - cyl_between((-361, -27, 318), (-361, 27, 318), 26.0) - cyl_between((-361, 0, 330), (-361, 0, 401), 18.0)
     out["thermostat_housing"] = th
     out["pump_inlet_pipe"] = \
-        (cyl_between((-361, 40, ZP - 38), (-361, 40, 122), 20.0) + cyl_between((-361, 40, 122), (-470, 40, 122), 20.0) -
-         cyl_between((-361, 40, ZP - 37), (-361, 40, 122), 17.5) - cyl_between((-361, 40, 122), (-471, 40, 122), 17.5))
+        (cyl_between((-361, 40, ZP - 52.5), (-361, 40, 122), 20.0) + cyl_between((-361, 40, 122), (-470, 40, 122), 20.0) -
+         cyl_between((-361, 40, ZP - 51.5), (-361, 40, 122), 17.5) - cyl_between((-361, 40, 122), (-471, 40, 122), 17.5))
     # low-temperature circuit: electric pump and hoses to the two charge-air coolers
     out["lt_pump"] = cyl_between((-300, 0, 285), (-195, 0, 285), 34.0) + cyl_between((-195, 0, 285), (-180, 0, 285), 14.0)
     for sy in (1, -1):
@@ -300,11 +314,18 @@ def accessories():
     out["accessory_belt"] = extrude(Plane(origin=(-423, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0)) * ring, amount=20.0, dir=(1, 0, 0))
     # belt planes: the pulleys above are modelled at the same axial station
     for sy in (1, -1):
-        br = box_at(MOUNT_X - 26, MOUNT_X + 36, sy * 176, sy * 196, 2, 40) + box_at(MOUNT_X - 26, MOUNT_X + 30, sy * 196, sy * 246, 10, 38)
+        # Fix G (2026-11-21): the plate on the block pad ends at z 35 - up to z 40 it cut 2 mm into the crankcase wall, which slopes
+        # outwards above the pad (y 176 at z ~37, 178.4 at z 40)
+        br = box_at(MOUNT_X - 26, MOUNT_X + 36, sy * 176, sy * 196, 2, 35) + box_at(MOUNT_X - 26, MOUNT_X + 30, sy * 196, sy * 246, 10, 35)
         out[f"mount_bracket_{'L' if sy > 0 else 'R'}"] = br
         out[f"mount_isolator_{'L' if sy > 0 else 'R'}"] = cyl_between((MOUNT_X + 2, sy * 228, -22), (MOUNT_X + 2, sy * 228, 10), 18.0)
-    out["front_cover"] = box_at(-XH - 9, -XH, -150, 150, -72, 150) - cyl_between((-XH - 10, 0, 0), (-XH + 1, 0, 0), 30.6) - \
+    fc = box_at(-XH - 9, -XH, -150, 150, -72, 150) - cyl_between((-XH - 10, 0, 0), (-XH + 1, 0, 0), 30.6) - \
         cyl_between((-XH - 10, GAL_C[0], GAL_C[1]), (-XH + 1, GAL_C[0], GAL_C[1]), 11.5)
+    # Fix C (2026-11-21): notch for the coolant pipes pump -> block inlet (r 19 + 3 mm clearance); they ran 2.3 mm into the cover edge
+    for bank in (1, 2):
+        a = L.to_global(bank, -XH if bank == 1 else XH, rho(1 if bank == 1 else 8) * P.u_bore_deck, P.deck_height - 45)
+        fc = fc - cyl_between((-XH - 12, a[1], a[2]), (-XH + 3, a[1], a[2]), 22.0)
+    out["front_cover"] = fc
     return out
 
 
