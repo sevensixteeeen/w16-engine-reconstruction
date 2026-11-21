@@ -145,9 +145,17 @@ def main():
     if bad:
         problems.append(f"stripped or sensitive paths still in history: {sorted(bad)[:10]}")
     revs = run(["git", "rev-list", "--all"], cwd=out).stdout.split()
-    hits = run(["git", "grep", "-I", "-l", "-E", SECRET_RE, *revs, "--", "."], cwd=out, check=False).stdout.split()
+    # matches are reported per file; the only allowed ones are the pattern definition of this script (SECRET_RE lines,
+    # in every revision of it - an earlier revision spelled github_pat_ / sk-ant- literally)
+    lines = run(["git", "grep", "-I", "-n", "-E", SECRET_RE, *revs, "--", "."], cwd=out, check=False).stdout.splitlines()
+    own = re.compile(r"^SECRET_RE = \(r\"|^ {13}r\"\|")
+    hits = set()
+    for ln in lines:
+        _, path, _, text = (ln.split(":", 3) + ["", "", ""])[:4]
+        if not (path == "tools/publish_github.py" and own.match(text)):
+            hits.add(path)
     if hits:
-        problems.append(f"token / key patterns: {sorted(set(h.split(':', 1)[1] for h in hits))[:10]}")
+        problems.append(f"token / key patterns: {sorted(hits)[:10]}")
     for needle in {home, home.replace("\\", "/")}:
         hits = run(["git", "grep", "-I", "-l", "-i", "-F", needle, *revs, "--", "."], cwd=out, check=False).stdout.split()
         if hits:
