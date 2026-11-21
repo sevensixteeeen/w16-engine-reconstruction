@@ -2,8 +2,25 @@
 
 _Last updated: 2026-11-21_
 
-Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-046) first. Run everything from the project root with
+Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-047) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
+
+## 2026-11-21 (evening) — user decisions applied (D-047); regeneration ready, not run
+
+- Committed before this step: `d31dac7` (D-045 / D-046). `/ultrareview` base for D-045 onwards: `ffcb24e`.
+- **Fix A:** undercut pin fillets adopted (`cranktrain.throw_solid` default). `fea.case_crank` is now the fine-mesh standard
+  (1.0 mm along both fillet circles, CG solver, factor on the fillet-zone peak; the old report value 8.14 was the whole-part
+  99.9th percentile on a 2.4 mm mesh). Expected after regeneration: about 4.7 (undercut; 6.0 for the old fillet on the same
+  mesh). Open: mesh-converged groove peak; bending + torsion at the fillet.
+- **Chain planes** XH+25 / +40 (bank 1), +29 / +44 (bank 2): all four hydraulic tensioners fit perpendicular at mid-span.
+  Intermediate shaft 72 mm; housing base 55 mm with a shallow crank zone (flywheel flange), tensioner pockets 60 mm, cam /
+  phaser region 69 mm, 1.51 kg. Long block +5 mm (housing to x 399); dressed length unchanged (flex plate rearmost, x 403).
+- **Duct B:** 11 mm to charge pipe B accepted. **Duct A:** the compressor-A inlet elbow alone does not fit (down-pipe B
+  reaches the duct footprint 20 mm in front of the inlet face) - options in DECISIONS, decision needed.
+- Targeted checks: static, groups 07 / crank / shells / flex plate / camshafts - no clashes (1,742 pairs); the earlier
+  groups 08-13 check stands (D-046). Kinematic big-end vs crank (`tools/check_kinematic_parts.py`, 12 angles): 96 of 96 clear (were 96 clashes).
+- **Regeneration (user, from cmd, nothing else open):** `run_regeneration.cmd` in the project folder (~16 h; the crank FE
+  now takes ~20 min with the CG solver).
 
 ## 2026-11-21 (later) — heat-input study (D-045), interference fixes applied (D-046), Fix A options for decision
 

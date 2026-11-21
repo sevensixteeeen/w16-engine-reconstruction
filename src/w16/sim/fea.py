@@ -14,6 +14,7 @@ import time
 import numpy as np
 import gmsh
 import pyvista as pv
+import scipy.sparse as sp
 from scipy.sparse.linalg import splu, spsolve
 from skfem import Basis, BilinearForm, ElementTetP1, ElementTetP2, ElementVector, FacetBasis, LinearForm, MeshTet, asm, condense
 from skfem.helpers import ddot, div, dot, grad, sym_grad, trace
@@ -128,6 +129,23 @@ def spd_factor(A):
     return splu(A, permc_spec="MMD_AT_PLUS_A", diag_pivot_thresh=0.0, options=dict(SymmetricMode=True))
 
 
+class CGSolver:
+    """Low-memory alternative to spd_factor: Jacobi-preconditioned conjugate gradients (same interface: .solve(b)).
+    Matched the direct solver to 1e-11 on the piston; used where a fine local mesh makes the direct factorisation too large."""
+    def __init__(self, A, rtol=1e-10):
+        from scipy.sparse.linalg import cg
+        self.A, self.cg, self.rtol = A.tocsr(), cg, rtol
+        self.M = sp.diags(1.0 / self.A.diagonal())
+
+    def solve(self, b):
+        t, it = time.time(), [0]
+        x, info = self.cg(self.A, b, rtol=self.rtol, maxiter=500000, M=self.M, callback=lambda xk: it.__setitem__(0, it[0] + 1))
+        if info != 0:
+            raise RuntimeError(f"CG did not converge (info {info}, {it[0]} iterations)")
+        print(f"    CG converged: {it[0]} iterations, {time.time() - t:.0f} s", flush=True)
+        return x
+
+
 def spd_solve(A, b):
     lu = spd_factor(A)
     x = lu.solve(b)
@@ -136,7 +154,7 @@ def spd_solve(A, b):
 
 
 def solve_elastic(m, mt, fixed, tractions=(), body=None, thermal=None, order=2, fixed_dirs=None, pressures=(), balance=None, points=(),
-                  factor_cache=None):
+                  factor_cache=None, iterative=False):
     """fixed: facet index array (all displacement components fixed) ; tractions: list of (facets, fn(x) -> 3 x ... array, MPa);
     body: fn(x) -> force density N/mm3; thermal: nodal temperature rise array on P1 nodes (K).
     pressures: list of (facets, p MPa) acting against the outward facet normal.  balance: (facets, fn, component) - a traction
@@ -207,6 +225,8 @@ def solve_elastic(m, mt, fixed, tractions=(), body=None, thermal=None, order=2, 
         factor_cache.clear()
         factor_cache.update(N=ib.N, D=D, lu=spd_factor(K[I][:, I].tocsc()))
         u[I] = factor_cache["lu"].solve(f[I])
+    elif iterative:
+        u[I] = CGSolver(K[I][:, I]).solve(f[I])
     else:
         u[I] = spd_solve(K[I][:, I].tocsc(), f[I])
     t_solve = time.time() - t0
@@ -556,7 +576,13 @@ def case_piston(thermal_only=False):
     save("piston", rec)
 
 
+CRANK_FILLET_MESH = 1.0          # mm, element size along both pin-fillet circles (D-047 standard; was 2.4 mm in a 34 mm ball)
+
+
 def case_crank():
+    """Crank throw 3 in bending.  D-047 (2026-11-21): undercut pin fillets (cranktrain default), 1.0 mm elements along both
+    fillet circles (40 refinement balls each), CG solver (the direct factorisation of ~1 M dof is too large), and the
+    fatigue factor on the fillet-zone peak instead of the whole-part 99.9th percentile."""
     R = results()["dynamics"]
     from ..cad.assembly import _cw
     cw, _ = _cw()
@@ -568,20 +594,40 @@ def case_crank():
     mt = mat("steel_qt")
     psi = math.radians(L.PIN_PHASE[k])
     pc = np.array([L.pin_x(k), P.throw * math.sin(psi), P.throw * math.cos(psi)])
-    ref = [((pc[0] - P.pin_width / 2, pc[1], pc[2]), 34, 2.4), ((pc[0] + P.pin_width / 2, pc[1], pc[2]), 34, 2.4)]
+    xa, xb = pc[0] - P.pin_width / 2, pc[0] + P.pin_width / 2
+    ref = [((xa, pc[1], pc[2]), 34, 2.4), ((xb, pc[1], pc[2]), 34, 2.4)]
+    rf0 = P.pin_dia / 2 + 1.25                                        # centre radius of the fillet zone
+    e1, up = np.array([0.0, math.cos(psi), -math.sin(psi)]), np.array([0.0, math.sin(psi), math.cos(psi)])
+    for xf in (xa, xb):
+        for a in np.linspace(0, 2 * math.pi, 40, endpoint=False):
+            ref.append((tuple(np.array([xf, pc[1], pc[2]]) + rf0 * (math.cos(a) * e1 + math.sin(a) * up)), 4.5, CRANK_FILLET_MESH))
     m, st = mesh_shape(thr, 5.0, "crank", refine=ref)
     mains = facets(m, lambda x: (np.hypot(x[1], x[2]) < P.main_dia / 2 + 0.05) & ((x[0] < L.main_x(k) + hm + 0.01) | (x[0] > L.main_x(k + 1) - hm - 0.01)))
     pin = facets(m, lambda x: (np.hypot(x[1] - pc[1], x[2] - pc[2]) < P.pin_dia / 2 + 0.05) & (np.abs(x[0] - pc[0]) < P.pin_width / 2 - 2.6))
     F = 2 * 0.0 + R["F_design_gas"]                                   # one rod at design peak pressure; partner cylinder near BDC
     e_pin = np.array([0, math.sin(psi), math.cos(psi)])
     fn, p0 = cos_load(pc, (1, 0, 0), -e_pin, F, m, pin)
-    s = solve_elastic(m, mt, mains, tractions=[(pin, fn)])
+    s = solve_elastic(m, mt, mains, tractions=[(pin, fn)], iterative=True)
     pk, p999, loc = peak(m, s["vm"])
-    rec = dict(case="crank throw 3 in bending", material=mt, mesh=st, inputs=dict(force_N=F, direction="towards the crank axis (firing TDC)"),
-               results=dict(applied_force_check_N=s["applied"].tolist(), vm_max_MPa=pk, vm_p999_MPa=p999, vm_max_location=loc, pin_deflection_mm=float(np.sqrt((s["U"] ** 2).sum(0)).max()),
-                            dofs=s["dofs"], solve_s=s["t_solve"], fatigue_limit_MPa=mt["fatigue"], factor_on_p999=mt["fatigue"] / (0.5 * p999)),
+    vm = np.asarray(s["vm"])
+    cen = m.p[:, m.t].mean(axis=1)
+    rp = np.hypot(cen[1] - pc[1], cen[2] - pc[2])
+    fz = (np.hypot(cen[0] - xa, rp - rf0) < 5.0) | (np.hypot(cen[0] - xb, rp - rf0) < 5.0)
+    web = (((cen[0] < xa) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb) & (cen[0] < xb + P.web_thk))) & ~fz & (np.hypot(cen[1], cen[2]) > P.main_dia / 2 + 6.0)
+    zone = lambda msk: dict(vm_max_MPa=float(vm[msk].max()), vm_p999_MPa=float(np.percentile(vm[msk], 99.9)),
+                            at=cen[:, int(np.argmax(np.where(msk, vm, -1)))].round(2).tolist())
+    fil, wb = zone(fz), zone(web)
+    rec = dict(case="crank throw 3 in bending", material=mt, mesh=st, inputs=dict(force_N=F, direction="towards the crank axis (firing TDC)",
+                                                                                 pin_fillet="undercut R2.5 (D-047)", fillet_mesh_mm=CRANK_FILLET_MESH),
+               results=dict(applied_force_check_N=s["applied"].tolist(), vm_max_MPa=pk, vm_p999_MPa=p999, vm_max_location=loc,
+                            fillet_vm_max_MPa=fil["vm_max_MPa"], fillet_vm_p999_MPa=fil["vm_p999_MPa"], fillet_vm_max_location=fil["at"],
+                            web_vm_max_MPa=wb["vm_max_MPa"], pin_deflection_mm=float(np.sqrt((s["U"] ** 2).sum(0)).max()),
+                            dofs=s["dofs"], solve_s=s["t_solve"], fatigue_limit_MPa=mt["fatigue"],
+                            factor_on_fillet_max=mt["fatigue"] / (0.5 * fil["vm_max_MPa"])),
                boundary_conditions="both main-journal surfaces fully fixed (stiffer than real bearings -> fillet stress over-predicted); load on the central part of the pin; "
-                                   "pulsating load, alternating stress = half the peak")
+                                   "pulsating load, alternating stress = half the peak; the main-journal / web corners are unfilleted in this slice, so the "
+                                   "whole-part peak can sit there - the fatigue factor uses the pin-fillet zone (within 5 mm of either fillet circle); "
+                                   "bending only - combined bending + torsion at the fillet is an open item (D-047)")
     picture(m, cell=s["vm"], title="von Mises", units="[MPa]", path=os.path.join(OUT, "crank_throw_vm.png"), view=(0.3, -1, 0.3), clim=(0, p999))
     save("crank", rec)
 

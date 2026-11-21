@@ -64,10 +64,10 @@ def undercut_ring(r, rf):
     return revolve(prof, axis=Axis.X)
 
 
-def throw_solid(k, cw=None, pin_fillet="ring"):
+def throw_solid(k, cw=None, pin_fillet="undercut"):
     """Pin k with its two webs.  cw = (direction deg, half-angle deg) of the counterweight sectors or None.
-    pin_fillet: "ring" - R2.5 fillet standing on the pin at each web (current); "undercut" - the same radius recessed into
-    the web (Fix A option (a), 2026-11-21, not adopted yet)."""
+    pin_fillet: "undercut" - the R2.5 pin fillet recessed into the web, so the big-end shells (16.25 mm) clear it (D-047,
+    Fix A option (a), adopted 2026-11-21); "ring" - the fillet standing on the pin (before D-047; the shell edge sat in it)."""
     psi = L.PIN_PHASE[k]
     px = L.pin_x(k)
     py, pz = _yz(psi, P.throw)

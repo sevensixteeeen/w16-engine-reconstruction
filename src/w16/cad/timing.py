@@ -16,7 +16,9 @@ INTER = (0.0, 118.0)                       # intermediate shaft axis (y, z)
 P1, Z_CRANK, Z_INT1 = 9.525, 28, 42        # primary: 3/8" duplex roller chain, ratio 1.5
 P2, Z_INT2, Z_CAM = 8.0, 21, 28            # secondary: 8 mm sleeve chains, ratio 4/3  (total 2.0)
 X_PRIM = XH + 12.0                         # centre plane of the primary chain
-ROWS = {(1, "ex"): XH + 25.0, (2, "in"): XH + 29.0, (1, "in"): XH + 35.0, (2, "ex"): XH + 39.0}
+# D-047 (2026-11-21): the two drives of a bank are >= 15 mm apart (were 10: 25 / 35 and 29 / 39) so that the inner drive's
+# hydraulic tensioner (Ø18, +-9 mm across its plane) clears the neighbouring drive axially - its loop is nested inside the other
+ROWS = {(1, "ex"): XH + 25.0, (2, "in"): XH + 29.0, (1, "in"): XH + 40.0, (2, "ex"): XH + 44.0}
 
 
 def pitch_r(p, z):
@@ -214,7 +216,7 @@ def phaser():
 def intermediate_shaft():
     """Intermediate shaft with its three sprocket seats (global, axis along X)."""
     y, z = INTER
-    return Pos(XH - 24, y, z) * Rot(Y=90) * Cylinder(12.5, 65.0, align=CMIN)
+    return Pos(XH - 24, y, z) * Rot(Y=90) * Cylinder(12.5, 72.0, align=CMIN)      # to XH + 48: carries the plane-44 sprocket (D-047)
 
 
 def _hull_poly(points):
@@ -228,9 +230,10 @@ def chain_cover():
     """Rear chain housing (CFRP, per the published Chiron description), global frame.
     Fix B1 (2026-11-21): the secondary-drive region is the convex hull, per bank, of the real chain, guide-rail, sprocket and
     tensioner footprints plus 5 mm clearance and the 3.5 mm wall (the old outline - circles round the cam axes and a lower lobe -
-    left the chain spans and guide rails outside the housing); that region and the crank / intermediate region are 50 mm deep
-    (46.5 mm inside: 3.75 mm behind the outermost guide rail, 14 mm in front of the flex plate at XH + 64); the cam / phaser
-    region stays 64 mm deep."""
+    left the chain spans and guide rails outside the housing).  Depths after the D-047 plane re-spacing (outermost plane XH+44):
+    secondary-drive and crank / intermediate region 55 mm (51.5 inside: 3.75 mm behind the outermost guide rail, 9 mm in front
+    of the flex plate at XH + 64); local pockets 60 mm for the tensioners of the XH+40 / +44 drives (bodies to XH+53, more than
+    175 mm from the crank axis, clear of the flex plate); cam / phaser region 69 mm (plane-44 phaser body to XH+62)."""
     wall, gap = 3.5, 5.0
     base_pts = []
     for (c, r) in (((0.0, 0.0), 66.0), (INTER, 78.0), ((0.0, 215.0), 60.0)):
@@ -248,6 +251,10 @@ def chain_cover():
                 pts += [(p[0] + rr * cx, p[1] + rr * cy) for cx, cy in ring]
         h = _hull_poly(pts)
         lower = h if lower is None else lower + h
+    pockets = []                       # D-047: deeper pockets for the tensioners whose body reaches past the base region
+    for d in secondary_layout():
+        if d["x_plane"] - XH + 9.0 + 3.0 > 55.0 - wall:
+            pockets.append(_hull_poly([(q[0] + (gap + wall) * cx, q[1] + (gap + wall) * cy) for q in d["tens_pts"] for cx, cy in ring]))
     pts = []
     for b in (1, 2):
         for k in ("in", "ex"):
@@ -258,10 +265,18 @@ def chain_cover():
         sk = sk + c
     upper = make_hull(sk.edges())
     pl = Plane(origin=(XH, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0))
-    d_lo, d_up = 50.0, 64.0
+    d_lo, d_up, d_pk = 55.0, 69.0, 60.0          # D-047: base 55 (was 50), cam / phaser 69 (was 64), tensioner pockets 60
     from build123d import offset
     shell = (extrude(pl * lower, amount=d_lo) + extrude(pl * upper, amount=d_up))
     inner = (extrude(pl * offset(lower, amount=-wall), amount=d_lo - wall) + extrude(pl * offset(upper, amount=-wall), amount=d_up - wall))
+    for pk in pockets:
+        shell = shell + extrude(pl * pk, amount=d_pk)
+        inner = inner + extrude(pl * offset(pk, amount=-wall), amount=d_pk - wall)
+    # D-047: shallow crank zone - the flywheel flange (r 60 from XH + 50) needs the back wall at XH + 46 there; a cylindrical step
+    # at r 65 (5 mm radial clearance) joins it to the 55 mm region (no secondary-drive part comes within 87 mm of the crank axis)
+    r_c, d_c = 65.0, 46.0
+    shell = shell - Pos(XH + d_c, 0, 0) * Rot(Y=90) * Cylinder(r_c, d_up, align=CMIN)
+    inner = inner - Pos(XH + d_c - wall, 0, 0) * Rot(Y=90) * Cylinder(r_c + wall, d_up, align=CMIN)
     cover = shell - inner
     cover = cover - Pos(XH - 1, 0, 0) * Rot(Y=90) * Cylinder(48.5, d_up + 2, align=CMIN)            # crank seal bore
     return cover
