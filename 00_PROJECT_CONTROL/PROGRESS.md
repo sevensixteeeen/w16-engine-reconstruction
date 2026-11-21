@@ -18,6 +18,11 @@ Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-044) first. Run every
 - Instances 1599 -> 1597: the exhaust secondary chains of both banks have 103 links instead of 104 - a rounding side effect of
   the D-042 deck change, odd link count; logged as an open item (DECISIONS), not changed.
 - **Next study (unchanged, no geometry changes):** piston heat input / `woschni_scale` (see 2026-11-20 below).
+- **Published** as its own public repository https://github.com/sevensixteeeen/w16-engine-reconstruction (no licence yet).
+  Re-publish at milestones from the monorepo with `.venv\Scripts\python tools\publish_github.py --push` (split, strip, verify,
+  push; it publishes committed history only). `01_RESEARCH/sources/` (VW SSP 248 copy and text extract) is git-ignored and
+  stripped from the published history; SSP 248 is cited in `01_RESEARCH/RESEARCH_LOG.md` (S5). The report HTML no longer
+  carries a local `<base href>`.
 
 ## D-041 + D-042 — applied in the source, verified by targeted checks; full regeneration approved 2026-11-20
 
@@ -102,7 +107,7 @@ of the whole case passed.
 
 **Piston FE run command (from `cmd`, nothing else running, ~10 GB):**
 ```
-cd <project root>
+cd bugatti_w16_engine
 set PYTHONPATH=src
 .venv\Scripts\python.exe -m w16.sim.fea piston > 08_SIMULATIONS\fea_piston_run.log 2>&1
 ```

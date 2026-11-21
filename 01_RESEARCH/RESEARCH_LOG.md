@@ -15,7 +15,7 @@ Compiled 2026-11-14. Every statement is tagged with a confidence level:
 | S2 | Bugatti Newsroom — Geneva International Motor Show 2016 (Chiron world premiere) | A | https://newsroom.bugatti.com/press-releases/geneva-international-motor-show-2016 |
 | S3 | Bugatti Newsroom — 37th Vienna Motor Symposium: the new Bugatti Chiron | A | https://newsroom.bugatti.com/press-releases/37-wiener-motorensymposium-der-neue-bugatti-chiron |
 | S4 | Bugatti model page (Centodieci / Chiron technical data) | A | https://www.bugatti.com/models/centodieci |
-| S5 | VW Self-Study Programme 248 "The W Engine Concept" (W8/W12 family; copy saved in `sources/`) | A (for the VW W family, not W16-specific) | https://www.thedrive.com/uploads/2023/08/02/SSP_248.pdf |
+| S5 | Volkswagen AG, Service Training: *The W Engine Concept - Design and Function*, Self-Study Programme 248 (W8 / W12 family) | A (for the VW W family, not W16-specific) | cited only; the document is not included in this repository |
 | S6 | Jalopnik — "The incredible tech in the new Bugatti Chiron" | B | https://jalopnik.com/the-incredible-tech-in-the-new-bugatti-chiron-the-worl-1761998342 |
 | S7 | Motor Authority — "A close look at the Bugatti Chiron's monster W-16 engine" | B | https://www.motorauthority.com/news/1102657_a-close-look-at-the-bugatti-chirons-monster-w-16-engine |
 | S8 | Motor1 — "Bugatti highlights quad-turbo W16 engine's complex development" | B | https://www.motor1.com/news/601356/bugatti-quad-turbo-w16-engine/ |

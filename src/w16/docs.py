@@ -851,13 +851,12 @@ set PYTHONPATH=src
 def to_pdf(md):
     import markdown
     html = markdown.markdown(md, extensions=["tables", "fenced_code"])
-    base = "file:///" + p("12_FINAL_REPORT").replace("\\", "/") + "/"
     css = """body{font-family:Segoe UI,Arial,sans-serif;font-size:10.5pt;line-height:1.35;margin:18mm 16mm;color:#111}
 h1{font-size:20pt;border-bottom:2px solid #333;padding-bottom:4px}h2{font-size:14.5pt;margin-top:22px;border-bottom:1px solid #999}h3{font-size:12pt}
 table{border-collapse:collapse;width:100%;margin:8px 0;font-size:8.2pt;page-break-inside:auto}th,td{border:1px solid #999;padding:3px 5px;vertical-align:top}
 th{background:#e8ebef}tr{page-break-inside:avoid}img{max-width:100%;page-break-inside:avoid}em{font-size:9pt;color:#444}code,pre{font-size:8.5pt;background:#f3f3f3}
 p{orphans:3;widows:3}"""
-    doc = f'<!doctype html><html><head><meta charset="utf-8"><base href="{base}"><title>W16 engineering report</title><style>{css}</style></head><body>{html}</body></html>'
+    doc = f'<!doctype html><html><head><meta charset="utf-8"><title>W16 engineering report</title><style>{css}</style></head><body>{html}</body></html>'
     hp = p("12_FINAL_REPORT", "W16_ENGINEERING_REPORT.html")
     W(hp, doc)
     pdf = p("12_FINAL_REPORT", "W16_ENGINEERING_REPORT.pdf")

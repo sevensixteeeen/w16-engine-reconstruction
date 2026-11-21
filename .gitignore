@@ -12,3 +12,6 @@ __pycache__/
 # logs of the full regeneration (run_regeneration.cmd -> tools/regenerate_d042.py)
 regen_logs/
 regen_logs_console.log
+
+# third-party source documents (copyrighted) - consulted locally, cited in 01_RESEARCH/RESEARCH_LOG.md, never published
+01_RESEARCH/sources/
