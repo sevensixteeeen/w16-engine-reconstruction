@@ -146,7 +146,7 @@ def main():
         problems.append(f"stripped or sensitive paths still in history: {sorted(bad)[:10]}")
     revs = run(["git", "rev-list", "--all"], cwd=out).stdout.split()
     # matches are reported per file; the only allowed ones are the pattern definition of this script (SECRET_RE lines,
-    # in every revision of it - an earlier revision spelled github_pat_ / sk-ant- literally)
+    # in every revision of it - an earlier revision spelled two of the token prefixes literally)
     lines = run(["git", "grep", "-I", "-n", "-E", SECRET_RE, *revs, "--", "."], cwd=out, check=False).stdout.splitlines()
     own = re.compile(r"^SECRET_RE = \(r\"|^ {13}r\"\|")
     hits = set()
