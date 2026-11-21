@@ -38,7 +38,7 @@ STRIP_PATHS = ["13_EXPORTS_STEP/", "14_EXPORTS_STL_3MF/", "06_ASSEMBLIES/step/",
                ".venv/", "wheelhouse/", ".cache/", "regen_logs/", "regen_logs_console.log"]
 STRIP_GLOBS = ["*/.venv/*", "*/.cache/*", "*/__pycache__/*", "*.pyc"]
 MAX_BYTES = 50 * 1024 * 1024
-SECRET_RE = (r"ghp_[A-Za-z0-9]{20,}|github[_]pat_|gho_[A-Za-z0-9]{20}|sk-[A-Za-z0-9_-]{20,}|sk[-]ant-|AKIA[0-9A-Z]{16}"
+SECRET_RE = (r"ghp_[A-Za-z0-9]{20,}|github[_]pat_[A-Za-z0-9_]{20,}|gho_[A-Za-z0-9]{20}|sk-[A-Za-z0-9_-]{20,}|sk[-]ant-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}"
              r"|-----BEGIN [A-Z ]*PRIVATE KEY|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|hf_[A-Za-z0-9]{30,}"
              r"|(api[_-]?key|secret|passw(or)?d|token)\s*[:=]\s*[\"'][^\"']{8,}")
 SENSITIVE_NAMES = re.compile(r"(^|/)(\.env|.*\.pem|.*\.key|id_rsa.*|credentials.*\.json|settings\.local\.json|\.npmrc|\.pypirc)$", re.I)
