@@ -303,7 +303,10 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     a = ap.parse_args()
     t0 = time.time()
-    rec = dict(source=ROOT, crown_tilt_axis_deg=P.crown_tilt_axis, pocket_depth_mm=pocket_depth(),
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # relative to this project ("." = the working tree); never an absolute local path
+    src = "." if os.path.normcase(os.path.abspath(ROOT)) == os.path.normcase(here) else "snapshot " + os.path.basename(os.path.normpath(ROOT))
+    rec = dict(source=src, crown_tilt_axis_deg=P.crown_tilt_axis, pocket_depth_mm=pocket_depth(),
                crown_rise_axis_mm=getattr(P, "crown_rise_axis", None), deck_height_mm=P.deck_height,
                head_face_height_mm=P.head_face_height, phaser_half_range_deg=PHASER, tolerance_feature_mm=TOL)
     if not a.crown_only:

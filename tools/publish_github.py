@@ -156,7 +156,7 @@ def main():
             hits.add(path)
     if hits:
         problems.append(f"token / key patterns: {sorted(hits)[:10]}")
-    for needle in {home, home.replace("\\", "/")}:
+    for needle in {home, home.replace("\\", "/"), home.replace("\\", "\\\\")}:   # last: JSON-escaped
         hits = run(["git", "grep", "-I", "-l", "-i", "-F", needle, *revs, "--", "."], cwd=out, check=False).stdout.split()
         if hits:
             problems.append(f"local path {needle!r} in: {sorted(set(h.split(':', 1)[1] for h in hits))[:10]}")
