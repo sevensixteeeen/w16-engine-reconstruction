@@ -7,10 +7,10 @@ on hydraulic support elements, short and long valves). Dimensions are an enginee
 
 | row | valve | head u | head w | tip u | tip w | stem tilt [deg] | head-to-tip length | support element u | cam u |
 |---|---|---|---|---|---|---|---|---|---|
-| inner | in | -61.37 | 18.82 | -44 | 112 | 10.56 | 94.79 | -17 | -27 |
-| inner | ex | -26.37 | 8.51 | 16 | 112 | 22.26 | 111.8 | 44 | 27 |
-| outer | in | 26.37 | 8.51 | -16 | 112 | -22.26 | 111.8 | -44 | -27 |
-| outer | ex | 61.37 | 18.82 | 44 | 112 | -10.56 | 94.79 | 17 | 27 |
+| inner | in | -61.34 | 18.8 | -44 | 112 | 10.54 | 94.8 | -17 | -27 |
+| inner | ex | -26.34 | 8.503 | 16 | 112 | 22.25 | 111.8 | 44 | 27 |
+| outer | in | 26.34 | 8.503 | -16 | 112 | -22.25 | 111.8 | -44 | -27 |
+| outer | ex | 61.34 | 18.8 | 44 | 112 | -10.54 | 94.8 | 17 | 27 |
 
 - Camshafts at u = -/+27 mm, w = 141 mm; base circle radius 14 mm.
 - Two finger types (D-034): short valves 17 mm tip arm / 10 mm pivot arm, ratio 2.70
@@ -20,10 +20,10 @@ on hydraulic support elements, short and long valves). Dimensions are an enginee
   (lower end w = 82 mm). A ratio of 2.7 is high for a finger follower: finger stiffness and roller contact
   stress must be checked in detail design.
 - Valve springs: beehive, 20 mm largest coil, installed height 38 mm (seat 42 mm below the tip).
-- Each camshaft serves the nearer row with short valves (95 mm head-to-tip, 10.6 deg) and the farther row with
+- Each camshaft serves the nearer row with short valves (95 mm head-to-tip, 10.5 deg) and the farther row with
   long valves (112 mm, 22.3 deg).
-- Chamber roof tilt 16.41 deg; piston crown tilted 8.26 deg to the head face (15.76 deg to the piston
-  axis normal) to give CR 9.0:1 with an analytic head-chamber volume of 86.3 cm3 (clearance volume
+- Chamber roof tilt 16.40 deg; piston crown tilted 8.51 deg to the head face (16.01 deg to the piston
+  axis normal) to give CR 9.0:1 with an analytic head-chamber volume of 87.4 cm3 (clearance volume
   62.44 cm3). The CAD-measured compression ratio is reported in the CAD validation.
 - Spark-plug wells tilt 17.8 deg and meet the head centre plane at w = 150 mm: one row of eight coils per head.
 
@@ -31,28 +31,28 @@ on hydraulic support elements, short and long valves). Dimensions are an enginee
 
 | check | margin [mm] |
 |---|---|
-| inner row: plug well vs in valve spring (min wall, mm) | 9.404 |
-| inner row: plug well vs in valve guide boss (min wall, mm) | 7.963 |
-| inner row: plug well vs ex valve spring (min wall, mm) | 8.49 |
-| inner row: plug well vs ex valve guide boss (min wall, mm) | 8.951 |
-| inner row: plug well vs intake cam core (clearance, mm) | 0.9454 |
+| inner row: plug well vs in valve spring (min wall, mm) | 9.407 |
+| inner row: plug well vs in valve guide boss (min wall, mm) | 7.962 |
+| inner row: plug well vs ex valve spring (min wall, mm) | 8.486 |
+| inner row: plug well vs ex valve guide boss (min wall, mm) | 8.949 |
+| inner row: plug well vs intake cam core (clearance, mm) | 0.9487 |
 | inner row: plug well vs exhaust cam core (clearance, mm) | 6.459 |
-| outer row: plug well vs in valve spring (min wall, mm) | 8.49 |
-| outer row: plug well vs in valve guide boss (min wall, mm) | 8.951 |
-| outer row: plug well vs ex valve spring (min wall, mm) | 9.404 |
-| outer row: plug well vs ex valve guide boss (min wall, mm) | 7.963 |
+| outer row: plug well vs in valve spring (min wall, mm) | 8.486 |
+| outer row: plug well vs in valve guide boss (min wall, mm) | 8.949 |
+| outer row: plug well vs ex valve spring (min wall, mm) | 9.407 |
+| outer row: plug well vs ex valve guide boss (min wall, mm) | 7.962 |
 | outer row: plug well vs intake cam core (clearance, mm) | 6.459 |
-| outer row: plug well vs exhaust cam core (clearance, mm) | 0.9454 |
+| outer row: plug well vs exhaust cam core (clearance, mm) | 0.9487 |
 | cam lobe tip circle to opposite cam lobe tip circle (mm) | 13.86 |
 | inner row: intake finger vs exhaust finger lateral gap (mm) | 21 |
 | outer row: intake finger vs exhaust finger lateral gap (mm) | 21 |
-| inner row: long ex valve spring vs short in valve support-element boss (mm) | 1.175 |
-| inner row: long ex valve spring vs short in valve support element (mm) | 3.931 |
-| inner row: long ex valve stem vs short in valve support-element boss (mm) | 8.184 |
+| inner row: long ex valve spring vs short in valve support-element boss (mm) | 1.184 |
+| inner row: long ex valve spring vs short in valve support element (mm) | 3.941 |
+| inner row: long ex valve stem vs short in valve support-element boss (mm) | 8.193 |
 | inner row: plug well vs short in valve support-element bore (wall, mm) | 3.501 |
-| outer row: long in valve spring vs short ex valve support-element boss (mm) | 1.175 |
-| outer row: long in valve spring vs short ex valve support element (mm) | 3.931 |
-| outer row: long in valve stem vs short ex valve support-element boss (mm) | 8.184 |
+| outer row: long in valve spring vs short ex valve support-element boss (mm) | 1.184 |
+| outer row: long in valve spring vs short ex valve support element (mm) | 3.941 |
+| outer row: long in valve stem vs short ex valve support-element boss (mm) | 8.193 |
 | outer row: plug well vs short ex valve support-element bore (wall, mm) | 3.501 |
 
 ## Timing (EST, phaser mid-position)
@@ -74,10 +74,10 @@ Lift law: half-sine acceleration flanks (17% of the event each) with a half-sine
 
 | row | valve | min clearance [mm] | at crank angle [deg] | valve lift there [mm] |
 |---|---|---|---|---|
-| inner | in | 8.758 | 2.5 | 0.1975 |
-| inner | ex | 3.025 | -1.5 | 0.09315 |
-| outer | in | 2.013 | 2 | 0.1786 |
-| outer | ex | 9.286 | -1.5 | 0.09315 |
+| inner | in | 10.82 | 2.5 | 0.1975 |
+| inner | ex | 5.371 | -1.5 | 0.09315 |
+| outer | in | 4.702 | 2 | 0.1786 |
+| outer | ex | 10.99 | -1.5 | 0.09315 |
 
 Criterion used: >= 1.5 mm intake, >= 2.0 mm exhaust. Shallow valve pockets are added in the piston CAD for the
 far-side valves to raise the smallest values.

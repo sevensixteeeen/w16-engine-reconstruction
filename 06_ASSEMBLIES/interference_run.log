@@ -1,102 +1,92 @@
-worker static 0 2 3893
-worker static 1 2 3893
-worker kin 0 1 16222
+# Interference check on D-041 / D-042 geometry
+# 1) full run 2026-11-20 22:14 - 2026-11-21 12:36 (regeneration stage 05: E.interference(2, 1)); static worker 0 stopped by the old 2700 s default time budget
+worker static 1 2 3778
+worker static 0 2 1550
+worker kin 0 1 14992
 worker exit codes [0, 0, 0]
-static: clear 4794 expected 2501 errors 94 clash pairs 66
+static: clear 3466 expected 1683 errors 93 clash pairs 30
   S W16-09-air_duct_B-L1 | W16-09-charge_pipe_B-L1 x 1 max 1487.7
   S W16-09-air_duct_B-L2 | W16-09-charge_pipe_B-L2 x 1 max 1486.71
-  S W16-02-001 | W16-06-010 x 1 max 958.97
-  S W16-02-002 | W16-06-012 x 1 max 958.97
-  S W16-02-001 | W16-06-009 x 1 max 958.97
-  S W16-02-002 | W16-06-011 x 1 max 958.97
   S W16-09-air_duct_A-L1 | W16-10-downpipe_B-L1 x 1 max 840.71
   S W16-09-air_duct_A-L2 | W16-10-downpipe_B-L2 x 1 max 838.54
-  S W16-02-002 | W16-06-002 x 8 max 640.37
-  S W16-02-003 | W16-06-011 x 1 max 639.31
-  S W16-02-003 | W16-06-009 x 1 max 639.31
-  S W16-02-003 | W16-06-012 x 1 max 639.31
-  S W16-02-003 | W16-06-010 x 1 max 639.31
-  S W16-07-008~10 | W16-07-010 x 1 max 598.02
-  S W16-07-008~03 | W16-07-010 x 1 max 520.25
-  S W16-07-008~05 | W16-07-010 x 1 max 468.49
-  S W16-07-008~08 | W16-07-010 x 1 max 468.49
-  S W16-02-001 | W16-06-002 x 8 max 431.15
-  S W16-02-001 | W16-06-004 x 8 max 332.29
-  S W16-06-005~h270 | W16-06-008 x 2 max 322.81
-  S W16-02-002 | W16-06-004 x 8 max 300.93
-  S W16-06-005~h315 | W16-06-008 x 2 max 280.29
-  S W16-06-005~h320 | W16-06-008 x 4 max 274.34
-  S W16-06-005~h360 | W16-06-008 x 24 max 249.17
-  S W16-07-008~09 | W16-07-010 x 1 max 223.09
-  S W16-07-008~04 | W16-07-010 x 1 max 175.7
-  S W16-07-008~06 | W16-07-009 x 1 max 149.63
-  S W16-07-008~04 | W16-07-009 x 1 max 149.56
-  S W16-02-002 | W16-06-006 x 17 max 148.13
-  S W16-08-004 | W16-10-downpipe_B-L2 x 1 max 137.87
+  S W16-07-008~10 | W16-07-010 x 1 max 598.86
+  S W16-07-008~03 | W16-07-010 x 1 max 521.01
+  S W16-07-008~08 | W16-07-010 x 1 max 468.85
+  S W16-13-pipe_pump_to_block_2 | W16-14-front_cover x 1 max 238.7
+  S W16-13-pipe_pump_to_block_1 | W16-14-front_cover x 1 max 238.7
+  S W16-07-008~06 | W16-07-009 x 1 max 149.65
+  S W16-07-008~04 | W16-07-009 x 1 max 149.58
   S W16-08-003 | W16-10-downpipe_B-L1 x 1 max 137.87
-  S W16-13-pipe_pump_to_block_2 | W16-14-front_cover x 1 max 120.38
-  S W16-13-pipe_pump_to_block_1 | W16-14-front_cover x 1 max 120.38
-  S W16-02-002 | W16-11-rail_P-L2 x 1 max 118.53
+  S W16-08-004 | W16-10-downpipe_B-L2 x 1 max 137.87
+  S W16-08-004 | W16-10-shutoff_valve-L2 x 1 max 128.43
   S W16-02-001 | W16-11-rail_P-L1 x 1 max 118.53
-  S W16-02-002 | W16-03-001 x 1 max 109.99
-  S W16-02-001 | W16-03-001 x 1 max 109.99
-  S W16-01-001 | W16-14-mount_bracket_R x 1 max 96.93
-  S W16-01-001 | W16-14-mount_bracket_L x 1 max 96.93
-  S W16-07-006 | W16-07-010 x 33 max 96.46
-  S W16-11-003~0 | W16-11-003~1 x 16 max 82.4
-  S W16-02-001 | W16-06-006 x 16 max 77.25
-  S W16-07-008~07 | W16-07-010 x 1 max 74.49
-  S W16-07-008~06 | W16-07-010 x 1 max 74.49
-  S W16-08-004 | W16-10-shutoff_valve-L2 x 1 max 62.4
-  S W16-08-003 | W16-10-shutoff_valve-L1 x 1 max 62.4
-  S W16-07-006 | W16-07-009 x 4 max 46.77
+  S W16-02-002 | W16-11-rail_P-L2 x 1 max 118.53
+  S W16-01-001 | W16-14-mount_bracket_R x 1 max 97.79
+  S W16-01-001 | W16-14-mount_bracket_L x 1 max 97.79
+  S W16-07-006 | W16-07-010 x 19 max 95.05
+  S W16-11-003~0 | W16-11-003~1 x 7 max 82.45
+  S W16-07-008~06 | W16-07-010 x 1 max 47.63
+  S W16-07-006 | W16-07-009 x 2 max 47.14
   S W16-04-003 | W16-05-001 x 32 max 26.53
   S W16-08-014 | W16-10-precat_A-L2 x 1 max 25.69
   S W16-08-013 | W16-10-precat_A-L1 x 1 max 25.69
-  S W16-02-001 | W16-06-007 x 8 max 23.08
-  S W16-02-002 | W16-06-007 x 8 max 23.06
   S W16-08-004 | W16-10-precat_A-L2 x 1 max 21.2
   S W16-08-003 | W16-10-precat_A-L1 x 1 max 21.2
-  S W16-06-001 | W16-06-007 x 16 max 14.25
-  S W16-06-003 | W16-06-007 x 16 max 13.79
-  S W16-06-004 | W16-06-007 x 16 max 10.46
-  S W16-06-002 | W16-06-007 x 16 max 10.31
-  S W16-02-007 | W16-06-003 x 12 max 6.95
-  S W16-02-007 | W16-06-004 x 12 max 6.95
-kinematic: clear 11892 errors 0 clash pairs 36
-  K W16-02-001 | W16-06-010 x 12 max 958.97 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-001 | W16-06-009 x 12 max 958.97 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-002 | W16-06-011 x 12 max 958.97 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-002 | W16-06-012 x 12 max 958.97 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-001 | W16-06-002 x 24 max 641.34 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-003 | W16-06-011 x 12 max 639.31 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-003 | W16-06-012 x 12 max 639.31 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-003 | W16-06-010 x 12 max 639.31 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-003 | W16-06-009 x 12 max 639.31 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-002 | W16-06-002 x 24 max 603.47 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-002 | W16-06-004 x 24 max 498.57 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-001 | W16-06-004 x 24 max 490.12 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-005~h270 | W16-06-008 x 24 max 322.81 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-005~h315 | W16-06-008 x 24 max 280.29 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-005~h320 | W16-06-008 x 48 max 274.34 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-005~h360 | W16-06-008 x 96 max 249.17 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-002 | W16-06-006 x 52 max 157.11 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-001 | W16-06-006 x 52 max 155.55 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-001 | W16-03-001 x 4 max 109.99 angles [0.0, 240.0, 360.0, 600.0]
-  K W16-06-005~h360 | W16-06-007 x 10 max 80.42 angles [240.0, 300.0, 360.0, 480.0, 540.0]
-  K W16-02-002 | W16-03-001 x 2 max 26.99 angles [300.0, 660.0]
+  S W16-13-pump_inlet_pipe | W16-13-water_pump_impeller x 1 max 6.81
+  S W16-13-pipe_pump_to_block_2 | W16-13-water_pump_impeller x 1 max 4.87
+  S W16-13-pipe_pump_to_block_1 | W16-13-water_pump_impeller x 1 max 4.87
+kinematic: clear 11886 errors 0 clash pairs 1
   K W16-04-003 | W16-05-001 x 96 max 26.53 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-001 | W16-06-007 x 24 max 23.16 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-002 | W16-06-007 x 24 max 23.06 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-001 | W16-06-007 x 48 max 14.25 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-003 | W16-06-007 x 48 max 14.17 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-002 | W16-06-007 x 48 max 10.51 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-004 | W16-06-007 x 48 max 10.46 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-007 | W16-06-003 x 34 max 6.95 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-02-007 | W16-06-004 x 34 max 6.95 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-006 | W16-06-007 x 192 max 6.57 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]
-  K W16-06-006 | W16-06-008 x 8 max 6.46 angles [120.0, 240.0, 480.0, 540.0]
-  K W16-06-007 | W16-06-009 x 4 max 2.75 angles [240.0, 540.0]
-  K W16-06-007 | W16-06-011 x 2 max 2.5 angles [180.0]
-  K W16-06-007 | W16-06-012 x 4 max 1.76 angles [600.0, 660.0]
-  K W16-06-007 | W16-06-010 x 4 max 1.45 angles [60.0, 300.0]
+
+# 2) 2026-11-21: recheck of the 2229 unchecked + 93 boolean-error static pairs (python -m w16.cad.export recheck 2), unclipped fuse fallback
+recheck: 2322 pairs to re-check, 1161 in this process
+recheck: 2322 pairs to re-check, 1161 in this process
+recheck done in 250 s
+recheck done in 374 s
+  (clash list of this step superseded by step 3: 7 head pairs flagged by unclipped-fuse noise)
+
+# 3) 2026-11-21: recheck of the 93 fuse-decided pairs with the clipped fallback (python -m w16.cad.export recheck 2)
+recheck: 93 pairs to re-check, 47 in this process
+recheck: 93 pairs to re-check, 46 in this process
+recheck done in 111 s
+recheck done in 199 s
+recheck exit codes [0, 0]
+complete: True []
+static: clear 4850 expected 2497 contact 93 unchecked 0 errors 0 clash pairs 35
+  S W16-09-air_duct_B-L1 | W16-09-charge_pipe_B-L1 x 1 max 1487.7
+  S W16-09-air_duct_B-L2 | W16-09-charge_pipe_B-L2 x 1 max 1486.71
+  S W16-09-air_duct_A-L1 | W16-10-downpipe_B-L1 x 1 max 840.71
+  S W16-09-air_duct_A-L2 | W16-10-downpipe_B-L2 x 1 max 838.54
+  S W16-07-008~10 | W16-07-010 x 1 max 598.86
+  S W16-07-008~03 | W16-07-010 x 1 max 521.01
+  S W16-07-008~05 | W16-07-010 x 1 max 468.85
+  S W16-07-008~08 | W16-07-010 x 1 max 468.85
+  S W16-13-pipe_pump_to_block_2 | W16-14-front_cover x 1 max 238.7
+  S W16-13-pipe_pump_to_block_1 | W16-14-front_cover x 1 max 238.7
+  S W16-07-008~09 | W16-07-010 x 1 max 223.25
+  S W16-07-008~04 | W16-07-010 x 1 max 175.7
+  S W16-07-008~06 | W16-07-009 x 1 max 149.65
+  S W16-07-008~04 | W16-07-009 x 1 max 149.58
+  S W16-08-003 | W16-10-downpipe_B-L1 x 1 max 137.87
+  S W16-08-004 | W16-10-downpipe_B-L2 x 1 max 137.87
+  S W16-08-003 | W16-10-shutoff_valve-L1 x 1 max 128.43
+  S W16-08-004 | W16-10-shutoff_valve-L2 x 1 max 128.43
+  S W16-02-001 | W16-11-rail_P-L1 x 1 max 118.53
+  S W16-02-002 | W16-11-rail_P-L2 x 1 max 118.53
+  S W16-01-001 | W16-14-mount_bracket_R x 1 max 97.79
+  S W16-01-001 | W16-14-mount_bracket_L x 1 max 97.79
+  S W16-07-006 | W16-07-010 x 34 max 96.57
+  S W16-11-003~0 | W16-11-003~1 x 16 max 82.45
+  S W16-07-008~07 | W16-07-010 x 1 max 47.63
+  S W16-07-008~06 | W16-07-010 x 1 max 47.63
+  S W16-07-006 | W16-07-009 x 4 max 47.14
+  S W16-04-003 | W16-05-001 x 32 max 26.53
+  S W16-08-014 | W16-10-precat_A-L2 x 1 max 25.69
+  S W16-08-013 | W16-10-precat_A-L1 x 1 max 25.69
+  S W16-08-004 | W16-10-precat_A-L2 x 1 max 21.2
+  S W16-08-003 | W16-10-precat_A-L1 x 1 max 21.2
+  S W16-13-pump_inlet_pipe | W16-13-water_pump_impeller x 1 max 6.81
+  S W16-13-pipe_pump_to_block_2 | W16-13-water_pump_impeller x 1 max 4.87
+  S W16-13-pipe_pump_to_block_1 | W16-13-water_pump_impeller x 1 max 4.87
+kinematic: clear 11886 contact 0 errors 0 clash pairs 1
+  K W16-04-003 | W16-05-001 x 96 max 26.53 angles [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]

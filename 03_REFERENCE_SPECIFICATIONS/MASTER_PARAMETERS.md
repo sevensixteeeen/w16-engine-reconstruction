@@ -62,6 +62,7 @@ Generated from `src/w16/params.py` - the single source of truth for CAD, calcula
 | `piston_uc_r` | 22 | mm | EST | under-crown cavity radius inside the ring belt (ring belt is solid outside it; D-035, 26 -> 22 in D-036) |
 | `piston_skirt_wall` | 4.6 | mm | EST | slipper-skirt wall below the ring belt |
 | `piston_boss_fillet_r` | 3 | mm | EST | fillet between the pin-boss side faces and the underside of the ring-belt step (D-037) |
+| `piston_valve_pocket_depth` | 2.2 | mm | EST | depth of the two crown pockets under the long valves, normal to the crown plane (D-042: 1.6 before; gives >= 1.8 mm piston-to-valve at full intake advance) |
 | `piston_pin_end_land` | 4 | mm | EST | land left under the oil-ring groove where the slipper skirt is cut away at the pin ends (1.5 mm before D-037) |
 | `gallery_r_in` | 25 | mm | EST | oil cooling gallery inner radius (29 -> 25 in D-036: closer to the crown centre) |
 | `gallery_r_out` | 35.8 | mm | EST | oil cooling gallery outer radius (>= 3.5 mm wall to the ring-groove roots) |
@@ -121,7 +122,7 @@ Generated from `src/w16/params.py` - the single source of truth for CAD, calcula
 | `p_max_design_bar` | 135 | bar | EST | design peak cylinder pressure (about 1.3 x the highest cycle-model value) |
 | `t_amb_k` | 298.1 | K | EST | ISO reference ambient |
 | `p_amb_bar` | 1.013 | bar | EST | ISO reference ambient |
-| `m_piston` | 0.446 | kg | CALC | bare piston, CAD mass of the gallery-cooled design (D-040: 0.4457 - 1.5 mm more compression height, land reliefs; 0.4348 in D-038, 0.4341 in D-037, 0.430 in D-036, 0.427 in D-035, 0.365 EST before) |
+| `m_piston` | 0.444 | kg | CALC | bare piston, CAD mass of the gallery-cooled design (D-042: 0.4436 - deeper valve pockets; 0.4457 in D-040, 0.4348 in D-038, 0.4341 in D-037, 0.430 in D-036, 0.427 in D-035, 0.365 EST before) |
 | `m_pin` | 0.141 | kg | CALC | gudgeon pin, CAD mass (dia 24 / 14 x 60) |
 | `m_rings` | 0.027 | kg | CALC | ring pack + circlips, CAD mass |
 | `m_rod` | 0.43 | kg | EST | titanium rod incl. bolts and shells |
@@ -137,20 +138,20 @@ Generated from `src/w16/params.py` - the single source of truth for CAD, calcula
 | `disp_cyl_cc` | 499.6 | cm3 | CALC | swept volume per cylinder |
 | `displacement_cc` | 7993 | cm3 | CALC | total swept volume |
 | `v_clear_cc` | 62.44 | cm3 | CALC | clearance volume per cylinder for CR 9.0 |
-| `deck_height` | 237.3 | mm | CALC | block deck plane height along the bank centre line from the crank axis |
-| `s_deck` | 239.3 | mm | CALC | axis coordinate s where a row axis pierces the deck |
-| `u_bore_deck` | 43.74 | mm | CALC | lateral distance of a bore centre from the bank centre plane at the deck |
+| `deck_height` | 237.1 | mm | CALC | block deck plane height along the bank centre line from the crank axis |
+| `s_deck` | 239.1 | mm | CALC | axis coordinate s where a row axis pierces the deck |
+| `u_bore_deck` | 43.71 | mm | CALC | lateral distance of a bore centre from the bank centre plane at the deck |
 | `s_bore_foot` | 105.9 | mm | CALC | bore foot; skirt protrudes 8 mm (EST) below it at BDC |
 | `web_bore_foot` | 3.998 | mm | CALC | solid web between adjacent zig-zag bores at the bore foot |
-| `web_bore_deck` | 27.93 | mm | CALC | solid web between adjacent zig-zag bores at the deck |
-| `bore_length` | 133.5 | mm | CALC | machined bore length on the axis |
-| `head_face_height` | 238.3 | mm | CALC | cylinder-head joint face height (v) |
-| `u_bore_head` | 43.87 | mm | CALC | lateral distance of a bore centre from the bank centre plane at the head joint face |
-| `crown_rise_axis` | 6.298 | mm | CALC | rise of the crown plane at the piston axis above its low edge |
-| `crown_tilt` | 8.263 | deg | CALC | tilt of the piston crown relative to the head joint face (towards the roof) giving CR 9.0 |
-| `crown_tilt_axis` | 15.76 | deg | CALC | crown tilt relative to the piston-axis normal |
-| `roof_tilt` | 16.41 | deg | CALC | combustion-chamber roof tilt relative to the head joint face |
-| `v_head_chamber_est_cc` | 86.26 | cm3 | CALC | head chamber volume (analytic estimate) |
+| `web_bore_deck` | 27.89 | mm | CALC | solid web between adjacent zig-zag bores at the deck |
+| `bore_length` | 133.3 | mm | CALC | machined bore length on the axis |
+| `head_face_height` | 238.1 | mm | CALC | cylinder-head joint face height (v) |
+| `u_bore_head` | 43.84 | mm | CALC | lateral distance of a bore centre from the bank centre plane at the head joint face |
+| `crown_rise_axis` | 6.491 | mm | CALC | rise of the crown plane at the piston axis above its low edge |
+| `crown_tilt` | 8.512 | deg | CALC | tilt of the piston crown relative to the head joint face (towards the roof) giving CR 9.0 |
+| `crown_tilt_axis` | 16.01 | deg | CALC | crown tilt relative to the piston-axis normal |
+| `roof_tilt` | 16.4 | deg | CALC | combustion-chamber roof tilt relative to the head joint face |
+| `v_head_chamber_est_cc` | 87.37 | cm3 | CALC | head chamber volume (analytic estimate) |
 
 ## Materials
 

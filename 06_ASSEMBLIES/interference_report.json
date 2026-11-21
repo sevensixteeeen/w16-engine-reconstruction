@@ -1,8 +1,9 @@
 {
  "meta": {
-  "static_candidates": 7560,
-  "static_checked": 7560,
-  "kin_checked": 14965,
+  "static_candidates": 7557,
+  "static_checked": 7557,
+  "static_unchecked": 0,
+  "kin_checked": 14992,
   "kin_angles": [
    0.0,
    60.0,
@@ -17,13 +18,16 @@
    600.0,
    660.0
   ],
-  "instances": 1599,
-  "static_unchecked": 0
+  "instances": 1597,
+  "complete": true,
+  "problems": []
  },
  "static": {
   "clear": 4850,
-  "expected": 2500,
-  "errors": 94,
+  "expected": 2497,
+  "contact": 93,
+  "unchecked": 0,
+  "errors": 0,
   "clashes": [
    {
     "a": "W16-09-air_duct_B-L1",
@@ -57,49 +61,49 @@
     "a": "W16-07-008~10",
     "b": "W16-07-010",
     "count": 1,
-    "max_volume_mm3": 598.71,
+    "max_volume_mm3": 598.86,
     "angles": []
    },
    {
     "a": "W16-07-008~03",
     "b": "W16-07-010",
     "count": 1,
-    "max_volume_mm3": 520.88,
-    "angles": []
-   },
-   {
-    "a": "W16-07-008~08",
-    "b": "W16-07-010",
-    "count": 1,
-    "max_volume_mm3": 468.78,
+    "max_volume_mm3": 521.01,
     "angles": []
    },
    {
     "a": "W16-07-008~05",
     "b": "W16-07-010",
     "count": 1,
-    "max_volume_mm3": 468.78,
+    "max_volume_mm3": 468.85,
     "angles": []
    },
    {
-    "a": "W16-07-008~09",
+    "a": "W16-07-008~08",
     "b": "W16-07-010",
     "count": 1,
-    "max_volume_mm3": 223.22,
+    "max_volume_mm3": 468.85,
     "angles": []
    },
    {
     "a": "W16-13-pipe_pump_to_block_2",
     "b": "W16-14-front_cover",
     "count": 1,
-    "max_volume_mm3": 221.12,
+    "max_volume_mm3": 238.7,
     "angles": []
    },
    {
     "a": "W16-13-pipe_pump_to_block_1",
     "b": "W16-14-front_cover",
     "count": 1,
-    "max_volume_mm3": 221.12,
+    "max_volume_mm3": 238.7,
+    "angles": []
+   },
+   {
+    "a": "W16-07-008~09",
+    "b": "W16-07-010",
+    "count": 1,
+    "max_volume_mm3": 223.25,
     "angles": []
    },
    {
@@ -113,14 +117,14 @@
     "a": "W16-07-008~06",
     "b": "W16-07-009",
     "count": 1,
-    "max_volume_mm3": 149.64,
+    "max_volume_mm3": 149.65,
     "angles": []
    },
    {
     "a": "W16-07-008~04",
     "b": "W16-07-009",
     "count": 1,
-    "max_volume_mm3": 149.57,
+    "max_volume_mm3": 149.58,
     "angles": []
    },
    {
@@ -138,6 +142,20 @@
     "angles": []
    },
    {
+    "a": "W16-08-003",
+    "b": "W16-10-shutoff_valve-L1",
+    "count": 1,
+    "max_volume_mm3": 128.43,
+    "angles": []
+   },
+   {
+    "a": "W16-08-004",
+    "b": "W16-10-shutoff_valve-L2",
+    "count": 1,
+    "max_volume_mm3": 128.43,
+    "angles": []
+   },
+   {
     "a": "W16-02-001",
     "b": "W16-11-rail_P-L1",
     "count": 1,
@@ -152,66 +170,52 @@
     "angles": []
    },
    {
-    "a": "W16-08-003",
-    "b": "W16-10-shutoff_valve-L1",
-    "count": 1,
-    "max_volume_mm3": 115.71,
-    "angles": []
-   },
-   {
-    "a": "W16-08-004",
-    "b": "W16-10-shutoff_valve-L2",
-    "count": 1,
-    "max_volume_mm3": 115.71,
-    "angles": []
-   },
-   {
     "a": "W16-01-001",
     "b": "W16-14-mount_bracket_R",
     "count": 1,
-    "max_volume_mm3": 97.63,
+    "max_volume_mm3": 97.79,
     "angles": []
    },
    {
     "a": "W16-01-001",
     "b": "W16-14-mount_bracket_L",
     "count": 1,
-    "max_volume_mm3": 97.63,
+    "max_volume_mm3": 97.79,
     "angles": []
    },
    {
     "a": "W16-07-006",
     "b": "W16-07-010",
-    "count": 33,
-    "max_volume_mm3": 96.28,
+    "count": 34,
+    "max_volume_mm3": 96.57,
     "angles": []
    },
    {
     "a": "W16-11-003~0",
     "b": "W16-11-003~1",
     "count": 16,
-    "max_volume_mm3": 82.43,
-    "angles": []
-   },
-   {
-    "a": "W16-07-008~06",
-    "b": "W16-07-010",
-    "count": 1,
-    "max_volume_mm3": 51.93,
+    "max_volume_mm3": 82.45,
     "angles": []
    },
    {
     "a": "W16-07-008~07",
     "b": "W16-07-010",
     "count": 1,
-    "max_volume_mm3": 51.93,
+    "max_volume_mm3": 47.63,
+    "angles": []
+   },
+   {
+    "a": "W16-07-008~06",
+    "b": "W16-07-010",
+    "count": 1,
+    "max_volume_mm3": 47.63,
     "angles": []
    },
    {
     "a": "W16-07-006",
     "b": "W16-07-009",
     "count": 4,
-    "max_volume_mm3": 47.09,
+    "max_volume_mm3": 47.14,
     "angles": []
    },
    {
@@ -270,11 +274,67 @@
     "max_volume_mm3": 4.87,
     "angles": []
    }
-  ]
+  ],
+  "contacts": [
+   [
+    "W16-02-001",
+    "W16-01-006"
+   ],
+   [
+    "W16-02-001",
+    "W16-02-003"
+   ],
+   [
+    "W16-02-001",
+    "W16-02-004"
+   ],
+   [
+    "W16-02-001",
+    "W16-06-008"
+   ],
+   [
+    "W16-02-001",
+    "W16-09-intake_manifold-L1"
+   ],
+   [
+    "W16-02-001",
+    "W16-10-manifold_front-L1"
+   ],
+   [
+    "W16-02-001",
+    "W16-10-manifold_rear-L1"
+   ],
+   [
+    "W16-02-002",
+    "W16-02-004"
+   ],
+   [
+    "W16-02-002",
+    "W16-02-008"
+   ],
+   [
+    "W16-02-002",
+    "W16-06-008"
+   ],
+   [
+    "W16-02-002",
+    "W16-09-intake_manifold-L2"
+   ],
+   [
+    "W16-02-002",
+    "W16-10-manifold_front-L2"
+   ],
+   [
+    "W16-02-002",
+    "W16-10-manifold_rear-L2"
+   ]
+  ],
+  "error_pairs": []
  },
  "kinematic": {
-  "clear": 11853,
+  "clear": 11886,
   "expected": 3010,
+  "contact": 0,
   "errors": 0,
   "clashes": [
    {
@@ -295,33 +355,6 @@
      540.0,
      600.0,
      660.0
-    ]
-   },
-   {
-    "a": "W16-06-011",
-    "b": "W16-06-013",
-    "count": 2,
-    "max_volume_mm3": 1.26,
-    "angles": [
-     300.0
-    ]
-   },
-   {
-    "a": "W16-06-009",
-    "b": "W16-06-013",
-    "count": 2,
-    "max_volume_mm3": 0.72,
-    "angles": [
-     420.0
-    ]
-   },
-   {
-    "a": "W16-02-001",
-    "b": "W16-06-001",
-    "count": 2,
-    "max_volume_mm3": 0.67,
-    "angles": [
-     420.0
     ]
    }
   ]

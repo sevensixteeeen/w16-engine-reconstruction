@@ -11,13 +11,14 @@
   "rho": 7850
  },
  "mesh": {
-  "nodes": 19334,
-  "tets": 86290,
+  "nodes": 19330,
+  "tets": 86269,
   "h_max": 5.0,
-  "quality_gamma_min": 0.10133618809380414,
-  "quality_gamma_mean": 0.7753716993066742,
-  "quality_below_0p1": 0,
-  "volume_mm3": 504937.89047969715
+  "quality_gamma_min": 0.09330477958921947,
+  "quality_gamma_mean": 0.7746004199407092,
+  "quality_below_0p1": 1,
+  "volume_mm3": 504915.86965590407,
+  "dropped_zero_volume_tets": 0
  },
  "inputs": {
   "force_N": 78418.86502258164,
@@ -29,18 +30,18 @@
    -43923.62411538472,
    64959.23009895413
   ],
-  "vm_max_MPa": 155.1477516532679,
-  "vm_p999_MPa": 125.76992569230464,
+  "vm_max_MPa": 167.27343659070922,
+  "vm_p999_MPa": 127.78152400921233,
   "vm_max_location": [
-   -136.16181791822262,
-   9.88488588341733,
-   -32.52537044234582
+   -82.62336037438165,
+   9.374673328189854,
+   -32.34839635260151
   ],
-  "pin_deflection_mm": 0.01586108390476356,
-  "dofs": 406623,
-  "solve_s": 1288.758903503418,
+  "pin_deflection_mm": 0.015853579707652506,
+  "dofs": 406590,
+  "solve_s": 1588.9186544418335,
   "fatigue_limit_MPa": 520,
-  "factor_on_p999": 8.26906746008862
+  "factor_on_p999": 8.13889181604237
  },
  "boundary_conditions": "both main-journal surfaces fully fixed (stiffer than real bearings -> fillet stress over-predicted); load on the central part of the pin; pulsating load, alternating stress = half the peak"
 }

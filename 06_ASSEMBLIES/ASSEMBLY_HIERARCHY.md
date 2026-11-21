@@ -6,7 +6,7 @@ Masses are CAD volume x material density; items marked * use a catalogue/estimat
 
 ```
 W16_ENGINE_MASTER_ASSEMBLY
-|- 01 Crankcase and cylinder block   (48 parts, 97.9 kg)
+|- 01 Crankcase and cylinder block   (48 parts, 97.8 kg)
 |   |- W16-01-001                   x1   Crankcase upper section (cylinder block)
 |   |- W16-01-002                   x1   Crankcase lower section (bearing support)
 |   |- W16-01-003                   x9   Main bearing cover (cast-in insert)
@@ -37,7 +37,7 @@ W16_ENGINE_MASTER_ASSEMBLY
 |   |- W16-04-005                   x32  Rod bolt M8x1
 |- 05 Crankshaft   (1 parts, 32.5 kg)
 |   |- W16-05-001                   x1   Crankshaft
-|- 06 Valvetrain   (324 parts, 17.5 kg)
+|- 06 Valvetrain   (324 parts, 17.4 kg)
 |   |- W16-06-001                   x16  Intake valve, short
 |   |- W16-06-002                   x16  Intake valve, long
 |   |- W16-06-003                   x16  Exhaust valve, short
@@ -178,12 +178,12 @@ W16_ENGINE_MASTER_ASSEMBLY
 
 | Group | Sub-assembly | Part numbers | Parts | Mass [kg] |
 |---|---|---|---|---|
-| 01 | Crankcase and cylinder block | 7 | 48 | 97.9 |
+| 01 | Crankcase and cylinder block | 7 | 48 | 97.8 |
 | 02 | Cylinder heads | 8 | 152 | 43.5 |
 | 03 | Piston assemblies | 5 | 112 | 9.8 |
 | 04 | Connecting rods | 5 | 112 | 6.8 |
 | 05 | Crankshaft | 1 | 1 | 32.5 |
-| 06 | Valvetrain | 13 | 324 | 17.5 |
+| 06 | Valvetrain | 13 | 324 | 17.4 |
 | 07 | Timing system | 10 | 32 | 5.9 |
 | 08 | Turbochargers | 14 | 32 | 22.4 |
 | 09 | Intake system | 24 | 24 | 24.7 |
@@ -193,6 +193,6 @@ W16_ENGINE_MASTER_ASSEMBLY
 | 13 | Cooling system | 14 | 14 | 3.8 |
 | 14 | Accessory system | 15 | 39 | 32.7 |
 | 15 | Fasteners and interfaces | 4 | 154 | 11.1 |
-| | **Total** | **151** | **1136** | **344.5** |
+| | **Total** | **151** | **1136** | **344.3** |
 
 Published reference: about 400 kg (not a design target). The CAD total includes dressing items that published engine weights usually exclude (pre-catalysts, air boxes, oil tank, charge-air coolers and ducts, accessories); fluids are not included. Brackets, hoses, small fasteners, seals and wiring not modelled are also not included.

@@ -213,6 +213,22 @@ functional analysis before release. Operating temperatures and loads refer to th
 
 
 # ====================================================================== requirements trace + acceptance
+def ic_status(I):
+    """Completeness of the interference check.  Returns (complete, text).  A report written before the completeness flag
+    existed counts as complete only if it has no unchecked static pairs and its checked count equals the candidates."""
+    m = (I or {}).get("meta", {})
+    if not m:
+        return False, "interference check not run"
+    un = m.get("static_unchecked", 0)
+    cand, chk = m.get("static_candidates", 0), m.get("static_checked", 0)
+    probs = m.get("problems", [])
+    complete = m.get("complete", un == 0 and chk == cand) and not probs
+    if complete:
+        return True, f"all {cand} static candidate pairs checked, {len(m.get('kin_angles', []))} crank angles"
+    return False, (f"**INCOMPLETE: {un} of {cand} static candidate pairs were not checked**"
+                   + (f" ({'; '.join(probs)})" if probs else "") + " - the static clash list is not complete")
+
+
 def evidence():
     R = J("08_SIMULATIONS", "analytical", "results.json")
     S = J("06_ASSEMBLIES", "assembly_summary.json")
@@ -290,13 +306,15 @@ def acceptance(E):
     fea_bad = [k for k in fea if "FAILED" in k]
     sc = I.get("static", {}).get("clashes", None)
     kc = I.get("kinematic", {}).get("clashes", None)
+    ic_done, ic_text = ic_status(I)
     vt_clash = [c for c in (sc or []) + (kc or []) if c["a"].startswith("W16-06") or c["b"].startswith("W16-06")]
     n_step = sum(1 for r in exp if r.get("step")); n_stl = sum(1 for r in exp if r.get("stl")); n_3mf = sum(1 for r in exp if r.get("threemf"))
     items = [
         ("All sixteen cylinders are represented", ok(q.get("W16-03-001") == 16), f"16 bores in the block CAD; pistons x{q.get('W16-03-001')}"),
         ("Four cylinder banks (rows) correctly organised", ok(bool(V)), "two VR8 banks at 90 deg, each with two rows at 15 deg; firing intervals 45.000 deg (layout check)"),
-        ("Engine architecture mechanically coherent", ("PARTIAL - valve-train clashes remain" if vt_clash else "PARTIAL - packaging overlaps listed") if (sc is not None and (sc or kc)) else ok(sc is not None),
-         f"interference check: {len(sc) if sc is not None else 'not run'} static and {len(kc) if kc is not None else 'not run'} kinematic clash pairs remain (listed in the report)"),
+        ("Engine architecture mechanically coherent", ("NOT VERIFIED - interference check incomplete" if not ic_done else ("PARTIAL - valve-train clashes remain" if vt_clash else "PARTIAL - packaging overlaps listed") if (sc or kc) else "PASS"),
+         f"interference check: {len(sc) if sc is not None else 'not run'} static and {len(kc) if kc is not None else 'not run'} kinematic clash pairs remain (listed in the report)"
+         + ("" if ic_done else "; " + ic_text)),
         ("Displacement consistent with bore and stroke", "PASS", f"{P.displacement_cc:.2f} cm3 vs 7,993 cm3 published"),
         ("All sixteen piston assemblies modelled", ok(q.get("W16-03-001") == 16 and q.get("W16-03-004") == 16), f"pistons {q.get('W16-03-001')}, pins {q.get('W16-03-004')}, rings {q.get('W16-03-002', 0) + q.get('W16-03-003', 0)}"),
         ("Shared crankshaft modelled", ok(q.get("W16-05-001") == 1), "one-piece crank, 8 pins, 9 mains, distributed counterweights"),
@@ -307,7 +325,8 @@ def acceptance(E):
         ("Intake and exhaust systems connected", ok(any(k.startswith("W16-09-intake_manifold") for k in q) and any(k.startswith("W16-10-manifold_front") for k in q)), "manifolds, coolers, charge pipes, logs, cross-over, down-pipes modelled per bank"),
         ("Fuel injection and ignition represented", ok(sum(v for k, v in q.items() if k.startswith("W16-11-003")) == 32 and q.get("W16-11-001") == 16), "32 injectors, 4 rails, 16 plugs, 16 coils; EMS architecture diagram"),
         ("Lubrication and cooling circuits modelled", ok(any(k.startswith("W16-12-") for k in q) and any(k.startswith("W16-13-") for k in q)), "galleries and jackets are real passages in block/heads; external circuit parts and 1-D flow calculations"),
-        ("Major mechanical interfaces validated", "PARTIAL" if (sc or kc) else ok(sc is not None), f"CAD interference check (static all-pairs + {len(I.get('meta', {}).get('kin_angles', []))} crank angles); CAD compression ratio "
+        ("Major mechanical interfaces validated", "NOT VERIFIED - interference check incomplete" if not ic_done else "PARTIAL" if (sc or kc) else "PASS",
+         (f"CAD interference check (static all-pairs + {len(I.get('meta', {}).get('kin_angles', []))} crank angles)" if ic_done else "CAD interference check: " + ic_text) + "; CAD compression ratio "
          + (", ".join(f"{c:.2f}" for c in cr if c) if cr[0] else "n/a")),
         ("Parametric CAD files editable", "PASS", "geometry is generated from `src/w16/params.py`; BREP per part in `05_COMPONENT_CAD/`"),
         ("STEP exports generated", ok(n_step > 0 and bool(aexp)), f"{n_step} component STEP files; master assembly {aexp.get('master', {}).get('size_mb', 'n/a')} MB; {len([k for k in aexp if k != 'master'])} sub-assemblies"),
@@ -563,13 +582,16 @@ acceptance measure**: it compares with the 110 MPa room-temperature limit at met
 def report(E, bom_rows):
     _sc = E["I"].get("static", {}).get("clashes", []) + E["I"].get("kinematic", {}).get("clashes", [])
     _vt = sorted({(c["a"], c["b"]) for c in _sc if c["a"].startswith("W16-06") or c["b"].startswith("W16-06")})
+    _done, _txt = ic_status(E["I"])
     vt_text = ("9. **Valve-train clashes remain** after the D-039 revision: " + ", ".join(f"{a} / {b}" for a, b in _vt[:8])
                + ". Other remaining CAD overlaps are listed in section 9.") if _vt else (
                "9. The valve-train conflicts found earlier are resolved: the long-valve spring through the short valve's support element "
                "(D-031) by the D-034 layout; the camshafts through the closed head / cover end walls, the retainers in the camshaft bearing "
                "webs, the opening long valves and the piston crown in a wedge left by the chamber cut, the follower pads on the valve tips "
-               "and the cam / roller fit by D-039. The interference check finds no valve-train clashes. The finger ratio of 2.7 on the short "
-               "valves is high and needs a stiffness / contact-stress check. Remaining packaging overlaps are listed in section 9.")
+               "and the cam / roller fit by D-039. " + ("The interference check finds no valve-train clashes. " if _done else
+               "The interference check found no valve-train clashes among the pairs it checked, but it is " + _txt + ". ")
+               + "The finger ratio of 2.7 on the short valves is high and needs a stiffness / contact-stress check. Remaining packaging "
+               "overlaps are listed in section 9.")
     R, S, V, I, fea = E["R"], E["S"], E["V"], E["I"], E["fea"]
     cur = R.get("curve", [])
     rated = min(cur, key=lambda r: abs(r["rpm"] - P.rpm_rated)) if cur else {}
@@ -578,7 +600,8 @@ def report(E, bom_rows):
     img = lambda rel, cap, w=100: f'\n<p><img src="../{rel}" style="width:{w}%"><br><em>{cap}</em></p>\n' if os.path.exists(p(*rel.split("/"))) else f"\n*(figure not generated: {rel})*\n"
     env = V.get("envelope_dressed_mm", {}).get("size", [0, 0, 0]); lb = V.get("envelope_long_block_mm", {}).get("size", [0, 0, 0])
     sc = I.get("static", {}); kc = I.get("kinematic", {})
-    cl_rows = [("static", c["a"], c["b"], c["count"], c["max_volume_mm3"]) for c in sc.get("clashes", [])[:25]] + \
+    ic_done, ic_text = ic_status(I)
+    cl_rows = [("static", c["a"], c["b"], c["count"], c["max_volume_mm3"]) for c in sc.get("clashes", [])] + \
               [("kinematic", c["a"], c["b"], c["count"], c["max_volume_mm3"]) for c in kc.get("clashes", [])[:25]]
     cw = V.get("counterweights", {})
     ib = list(cw.get("internal_balance", {}).values()) or [0.0]
@@ -755,8 +778,10 @@ castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factor
 
 - **Compression ratio from CAD volumes:** {", ".join(f"cyl {k[-1]}: {V[k]['cr']:.2f} (V_tdc {V[k]['v_tdc_cc']:.1f} cm3)" for k in ("cyl1", "cyl2") if k in V) or "not available"}; target {P.compression_ratio}.
 - **Firing intervals:** 45.000 deg for all 16 cylinders (numerical TDC search).
-- **Interference check:** {sc.get('clear', 'n/a')} static pairs clear, {sc.get('expected', 'n/a')} intentional contacts (threads, press fits, seats), {len(sc.get('clashes', []))} static clash pairs;
-  kinematic sweep over {len(I.get('meta', {}).get('kin_angles', []))} crank angles: {kc.get('clear', 'n/a')} pair checks clear, {len(kc.get('clashes', []))} clash pairs; boolean errors {sc.get('errors', 0)} / {kc.get('errors', 0)}.
+- **Interference check:** {ic_text}. Of {I.get('meta', {}).get('static_candidates', 'n/a')} static candidate pairs (bounding boxes overlapping, {I.get('meta', {}).get('instances', 'n/a')} placed solids):
+  {sc.get('clear', 'n/a')} clear, {sc.get('expected', 'n/a')} intentional contacts by rule (threads, press fits, seats), {sc.get('contact', 0)} touching with no overlap
+  (zero distance; the common of the two solids, cut to their bounding-box overlap, is empty and the fuse residual is within volume-integration noise), {sc.get('errors', 0)} boolean errors, {sc.get('unchecked', I.get('meta', {}).get('static_unchecked', 0))} not checked; {len(sc.get('clashes', []))} static clash pairs.
+  Kinematic sweep over {len(I.get('meta', {}).get('kin_angles', []))} crank angles: {kc.get('clear', 'n/a')} pair checks clear, {kc.get('contact', 0)} touching, {len(kc.get('clashes', []))} clash pairs, boolean errors {kc.get('errors', 0)}.
 {("" if not cl_rows else chr(10) + tab(cl_rows, ["Check", "Part A", "Part B", "Occurrences", "Max overlap [mm3]"]) + chr(10) + chr(10) + "These remaining overlaps are packaging errors of this concept model and are listed as open work; they are not hidden.")}
 - **Piston-to-valve clearance, spring loads, transverse head clearances:** `08_SIMULATIONS/analytical/03_valvetrain.md`.
 - **Comparison with published targets:** section 7.1.

@@ -330,30 +330,71 @@ def candidate_pairs(inst, only=None):
     return pairs
 
 
+FUSE_NOISE = 5e-6     # relative volume-integration noise of OCC GProp on these solids (measured 2026-11-21: residuals of
+                      # -0.86 .. +0.53 mm3 on clipped volumes of 5e3 .. 3.3e6 mm3; -10 .. +35 mm3 on the unclipped heads)
+
+
+def clipped_overlap(a, b, pad=1.0):
+    """Second check for a touching pair (common empty or failed).  build123d 0.13 returns None from `a & b` both when the
+    solids only touch (face / line contact, no interior overlap) and when OCC's common fails without raising, so None alone
+    does not prove the pair clear.  Both solids are cut to the overlap of their bounding boxes (+pad), then (1) the common
+    and (2) the fuse residual V(a') + V(b') - V(a' fuse b') of the small pieces are evaluated.  Clipping keeps the volume
+    noise of the fuse residual proportional to the pieces, not to a whole cylinder head.
+    Returns (common_volume or None, fuse_residual, noise_threshold, piece_volumes)."""
+    lo, hi = np.maximum(a[3], b[3]) - pad, np.minimum(a[4], b[4]) + pad
+    box = Pos(*((lo + hi) / 2)) * Box(*(hi - lo))
+    ca, cb = a[2] & box, b[2] & box
+    if ca is None or cb is None:
+        return 0.0, 0.0, 0.0, (0.0 if ca is None else ca.volume, 0.0 if cb is None else cb.volume)
+    va, vb = ca.volume, cb.volume
+    com = ca & cb
+    vc = None if com is None else float(com.volume)
+    vf = float(va + vb - (ca + cb).volume)
+    return vc, vf, FUSE_NOISE * (va + vb), (va, vb)
+
+
 def check_pairs(inst, pairs, tol=0.5, budget=None):
+    """Boolean check of each pair.  Status: expected / clear / contact (touching, overlap below tol by two booleans) / clash /
+    error / unchecked (time budget used up - the caller must treat the result as incomplete)."""
     res = []
     t0 = time.time()
     for i, j in pairs:
-        if budget and time.time() - t0 > budget:
-            res.append(dict(a=inst[i][0], b=inst[j][0], status="unchecked"))
-            continue
         a, b = inst[i], inst[j]
+        if budget and time.time() - t0 > budget:
+            res.append(dict(a=a[0], b=b[0], ia=a[1], ib=b[1], pair=[int(i), int(j)], status="unchecked"))
+            continue
         why = expected(a[0], b[0])
         if why:
             res.append(dict(a=a[0], b=b[0], status="expected", reason=why))
             continue
         try:
-            v = (a[2] & b[2]).volume
+            common = a[2] & b[2]
+            v = 0.0 if common is None else common.volume
         except Exception as e:
-            # boolean failed: fall back to the minimum distance between the two solids
+            common, v, err = False, None, e
+        if common is None or v is None:
+            # empty or failed common: fall back to the minimum distance, then to the fuse volume for touching pairs
             try:
                 dist = a[2].distance_to(b[2])
             except Exception:
                 dist = None
             if dist is not None and dist > 1e-3:
-                res.append(dict(a=a[0], b=b[0], ia=a[1], ib=b[1], status="clear", volume_mm3=0.0, by="distance"))
-            else:
-                res.append(dict(a=a[0], b=b[0], ia=a[1], ib=b[1], status="error", reason=repr(e)[:80]))
+                res.append(dict(a=a[0], b=b[0], ia=a[1], ib=b[1], status="clear", volume_mm3=0.0, by="distance", distance_mm=round(float(dist), 4)))
+                continue
+            try:
+                vc, vf, noise, pv = clipped_overlap(a, b)
+            except Exception as e2:
+                res.append(dict(a=a[0], b=b[0], ia=a[1], ib=b[1], status="error",
+                                reason=("common empty, " if common is None else repr(err)[:60] + "; ") + "clipped check failed: " + repr(e2)[:60]))
+                continue
+            lim = max(tol, noise)
+            vol = vc if vc is not None else vf
+            st = "clash" if (vc is not None and vc > tol) or vf > lim else "contact"
+            res.append(dict(a=a[0], b=b[0], ia=a[1], ib=b[1], status=st, volume_mm3=round(max(vol, 0.0) if st == "clash" else 0.0, 2), by="clipped",
+                            clipped_common_mm3=None if vc is None else round(vc, 3), clipped_fuse_residual_mm3=round(vf, 3),
+                            fuse_limit_mm3=round(lim, 3), pieces_mm3=[round(float(v), 1) for v in pv],
+                            distance_mm=None if dist is None else round(float(dist), 4),
+                            note="common empty" if common is None else "common failed: " + repr(err)[:60]))
             continue
         res.append(dict(a=a[0], b=b[0], ia=a[1], ib=b[1], status="clash" if v > tol else "clear", volume_mm3=round(float(v), 2)))
     return res
@@ -386,8 +427,11 @@ def worker(k, n, mode):
         inst = instances(reg)
         pairs = candidate_pairs(inst)
         mine = pairs[k::n]
-        res = check_pairs(inst, mine, budget=float(os.environ.get("W16_IC_BUDGET", "2700")))
-        meta = dict(candidates=len(pairs), checked=sum(1 for r in res if r["status"] != "unchecked"), unchecked=sum(1 for r in res if r["status"] == "unchecked"), instances=len(inst))
+        # no time budget unless W16_IC_BUDGET is set (seconds); a budget-limited worker exits non-zero (below)
+        budget = float(os.environ["W16_IC_BUDGET"]) if os.environ.get("W16_IC_BUDGET") else None
+        res = check_pairs(inst, mine, budget=budget)
+        meta = dict(candidates=len(pairs), share=len(mine), checked=sum(1 for r in res if r["status"] != "unchecked"),
+                    unchecked=sum(1 for r in res if r["status"] == "unchecked"), instances=len(inst), budget_s=budget)
     else:
         from . import render as R
         R.RING_Z = (info["piston"]["g1"], info["piston"]["g2"], info["piston"]["g3"])
@@ -409,7 +453,11 @@ def worker(k, n, mode):
             meta["checked"] += len(pairs)
     with open(os.path.join(out_dir, f"{mode}_{k}_of_{n}.json"), "w", encoding="utf-8") as fh:
         json.dump(dict(meta=meta, results=res), fh)
-    print("worker", mode, k, n, meta.get("checked"))
+    print("worker", mode, k, n, meta.get("checked"), flush=True)
+    if mode == "static" and (meta["unchecked"] or meta["checked"] != meta["share"]):
+        print(f"ERROR: static worker {k} of {n} checked {meta['checked']} of its {meta['share']} pairs "
+              f"({meta['unchecked']} unchecked, time budget {budget} s) - result incomplete", file=sys.stderr, flush=True)
+        sys.exit(3)
 
 
 def interference(n_static=3, n_kin=2):
@@ -421,24 +469,56 @@ def interference(n_static=3, n_kin=2):
     procs = [subprocess.Popen([sys.executable, "-m", "w16.cad.export", "worker", str(k), str(n_static), "static"], env=env, cwd=ROOT) for k in range(n_static)]
     procs += [subprocess.Popen([sys.executable, "-m", "w16.cad.export", "worker", str(k), str(n_kin), "kin"], env=env, cwd=ROOT) for k in range(n_kin)]
     codes = [p.wait() for p in procs]
-    print("worker exit codes", codes)
-    merge_interference()
+    print("worker exit codes", codes, flush=True)
+    summ = merge_interference(n_static, n_kin)
+    bad = [c for c in codes if c != 0]
+    if bad or not summ["meta"]["complete"]:
+        print(f"ERROR: interference check incomplete (worker exit codes {codes}, problems: {summ['meta']['problems']})", file=sys.stderr, flush=True)
+        sys.exit(3)
 
 
-def merge_interference():
+def merge_interference(n_static=None, n_kin=None):
+    """Merge the worker files into interference_report.json.  meta.complete is False (and meta.problems says why) when a
+    worker file is missing, a static share was not fully checked, the static shares do not add up to the candidate pairs,
+    or the kinematic sweep does not cover all 12 crank angles."""
     out_dir = os.path.join(D_ASM, "interference")
     stat, kin = [], []
-    meta = dict(static_candidates=0, static_checked=0, kin_checked=0, kin_angles=[])
+    meta = dict(static_candidates=0, static_checked=0, static_unchecked=0, kin_checked=0, kin_angles=[])
+    problems, shares, seen = [], 0, {"static": set(), "kin": set()}
     for f in sorted(os.listdir(out_dir)):
-        if not re.match(r"(static|kin)_\d+_of_\d+\.json", f):
+        mm = re.match(r"(static|kin)_(\d+)_of_(\d+)\.json$", f)
+        if not mm:
             continue
+        mode, k, n = mm.group(1), int(mm.group(2)), int(mm.group(3))
+        seen[mode].add((k, n))
         with open(os.path.join(out_dir, f), encoding="utf-8") as fh:
             d = json.load(fh)
-        if f.startswith("static"):
-            stat += d["results"]; meta["static_candidates"] = d["meta"]["candidates"]; meta["static_checked"] += d["meta"]["checked"]; meta["instances"] = d["meta"]["instances"]
-            meta["static_unchecked"] = meta.get("static_unchecked", 0) + d["meta"].get("unchecked", 0)
+        if mode == "static":
+            stat += d["results"]; meta["static_candidates"] = d["meta"]["candidates"]; meta["instances"] = d["meta"]["instances"]
+            un = sum(1 for r in d["results"] if r["status"] == "unchecked")
+            meta["static_unchecked"] += un
+            meta["static_checked"] += len(d["results"]) - un
+            share = d["meta"].get("share", len(d["results"]))
+            shares += share
+            if un or len(d["results"]) != share:
+                problems.append(f"{f}: {un} of {share} pairs unchecked")
         else:
             kin += d["results"]; meta["kin_checked"] += d["meta"]["checked"]; meta["kin_angles"] += d["meta"]["angles"]
+    for mode, want in (("static", n_static), ("kin", n_kin)):
+        ns = {n for _, n in seen[mode]}
+        if len(ns) > 1:
+            problems.append(f"{mode} files of different worker counts {sorted(ns)}")
+        n = want or (min(ns) if ns else None)
+        missing = [k for k in range(n or 0) if (k, n) not in seen[mode]]
+        if not seen[mode] or missing:
+            problems.append(f"{mode} worker files missing: {missing or 'all'}")
+    if shares != meta["static_candidates"]:
+        problems.append(f"static shares {shares} != candidate pairs {meta['static_candidates']}")
+    if sorted(meta["kin_angles"]) != [float(a) for a in range(0, 720, 60)]:
+        problems.append(f"kinematic angles {sorted(meta['kin_angles'])} do not cover 0-660 deg in 60 deg steps")
+    meta["kin_angles"] = sorted(meta["kin_angles"])
+    meta["complete"] = not problems
+    meta["problems"] = problems
     def agg(rows):
         g = {}
         for r in rows:
@@ -452,18 +532,103 @@ def merge_interference():
         return sorted(({**e, "angles": sorted(e["angles"])} for e in g.values()), key=lambda e: -e["max_volume_mm3"])
     summ = dict(meta=meta,
                 static=dict(clear=sum(1 for r in stat if r["status"] == "clear"), expected=sum(1 for r in stat if r["status"] == "expected"),
-                            errors=sum(1 for r in stat if r["status"] == "error"), clashes=agg(stat)),
+                            contact=sum(1 for r in stat if r["status"] == "contact"), unchecked=meta["static_unchecked"],
+                            errors=sum(1 for r in stat if r["status"] == "error"), clashes=agg(stat),
+                            contacts=sorted({(r["a"], r["b"]) for r in stat if r["status"] == "contact"}),
+                            error_pairs=[dict(a=r["a"], b=r["b"], reason=r.get("reason")) for r in stat if r["status"] == "error"]),
                 kinematic=dict(clear=sum(r.get("n", 0) for r in kin if r["status"] == "clear_count"), expected=sum(1 for r in kin if r["status"] == "expected"),
+                               contact=sum(1 for r in kin if r["status"] == "contact"),
                                errors=sum(1 for r in kin if r["status"] == "error"), clashes=agg(kin)))
     with open(os.path.join(D_ASM, "interference_report.json"), "w", encoding="utf-8") as fh:
         json.dump(summ, fh, indent=1)
-    print("static: clear", summ["static"]["clear"], "expected", summ["static"]["expected"], "errors", summ["static"]["errors"], "clash pairs", len(summ["static"]["clashes"]))
+    print("complete:", meta["complete"], meta["problems"])
+    print("static: clear", summ["static"]["clear"], "expected", summ["static"]["expected"], "contact", summ["static"]["contact"],
+          "unchecked", meta["static_unchecked"], "errors", summ["static"]["errors"], "clash pairs", len(summ["static"]["clashes"]))
     for c in summ["static"]["clashes"][:60]:
         print("  S", c["a"], "|", c["b"], "x", c["count"], "max", c["max_volume_mm3"])
-    print("kinematic: clear", summ["kinematic"]["clear"], "errors", summ["kinematic"]["errors"], "clash pairs", len(summ["kinematic"]["clashes"]))
+    print("kinematic: clear", summ["kinematic"]["clear"], "contact", summ["kinematic"]["contact"], "errors", summ["kinematic"]["errors"], "clash pairs", len(summ["kinematic"]["clashes"]))
     for c in summ["kinematic"]["clashes"][:40]:
         print("  K", c["a"], "|", c["b"], "x", c["count"], "max", c["max_volume_mm3"], "angles", c["angles"][:6])
     return summ
+
+
+def _fold_counts(d):
+    d["meta"]["checked"] = sum(1 for r in d["results"] if r["status"] != "unchecked")
+    d["meta"]["unchecked"] = sum(1 for r in d["results"] if r["status"] == "unchecked")
+    d["meta"]["share"] = len(d["results"])
+    d["meta"]["rechecked"] = time.strftime("%Y-%m-%d %H:%M")
+
+
+def recheck_static(n_proc=1, k_proc=None):
+    """Re-check only the static pairs a previous run left 'unchecked' or 'error' (or decided by the superseded unclipped fuse), in place in the worker files
+    static_K_of_N.json (row i of a worker file is candidate_pairs(...)[K::N][i]; the pair names are verified first, so a
+    changed geometry stops the recheck), then merge.  n_proc > 1 splits the work over that many sub-processes."""
+    out_dir = os.path.join(D_ASM, "interference")
+    files = sorted(f for f in os.listdir(out_dir) if re.match(r"static_\d+_of_\d+\.json$", f))
+    if k_proc is None and n_proc > 1:
+        env = dict(os.environ, PYTHONPATH=os.path.join(ROOT, "src"))
+        procs = [subprocess.Popen([sys.executable, "-m", "w16.cad.export", "recheck", str(n_proc), str(k)], env=env, cwd=ROOT) for k in range(n_proc)]
+        codes = [p.wait() for p in procs]
+        print("recheck exit codes", codes, flush=True)
+        for f in files:   # fold the per-process results back into the worker files
+            path = os.path.join(out_dir, f)
+            with open(path, encoding="utf-8") as fh:
+                d = json.load(fh)
+            for k in range(n_proc):
+                part = os.path.join(out_dir, f"recheck_{k}_of_{n_proc}__{f}")
+                if os.path.exists(part):
+                    with open(part, encoding="utf-8") as fh:
+                        for idx, r in json.load(fh).items():
+                            d["results"][int(idx)] = r
+                    os.remove(part)
+            _fold_counts(d)
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump(d, fh)
+        summ = merge_interference()
+        if any(codes) or not summ["meta"]["complete"]:
+            print("ERROR: recheck incomplete", summ["meta"]["problems"], file=sys.stderr, flush=True)
+            sys.exit(3)
+        return summ
+    reg, info = ASM.build(0.0)
+    inst = instances(reg)
+    pairs = candidate_pairs(inst)
+    todo = []
+    for f in files:
+        k, n = map(int, re.findall(r"\d+", f)[:2])
+        with open(os.path.join(out_dir, f), encoding="utf-8") as fh:
+            d = json.load(fh)
+        mine = pairs[k::n]
+        if len(mine) != len(d["results"]):
+            raise RuntimeError(f"{f}: {len(d['results'])} results but {len(mine)} pairs in this share - geometry changed since the run")
+        for idx, (r, (i, j)) in enumerate(zip(d["results"], mine)):
+            if (r["a"], r["b"]) != (inst[i][0], inst[j][0]):
+                raise RuntimeError(f"{f} row {idx}: {r['a']} | {r['b']} vs pair {inst[i][0]} | {inst[j][0]} - geometry changed since the run")
+            if r["status"] in ("unchecked", "error") or r.get("by") == "fuse":   # "fuse": the unclipped fallback of 2026-11-21, superseded
+                todo.append((f, idx, i, j))
+    mine = todo if k_proc is None else todo[k_proc::n_proc]
+    print(f"recheck: {len(todo)} pairs to re-check, {len(mine)} in this process", flush=True)
+    t0 = time.time()
+    out = {}
+    for c, (f, idx, i, j) in enumerate(mine):
+        out.setdefault(f, {})[idx] = check_pairs(inst, [(i, j)])[0]
+        if c % 100 == 0:
+            print(f"  {c}/{len(mine)} {time.time() - t0:.0f} s", flush=True)
+    for f, rows in out.items():
+        if k_proc is None:
+            path = os.path.join(out_dir, f)
+            with open(path, encoding="utf-8") as fh:
+                d = json.load(fh)
+            for idx, r in rows.items():
+                d["results"][idx] = r
+            _fold_counts(d)
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump(d, fh)
+        else:
+            with open(os.path.join(out_dir, f"recheck_{k_proc}_of_{n_proc}__{f}"), "w", encoding="utf-8") as fh:
+                json.dump({str(i): r for i, r in rows.items()}, fh)
+    print(f"recheck done in {time.time() - t0:.0f} s", flush=True)
+    if k_proc is None:
+        return merge_interference()
 
 
 def main():
@@ -474,6 +639,8 @@ def main():
         return interference()
     if cmd == "merge":
         return merge_interference()
+    if cmd == "recheck":
+        return recheck_static(int(sys.argv[2]) if len(sys.argv) > 2 else 1, int(sys.argv[3]) if len(sys.argv) > 3 else None)
     reg, info = ASM.build(0.0)
     if cmd in ("components", "all"):
         components(reg)

@@ -17,30 +17,31 @@
   "quality_gamma_min": 0.24112072992532252,
   "quality_gamma_mean": 0.7777252487043841,
   "quality_below_0p1": 0,
-  "volume_mm3": 82039.29950588786
+  "volume_mm3": 82039.29950588786,
+  "dropped_zero_volume_tets": 0
  },
  "inputs": {
-  "force_N": 36721.96979492512,
+  "force_N": 36727.61121219981,
   "direction": "-Z (into the cover)"
  },
  "results": {
   "applied_force_check_N": [
    0.0,
    0.0,
-   -36721.97227469853
+   -36727.61369235418
   ],
-  "peak_bearing_pressure_MPa": 27.954551978461545,
-  "vm_max_MPa": 88.74643182701196,
-  "vm_p999_MPa": 74.5021344405321,
+  "peak_bearing_pressure_MPa": 27.958846500060417,
+  "vm_max_MPa": 88.76006550887521,
+  "vm_p999_MPa": 74.51357984039984,
   "vm_max_location": [
    8.513118191514604,
    41.46110089558145,
    -57.275295993168825
   ],
-  "bore_deflection_mm": 0.020255115808653617,
+  "bore_deflection_mm": 0.020258227503392803,
   "dofs": 56973,
-  "solve_s": 5.194807291030884,
-  "yield_factor_on_p999": 4.966300667470614
+  "solve_s": 6.203482389450073,
+  "yield_factor_on_p999": 4.965537836089752
  },
  "boundary_conditions": "bolt-hole surfaces fixed; support from the surrounding aluminium bedplate neglected (conservative)"
 }

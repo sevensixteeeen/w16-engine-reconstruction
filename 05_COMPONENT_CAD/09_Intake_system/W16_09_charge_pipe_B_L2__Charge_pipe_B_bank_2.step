@@ -2,7 +2,7 @@ ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');
 FILE_NAME('W16_09_charge_pipe_B_L2__Charge_pipe_B_bank_2',
-  '2026-11-17T01:11:17',('Author'),('Open CASCADE'),
+  '2026-11-20T21:38:21',('Author'),('Open CASCADE'),
   'Open CASCADE STEP processor 8.0','build123d','Unknown');
 FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
 ENDSEC;

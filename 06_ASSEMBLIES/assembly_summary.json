@@ -5,7 +5,7 @@
    "name": "Crankcase and cylinder block",
    "part_numbers": 7,
    "instances": 48,
-   "mass_kg": 97.88
+   "mass_kg": 97.79
   },
   {
    "group": "02",
@@ -19,7 +19,7 @@
    "name": "Piston assemblies",
    "part_numbers": 5,
    "instances": 112,
-   "mass_kg": 9.81
+   "mass_kg": 9.78
   },
   {
    "group": "04",
@@ -40,14 +40,14 @@
    "name": "Valvetrain",
    "part_numbers": 13,
    "instances": 324,
-   "mass_kg": 17.5
+   "mass_kg": 17.41
   },
   {
    "group": "07",
    "name": "Timing system",
    "part_numbers": 10,
-   "instances": 495,
-   "mass_kg": 5.9
+   "instances": 493,
+   "mass_kg": 5.89
   },
   {
    "group": "08",
@@ -68,7 +68,7 @@
    "name": "Exhaust system",
    "part_numbers": 18,
    "instances": 18,
-   "mass_kg": 17.87
+   "mass_kg": 17.86
   },
   {
    "group": "11",
@@ -106,8 +106,8 @@
    "mass_kg": 11.11
   }
  ],
- "total_mass_kg": 344.5,
+ "total_mass_kg": 344.3,
  "part_numbers": 151,
- "instances": 1599,
+ "instances": 1597,
  "invalid_or_multi_solid": []
 }

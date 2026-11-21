@@ -11,13 +11,14 @@
   "rho": 2680
  },
  "mesh": {
-  "nodes": 29021,
-  "tets": 115879,
+  "nodes": 28995,
+  "tets": 115645,
   "h_max": 5.0,
   "quality_gamma_min": 0.005944210482006116,
-  "quality_gamma_mean": 0.7627984074224914,
-  "quality_below_0p1": 17,
-  "volume_mm3": 1699319.865777496
+  "quality_gamma_mean": 0.7631779773519554,
+  "quality_below_0p1": 15,
+  "volume_mm3": 1696919.9268225161,
+  "dropped_zero_volume_tets": 0
  },
  "element": "P1 tetrahedra",
  "inputs": {
@@ -25,40 +26,40 @@
  },
  "facet_counts": {
   "base": 923,
-  "symmetry": 4209,
+  "symmetry": 4213,
   "bore_loaded": 1328,
-  "jacket": 6861
+  "jacket": 6842
  },
  "results": {
   "gas_pressure": {
-   "vm_max_MPa": 185.11448332008277,
-   "vm_p999_MPa": 122.83771164500448,
+   "vm_max_MPa": 171.1114757604715,
+   "vm_p999_MPa": 121.77050364389328,
    "vm_max_location": [
-    -69.25195305197774,
-    195.16542528943324,
-    128.07298345701818
+    -165.49291896995965,
+    197.5274380292795,
+    135.6576884455077
    ],
-   "dofs": 87063,
-   "solve_s": 23.605368614196777,
+   "dofs": 86985,
+   "solve_s": 42.05824589729309,
    "applied_force_check_N": [
-    51.67646484204593,
-    6338.118323366913,
-    -8259.996615081554
+    -77.28181388461861,
+    6217.340153912015,
+    -8102.595440162619
    ],
-   "max_displacement_mm": 0.16357211109320927,
+   "max_displacement_mm": 0.1630693063400708,
    "plausible": true
   },
   "thermal": {
-   "T_bore_max_C": 188.1251228498533,
-   "T_bore_mean_C": 124.99800775061243,
-   "T_max_C": 188.1251228498533,
-   "heat_to_jacket_W": 5941.115958719089,
-   "jacket_facets": 6861,
+   "T_bore_max_C": 188.72862703821653,
+   "T_bore_mean_C": 124.90067921303358,
+   "T_max_C": 188.72862703821653,
+   "heat_to_jacket_W": 5928.104827501738,
+   "jacket_facets": 6842,
    "q_top_W_mm2": 0.5179857958433718
   },
   "thermal_expansion": {
-   "bore_radial_growth_mean_um": 57.34986568055373,
-   "bore_out_of_round_um": 511.07672525210546,
+   "bore_radial_growth_mean_um": 57.20235876461399,
+   "bore_out_of_round_um": 509.40596281756376,
    "note": "thermal growth with the same supports as the gas case (split plane fixed, cut faces symmetric); includes bending of the bank, so out-of-round is an upper bound"
   }
  },

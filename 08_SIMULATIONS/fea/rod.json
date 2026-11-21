@@ -17,7 +17,8 @@
   "quality_gamma_min": 0.020679649601998317,
   "quality_gamma_mean": 0.7529724138373886,
   "quality_below_0p1": 1,
-  "volume_mm3": 74418.1372985145
+  "volume_mm3": 74418.1372985145,
+  "dropped_zero_volume_tets": 0
  },
  "element": "P2 tetrahedra",
  "results": {
@@ -38,34 +39,34 @@
    ],
    "max_axial_displacement_mm": 0.27779531392829987,
    "dofs": 92202,
-   "solve_s": 16.52445149421692,
+   "solve_s": 16.38734531402588,
    "yield_factor_on_p999": 2.468001874129167
   },
   "tension_overspeed_inertia": {
-   "force_N": 23537.4136118102,
+   "force_N": 23474.0558362737,
    "applied_force_check_N": [
     0.0,
     0.0,
-    23534.95855356644
+    23471.60738653127
    ],
-   "peak_bearing_pressure_MPa": 59.49122419900608,
-   "vm_max_MPa": 591.5728605282435,
-   "vm_p999_MPa": 488.8179507727665,
+   "peak_bearing_pressure_MPa": 59.33108631421737,
+   "vm_max_MPa": 589.9804705941233,
+   "vm_p999_MPa": 487.50215548133366,
    "vm_max_location": [
     6.456104893570831,
     16.167172924599818,
     30.304604455064567
    ],
-   "max_axial_displacement_mm": 0.47458593327945525,
+   "max_axial_displacement_mm": 0.47330844759094964,
    "dofs": 92202,
-   "solve_s": 15.704889059066772,
-   "yield_factor_on_p999": 1.8002612191488025
+   "solve_s": 19.110504388809204,
+   "yield_factor_on_p999": 1.805120223788826
   },
   "fatigue_estimate": {
    "note": "alternating stress taken as half the sum of the two p99.9 stresses (conservative, locations differ)",
-   "sigma_a_MPa": 422.69084972866017,
+   "sigma_a_MPa": 422.0329520829437,
    "fatigue_limit_MPa": 500,
-   "factor": 1.1828976196692387
+   "factor": 1.1847416120761423
   }
  },
  "inputs": {},

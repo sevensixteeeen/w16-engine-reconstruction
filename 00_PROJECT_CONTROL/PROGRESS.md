@@ -1,9 +1,23 @@
 # Progress — resume from here
 
-_Last updated: 2026-11-18_
+_Last updated: 2026-11-21_
 
-Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-043) first. Run everything from the project root with
+Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-044) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
+
+## 2026-11-21 — regeneration finished; interference check completed (D-044)
+
+- `run_regeneration.cmd` ran 2026-11-20 21:28 to 2026-11-21 12:56, all 9 stages exit 0 (`regen_logs/summary.json`; interference
+  with 2 static + 1 kinematic worker, 10.6 GB available; the kinematic sweep took 14.4 h).
+- **The static interference result was incomplete**: worker 0 hit the old 2700 s default time budget (1550 of 3779 pairs) and
+  exited 0 - 2229 of 7557 pairs unchecked. Fixed by D-044 (no default budget, worker / `interference()` exit 3, `meta.complete`,
+  `recheck` command, clipped-solid check for touching pairs, report says INCOMPLETE / NOT VERIFIED). Rechecked only those pairs
+  (not the kinematic sweep) and merged: **all 7557 static pairs checked, 35 static clash pairs (the same 35 as 2026-11-17),
+  93 touching contacts (were "boolean errors"), 0 errors; kinematic 1 clash pair** (big-end shell / crankshaft). Run log:
+  `06_ASSEMBLIES/interference_run.log`. Report regenerated (`python -m w16.docs`).
+- Instances 1599 -> 1597: the exhaust secondary chains of both banks have 103 links instead of 104 - a rounding side effect of
+  the D-042 deck change, odd link count; logged as an open item (DECISIONS), not changed.
+- **Next study (unchanged, no geometry changes):** piston heat input / `woschni_scale` (see 2026-11-20 below).
 
 ## D-041 + D-042 — applied in the source, verified by targeted checks; full regeneration approved 2026-11-20
 
