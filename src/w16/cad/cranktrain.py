@@ -53,21 +53,30 @@ def fillet_ring(r, rf):
 
 
 def undercut_ring(r, rf):
-    """Recessed (undercut) journal fillet: the R rf fillet of fillet_ring mirrored into the web face at x = 0, as a groove
-    to subtract - the journal surface (radius r) runs straight up to the web face, so a bearing can use the full width."""
-    pts = [(0.3, r), (-rf, r)]
-    for a in np.linspace(0, 90, 7)[1:]:
-        pts.append((-rf + rf * math.sin(a * D2R), r + rf - rf * math.cos(a * D2R)))
-    pts.append((0.3, r + rf))
-    prof = Plane.XY * poly(pts)
-    from build123d import Axis
-    return revolve(prof, axis=Axis.X)
+    """Semicircular relief groove (recessed / undercut journal fillet, D-048), as a body of revolution about +X to subtract:
+    a true arc of radius rf centred on the web face (x = 0) at radius r + rf, x <= 0, so the groove is tangent to the journal
+    surface (radius r) at the web face, runs rf deep into the web and opens on the web face between r and r + 2 rf.  The
+    journal surface runs straight up to the web face, so a bearing can use the full width.  (+0.3 mm on the journal side,
+    in free space, for a clean cut.)
+    D-047 used the fillet's material region mirrored into the web instead: its web edge was a convex arc tangent to the
+    journal line, so the groove ended in a zero-angle, crack-like tip whose FE peak depended on the mesh (223 / 296 MPa on
+    two meshes of the same size; corrected 2026-11-22)."""
+    from build123d import Axis, BuildLine, BuildSketch, CenterArc, Line, make_face
+    with BuildSketch(Plane.XY) as sk:
+        with BuildLine():
+            Line((0.3, r), (0.0, r))
+            CenterArc((0.0, r + rf), rf, start_angle=-90.0, arc_size=-180.0)
+            Line((0.0, r + 2 * rf), (0.3, r + 2 * rf))
+            Line((0.3, r + 2 * rf), (0.3, r))
+        make_face()
+    return revolve(sk.sketch, axis=Axis.X)
 
 
 def throw_solid(k, cw=None, pin_fillet="undercut"):
     """Pin k with its two webs.  cw = (direction deg, half-angle deg) of the counterweight sectors or None.
-    pin_fillet: "undercut" - the R2.5 pin fillet recessed into the web, so the big-end shells (16.25 mm) clear it (D-047,
-    Fix A option (a), adopted 2026-11-21); "ring" - the fillet standing on the pin (before D-047; the shell edge sat in it)."""
+    pin_fillet: "undercut" - R2.5 semicircular relief groove recessed into the web, so the big-end shells (16.25 mm) clear
+    it (D-047, Fix A option (a), adopted 2026-11-21; groove form D-048); "ring" - the fillet standing on the pin (before
+    D-047; the shell edge sat in it)."""
     psi = L.PIN_PHASE[k]
     px = L.pin_x(k)
     py, pz = _yz(psi, P.throw)
@@ -80,7 +89,7 @@ def throw_solid(k, cw=None, pin_fillet="undercut"):
     body = pin + wa + wb
     if cwp is not None:                               # counterweight sectors fused as solids (they overlap the web boss)
         body = body + ex(cwp, px - hw - P.web_thk) + ex(cwp, px + hw)
-    # stress-relief fillets pin/web (R2.5)
+    # stress-relief fillets pin/web (R2.5 relief grooves, D-048: web 9.5 mm -> 7.0 mm behind the groove)
     if pin_fillet == "undercut":
         g1 = Pos(px - hw, py, pz) * undercut_ring(P.pin_dia / 2, 2.5)                  # groove into web a (towards -X)
         g2 = Pos(px + hw, py, pz) * Rot(Z=180) * undercut_ring(P.pin_dia / 2, 2.5)     # groove into web b (towards +X)

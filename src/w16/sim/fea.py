@@ -577,12 +577,15 @@ def case_piston(thermal_only=False):
 
 
 CRANK_FILLET_MESH = 1.0          # mm, element size along both pin-fillet circles (D-047 standard; was 2.4 mm in a 34 mm ball)
+GROOVE_DEPTH = 2.5               # mm, depth of the R2.5 semicircular relief groove into the web (cranktrain.undercut_ring, D-048)
 
 
 def case_crank():
     """Crank throw 3 in bending.  D-047 (2026-11-21): undercut pin fillets (cranktrain default), 1.0 mm elements along both
     fillet circles (40 refinement balls each), CG solver (the direct factorisation of ~1 M dof is too large), and the
-    fatigue factor on the fillet-zone peak instead of the whole-part 99.9th percentile."""
+    fatigue factor on the fillet-zone peak instead of the whole-part 99.9th percentile.  D-048 (2026-11-22): the groove is a
+    semicircular relief groove (cranktrain.undercut_ring); the web stress is also reported in the 7.0 mm ligament behind the
+    groove.  The mesh-converged fillet peak is tools/crank_groove_convergence.py (this run is the standard 1.0 mm mesh)."""
     R = results()["dynamics"]
     from ..cad.assembly import _cw
     cw, _ = _cw()
@@ -614,14 +617,22 @@ def case_crank():
     rp = np.hypot(cen[1] - pc[1], cen[2] - pc[2])
     fz = (np.hypot(cen[0] - xa, rp - rf0) < 5.0) | (np.hypot(cen[0] - xb, rp - rf0) < 5.0)
     web = (((cen[0] < xa) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb) & (cen[0] < xb + P.web_thk))) & ~fz & (np.hypot(cen[1], cen[2]) > P.main_dia / 2 + 6.0)
+    # ligament behind the groove: web material between the groove bottom (GROOVE_DEPTH into the web) and the far web face,
+    # radially across the groove opening, outside the main-journal footprint (where the main journal continues behind it)
+    lig = ((((cen[0] < xa - GROOVE_DEPTH) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb + GROOVE_DEPTH) & (cen[0] < xb + P.web_thk)))
+           & (rp > P.pin_dia / 2) & (rp < P.pin_dia / 2 + 2 * GROOVE_DEPTH) & (np.hypot(cen[1], cen[2]) > P.main_dia / 2))
     zone = lambda msk: dict(vm_max_MPa=float(vm[msk].max()), vm_p999_MPa=float(np.percentile(vm[msk], 99.9)),
                             at=cen[:, int(np.argmax(np.where(msk, vm, -1)))].round(2).tolist())
-    fil, wb = zone(fz), zone(web)
+    fil, wb, lg = zone(fz), zone(web), zone(lig)
     rec = dict(case="crank throw 3 in bending", material=mt, mesh=st, inputs=dict(force_N=F, direction="towards the crank axis (firing TDC)",
-                                                                                 pin_fillet="undercut R2.5 (D-047)", fillet_mesh_mm=CRANK_FILLET_MESH),
+                                                                                 pin_fillet="semicircular relief groove R2.5 (D-047 / D-048)", fillet_mesh_mm=CRANK_FILLET_MESH,
+                                                                                 web_thk_mm=P.web_thk, groove_depth_mm=GROOVE_DEPTH,
+                                                                                 web_remaining_at_groove_mm=P.web_thk - GROOVE_DEPTH),
                results=dict(applied_force_check_N=s["applied"].tolist(), vm_max_MPa=pk, vm_p999_MPa=p999, vm_max_location=loc,
                             fillet_vm_max_MPa=fil["vm_max_MPa"], fillet_vm_p999_MPa=fil["vm_p999_MPa"], fillet_vm_max_location=fil["at"],
-                            web_vm_max_MPa=wb["vm_max_MPa"], pin_deflection_mm=float(np.sqrt((s["U"] ** 2).sum(0)).max()),
+                            web_vm_max_MPa=wb["vm_max_MPa"], web_vm_p999_MPa=wb["vm_p999_MPa"],
+                            ligament_vm_max_MPa=lg["vm_max_MPa"], ligament_vm_p999_MPa=lg["vm_p999_MPa"], ligament_vm_max_location=lg["at"],
+                            pin_deflection_mm=float(np.sqrt((s["U"] ** 2).sum(0)).max()),
                             dofs=s["dofs"], solve_s=s["t_solve"], fatigue_limit_MPa=mt["fatigue"],
                             factor_on_fillet_max=mt["fatigue"] / (0.5 * fil["vm_max_MPa"])),
                boundary_conditions="both main-journal surfaces fully fixed (stiffer than real bearings -> fillet stress over-predicted); load on the central part of the pin; "
