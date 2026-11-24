@@ -83,7 +83,10 @@ def classify(f, k):
     t = s.GetType()
     psi = math.radians(L.PIN_PHASE[k])
     C = P.throw * np.array([math.sin(psi), math.cos(psi)])
-    if t in (GeomAbs_Torus, GeomAbs_SurfaceOfRevolution):
+    if t == GeomAbs_Torus:                       # pin relief groove (axis through the pin centre) or main fillet (crank axis)
+        loc = s.Torus().Location()
+        return "main fillet" if math.hypot(loc.Y(), loc.Z()) < 1e-3 else "relief groove"
+    if t == GeomAbs_SurfaceOfRevolution:
         return "relief groove"
     if t == GeomAbs_Cylinder:
         cy = s.Cylinder()
@@ -103,9 +106,7 @@ def walls(cw):
     hm = P.main_width / 2
     out = []
     for k in range(1, 9):
-        thr = CT.throw_solid(k, (cw[k][0], cw[k][1]))
-        for j in (k, k + 1):
-            thr = thr + Pos(L.main_x(j) - hm, 0, 0) * Rot(Y=90) * Cylinder(P.main_dia / 2, P.main_width, align=CMIN)
+        thr = CT.fe_throw(k, (cw[k][0], cw[k][1]))          # with the D-050 main fillets at both webs
         faces = thr.faces()
         for d in [d for d in CT.oil_drillings() if d["pin"] == k]:
             H = cyl_between(d["I"] - 2.0 * d["e"], d["O"] + 2.0 * d["e"], CT.OIL_R)
@@ -151,10 +152,11 @@ def openings():
     r_out = CT.OIL_R / math.cos(math.radians(d["a_out"])) + CT.OIL_CHAMFER
     r_in = CT.OIL_R / math.cos(math.radians(d["a_in"])) + CT.OIL_CHAMFER
     shell_be = (P.rod_be_width - 1.5) / 2                 # big-end shell half-width (rod_solids: shell_w = w - 1.5)
-    shell_main = (P.main_width - 2.0) / 2                 # main shell half-width (block.main_shell)
+    shell_main = P.main_shell_width / 2 - P.main_shell_chamfer   # main shell land half-width (D-050: 16 mm shell, 1 mm chamfers)
     return dict(outlet_radius_with_chamfer_mm=r_out, inlet_radius_with_chamfer_mm=r_in,
                 outlet_to_big_end_shell_edge_mm=shell_be - r_out, outlet_to_pin_end_mm=P.pin_width / 2 - P.bank_offset / 2 - r_out,
-                inlet_to_main_shell_edge_mm=shell_main - r_in, main_shell_groove_width_mm=4.0)
+                inlet_to_main_shell_land_edge_mm=shell_main - r_in, main_shell_groove_width_mm=4.0,
+                inlet_to_main_fillet_tangent_mm=P.main_width / 2 - P.main_fillet_r - r_in)
 
 
 def access(cw):
@@ -216,6 +218,7 @@ def main():
     res["summary"] = dict(
         drillings=len(W), only_pin_and_main_surfaces_cut=all(set(w["faces_cut"]) == {"pin surface", "main surface"} for w in W),
         min_wall_to_relief_groove_mm=min(w["wall_mm"].get("relief groove", 1e9) for w in W),
+        min_wall_to_main_fillet_mm=min(w["wall_mm"].get("main fillet", 1e9) for w in W),
         min_wall_to_web_contour_mm=min(w["wall_mm"].get("web contour", 1e9) for w in W),
         min_wall_web_faces_mm={k: min(w["wall_web_faces_mm"].get(k, 1e9) for w in W) for k in W[0]["wall_web_faces_mm"]},
         axis_to_outlet_normal_deg=max(w["axis_to_outlet_normal_deg"] for w in W), axis_to_inlet_normal_deg=max(w["axis_to_inlet_normal_deg"] for w in W),

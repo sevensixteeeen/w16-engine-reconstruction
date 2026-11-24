@@ -132,6 +132,12 @@ a("rod_be_od", 68.0, "mm", "EST", "big-end outer diameter across the eye")
 a("rod_bolt_dia", 8.0, "mm", "EST", "M8x1 rod bolts")
 a("bearing_shell_thk", 1.8, "mm", "EST", "rod bearing shell wall")
 a("main_shell_thk", 2.5, "mm", "EST", "main bearing shell wall")
+a("main_shell_width", 16.0, "mm", "EST", "main bearing shell width (axial), centred on the 18 mm journal")
+a("main_shell_chamfer", 1.0, "mm", "EST", "45-deg chamfer at both bore edges of the main shells (D-050); load-carrying land = "
+  "shell width - 2 x chamfer = 14 mm")
+a("main_fillet_r", 1.6, "mm", "CALC", "main-journal fillet radius (D-050): the largest radius, in 0.1 mm steps, that keeps the "
+  "axial allowance to the chamfered main shell (cranktrain.main_fillet_fit)")
+a("crank_end_float", 0.20, "mm", "EST", "total axial float of the crankshaft; thrust bearing assumed at main 5 (none is modelled)")
 
 # ---------------------------------------------------------------- block
 a("liner_wall", 5.0, "mm", "EST", "minimum cylinder wall to water jacket")
@@ -191,7 +197,8 @@ a("m_rod", 0.430, "kg", "EST", "titanium rod incl. bolts and shells")
 a("rod_cg_frac", 0.30, "-", "EST", "rod centre of gravity from big-end centre / rod length")
 a("J_damper", 0.022, "kg m2", "EST", "viscous damper ring + hub + pulley")
 a("J_flywheel", 0.110, "kg m2", "EST", "flex plate + dual-clutch input mass")
-a("J_throw_fixed", 0.0042, "kg m2", "EST", "webs + pin + counterweights of one throw; replaced by CAD value")
+a("J_throw_fixed", 0.0042, "kg m2", "EST", "webs + pin + counterweights of one throw - fallback only: the torsional model uses the "
+  "CAD throw inertia (D-050; about 9.5 g m2)")
 a("p_crankcase_bar", 0.85, "bar", "EST", "dry-sump crankcase depression (abs)")
 
 # ---------------------------------------------------------------- materials (density kg/m3, E GPa, nu, alpha 1/K, k W/mK, yield MPa, fatigue MPa)

@@ -177,8 +177,17 @@ surge line). They are **not** a measured map.
     d = loads[6700]; d2 = loads[2000]
     ino = dynamics.inertia_only(P.rpm_overspeed)
     in_r = dynamics.inertia_only(P.rpm_rated)
-    f_t, modes, K, J, kk, tinfo = dynamics.torsional_modes()
-    tors, _, _ = dynamics.torsional_forced(loads)
+    # torsional model with the CAD throw inertia (D-050): counterweights designed exactly as in the CAD assembly
+    from .cad import cranktrain as CT
+    cw_t, _ = CT.design_counterweights({k: v * 1e3 for k, v in d["mr_cw"].items()}, d["cw_angle"])
+    J_cad = CT.throw_inertia(cw_t)
+    f_t, modes, K, J, kk, tinfo = dynamics.torsional_modes(J_cad)
+    tors, _, _ = dynamics.torsional_forced(loads, J_cad=J_cad)
+    crit = {o: f_t[1] * 60 / o for o in (8, 4, 2.5)}                 # first-mode critical speeds of the listed orders
+    n25 = crit[2.5]
+    res25 = (f"**The order-2.5 resonance at about {n25:,.0f} rpm lies inside the operating range** (up to {P.rpm_max:,.0f} rpm, rated "
+             f"{P.rpm_rated:,.0f} rpm): the viscous damper at the free end must address it." if n25 <= P.rpm_max else
+             f"The order-2.5 resonance at about {n25:,.0f} rpm is above the governed speed ({P.rpm_max:,.0f} rpm).")
     hm_rod = dynamics.short_bearing_hmin(d2["be_peak"], P.pin_dia, d2["w_eff_rod"], 2000)
     hm_main = dynamics.short_bearing_hmin(d["main_peak"], P.main_dia, d["w_eff_main"], 6700)
     m_rec, m_rot = dynamics.masses()
@@ -189,6 +198,7 @@ surge line). They are **not** a measured map.
                          F_design_gas=F_design, torsional_f=f_t[:4].tolist(), m_rec=m_rec, m_rod_rot=m_rot,
                          main_peak_vec=max(d["mains"].values(), key=lambda m: m["peak"])["peak_vec"],
                          T_max=d["T_max"], T_min=d["T_min"], a_tdc_overspeed=ino["a_tdc"], tors=tinfo,
+                         torsional_crit_rpm={str(o): n for o, n in crit.items()}, J_throw_cad={k: v for k, v in J_cad[0].items()}, J_main_cad=J_cad[1],
                          F_free_peak=d["F_free_peak"], M_free_peak=d["M_free_peak"])
     c1, c2 = L.CYL[1], L.CYL[2]
     al = dynamics.AL
@@ -282,12 +292,14 @@ residuals remain. No balance shafts are needed (the VW W8 needs two, the W12 and
 
 ## Torsional vibration (lumped model: damper - 8 throws - flywheel)
 
-Throw stiffness from Carter's formula: {tinfo['k_throw'] / 1e3:.0f} kN m/rad; throw inertia {tinfo['J_throw'] * 1e3:.2f} g m2 (EST until CAD);
+Throw stiffness from Carter's formula: {tinfo['k_throw'] / 1e3:.0f} kN m/rad; throw inertia {tinfo['J_throw'] * 1e3:.2f} g m2 (crank part
+{tinfo['J_throw_crank'] * 1e3:.2f} g m2 from the CAD - pin, webs, counterweights and one main journal (D-050; the earlier EST was
+{P.J_throw_fixed * 1e3:.1f} g m2) - plus {tinfo['J_throw_rods'] * 1e3:.2f} g m2 of rods and pistons);
 damper {P.J_damper * 1e3:.0f} g m2; flywheel side {P.J_flywheel * 1e3:.0f} g m2.
 
 Natural frequencies: {", ".join(f"{x:.0f} Hz" for x in f_t[1:5])}.
-First mode ({f_t[1]:.0f} Hz) is excited by order 8 at {f_t[1] * 60 / 8:.0f} rpm, order 4 at {f_t[1] * 60 / 4:.0f} rpm and
-order 2.5 at {f_t[1] * 60 / 2.5:.0f} rpm.
+First mode ({f_t[1]:.0f} Hz) is excited by order 8 at {crit[8]:,.0f} rpm, order 4 at {crit[4]:,.0f} rpm and
+order 2.5 at {crit[2.5]:,.0f} rpm. {res25}
 
 {_tab([(o['rpm'], float(o['sec_torque'].max()), o['worst_order'], o['worst_amp']) for o in tors], ["rpm", "vibratory torque, worst section [N m, RSS of orders]", "largest single order", "its amplitude [N m]"])}
 

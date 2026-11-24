@@ -52,6 +52,54 @@ def fillet_ring(r, rf):
     return revolve(prof, axis=Axis.X)
 
 
+def journal_fillet(r, rf):
+    """Concave journal fillet (D-050) as a body of revolution about +X: a true arc of radius rf, tangent to the journal
+    surface (radius r) at x = rf and to the web face (x = 0) at radius r + rf; the journal is on the +x side, the web on the
+    -x side.  0.3 mm of overlap into both for a clean fuse.  (fillet_ring is the older faceted form, kept for the pin
+    option "ring".)"""
+    from build123d import Axis, BuildLine, BuildSketch, CenterArc, Line, make_face
+    with BuildSketch(Plane.XY) as sk:
+        with BuildLine():
+            Line((-0.3, r + rf), (0.0, r + rf))
+            CenterArc((rf, r + rf), rf, start_angle=180.0, arc_size=90.0)
+            Line((rf, r), (rf, r - 0.3))
+            Line((rf, r - 0.3), (-0.3, r - 0.3))
+            Line((-0.3, r - 0.3), (-0.3, r + rf))
+        make_face()
+    return revolve(sk.sketch, axis=Axis.X)
+
+
+# D-050 fit of the main fillet to the chamfered main shells: allowances (EST)
+MAIN_FIT = dict(thrust_main=5, t_assembly_c=20.0, t_block_hot_c=110.0, t_crank_hot_c=130.0, t_cold_c=-30.0, tolerance_mm=0.08)
+
+
+def main_fillet_fit(R=None):
+    """D-050: the largest main-journal fillet radius that clears the chamfered main shells.
+    Section through a main journal / web corner: s = axial distance from the web face.  The shell edge is at
+    g = (main_width - main_shell_width) / 2, its 45-deg bore chamfer c ends at s = g + c on the journal; the fillet R is
+    tangent to the journal at s = R.  Axial allowance per side = half the crank end float (thrust bearing at main 5)
+    + the differential thermal growth of the A356 block against the steel crank at the main farthest from the thrust
+    bearing (hot or cold, the larger) + a tolerance stack.  R = the largest 0.1 mm step with g + c - R >= allowance, and
+    the shell corner (s = g, r = r_j + c) stays inside the fillet's free space when the shell is shifted towards the web
+    by the allowance.  Returns the derivation (mm)."""
+    f = MAIN_FIT
+    a_al, a_st = MATERIALS[MAT["al_cast"]]["alpha"], MATERIALS[MAT["steel_qt"]]["alpha"]
+    d_max = max(abs(L.main_x(j) - L.main_x(f["thrust_main"])) for j in range(1, P.n_main + 1))
+    hot = (a_al * (f["t_block_hot_c"] - f["t_assembly_c"]) - a_st * (f["t_crank_hot_c"] - f["t_assembly_c"])) * d_max
+    cold = (a_al - a_st) * (f["t_cold_c"] - f["t_assembly_c"]) * d_max
+    allow = P.crank_end_float / 2 + max(abs(hot), abs(cold)) + f["tolerance_mm"]
+    g = (P.main_width - P.main_shell_width) / 2
+    c = P.main_shell_chamfer
+    r_max = math.floor((g + c - allow) / 0.1 + 1e-9) * 0.1
+    R = r_max if R is None else R
+    rj = P.main_dia / 2
+    corner = lambda shift: R - math.hypot(R - (g - shift), R - c)          # > 0: corner inside the fillet's free space
+    return dict(shell_edge_from_web_mm=g, chamfer_mm=c, land_mm=P.main_shell_width - 2 * c, end_float_half_mm=P.crank_end_float / 2,
+                thermal_hot_mm=hot, thermal_cold_mm=cold, farthest_main_from_thrust_mm=d_max, tolerance_mm=f["tolerance_mm"],
+                allowance_mm=allow, r_max_mm=round(r_max, 3), R_mm=R, axial_gap_nominal_mm=g + c - R, axial_gap_worst_mm=g + c - R - allow,
+                corner_clearance_nominal_mm=corner(0.0), corner_clearance_worst_mm=corner(allow), journal_radius_mm=rj)
+
+
 def undercut_ring(r, rf):
     """Semicircular relief groove (recessed / undercut journal fillet, D-048), as a body of revolution about +X to subtract:
     a true arc of radius rf centred on the web face (x = 0) at radius r + rf, x <= 0, so the groove is tangent to the journal
@@ -102,6 +150,35 @@ def throw_solid(k, cw=None, pin_fillet="undercut"):
     if P.pin_bore > 0:
         body = body - Pos(px - hw - P.web_thk - 1, py, pz) * Rot(Y=90) * Cylinder(P.pin_bore / 2, P.pin_width + 2 * P.web_thk + 2, align=CMIN)
     return body
+
+
+def fe_throw(k, cw, pin_fillet="undercut"):
+    """Throw k (pin, webs, counterweights) with its two main journals and the main fillets at its two webs: the solid of
+    the crank FE and of the oil-drilling check (D-050).  cw = (direction deg, half-angle deg)."""
+    hm = P.main_width / 2
+    thr = throw_solid(k, cw, pin_fillet=pin_fillet)
+    for j in (k, k + 1):
+        thr = thr + Pos(L.main_x(j) - hm, 0, 0) * Rot(Y=90) * Cylinder(P.main_dia / 2, P.main_width, align=CMIN)
+    thr = thr + Pos(L.main_x(k) + hm, 0, 0) * Rot(Z=180) * journal_fillet(P.main_dia / 2, P.main_fillet_r)
+    thr = thr + Pos(L.main_x(k + 1) - hm, 0, 0) * journal_fillet(P.main_dia / 2, P.main_fillet_r)
+    return thr
+
+
+def throw_inertia(cw):
+    """Polar moments of inertia about the crank axis (kg m2, D-050): {throw k: pin + webs + counterweights} and one main
+    journal with its two fillets.  The oil drillings (about 0.2 %) are not included."""
+    from OCP.BRepGProp import BRepGProp
+    from OCP.GProp import GProp_GProps
+    from OCP.gp import gp_Ax1, gp_Dir, gp_Pnt
+
+    def jx(s):
+        g = GProp_GProps()
+        BRepGProp.VolumeProperties_s(s.wrapped, g)
+        return g.MomentOfInertia(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(1, 0, 0))) * RHO_STEEL * 1e-15
+    hm = P.main_width / 2
+    main = Pos(-hm, 0, 0) * Rot(Y=90) * Cylinder(P.main_dia / 2, P.main_width, align=CMIN)
+    main = main + Pos(-hm, 0, 0) * journal_fillet(P.main_dia / 2, P.main_fillet_r) + Pos(hm, 0, 0) * Rot(Z=180) * journal_fillet(P.main_dia / 2, P.main_fillet_r)
+    return {k: jx(throw_solid(k, (cw[k][0], cw[k][1]))) for k in range(1, 9)}, jx(main)
 
 
 def _cw_capacity_curve(k=1):
@@ -222,10 +299,11 @@ def crankshaft(cw):
     for j in range(1, P.n_main + 1):
         mx = L.main_x(j)
         body = body + Pos(mx - hm, 0, 0) * Rot(Y=90) * Cylinder(P.main_dia / 2, P.main_width, align=CMIN)
-        if j > 1:
-            body = body + Pos(mx - hm, 0, 0) * Rot(Z=180) * fillet_ring(P.main_dia / 2, 2.5)
-        if j < P.n_main:
-            body = body + Pos(mx + hm, 0, 0) * fillet_ring(P.main_dia / 2, 2.5)
+        # main fillets on the journal at both web faces (D-050; before, the rings were mirrored into the webs)
+        if j > 1:                                     # web b of throw j - 1 at mx - hm, journal on its +x side
+            body = body + Pos(mx - hm, 0, 0) * journal_fillet(P.main_dia / 2, P.main_fillet_r)
+        if j < P.n_main:                              # web a of throw j at mx + hm, journal on its -x side
+            body = body + Pos(mx + hm, 0, 0) * Rot(Z=180) * journal_fillet(P.main_dia / 2, P.main_fillet_r)
     x_f = L.main_x(1) - hm
     x_r = L.main_x(P.n_main) + hm
     # front: seal/oil-pump-drive journal and damper nose

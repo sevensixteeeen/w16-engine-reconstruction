@@ -353,13 +353,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.9355214593461483,
     "relief groove": 5.320627392187621,
     "web contour": 8.584970516311786,
-    "web face": 5.293306616045533
+    "web face": 5.985775756288185
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.7369195650692415,
-    "web face at the main journal (main / web corner)": 5.293306616045533,
+    "web face at the main journal (main / web corner)": 6.131317490196459,
     "main / web corner at the other end of the main": 5.985775756288185
    }
   },
@@ -376,13 +377,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346237,
     "relief groove": 5.320627392188123,
     "web contour": 8.584970516311785,
-    "web face": 5.293306616045551
+    "web face": 5.985775756288147
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069245,
-    "web face at the main journal (main / web corner)": 5.293306616045551,
+    "web face at the main journal (main / web corner)": 6.131317490196523,
     "main / web corner at the other end of the main": 5.985775756288147
    }
   },
@@ -399,13 +401,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346205,
     "relief groove": 5.320627392187681,
     "web contour": 8.584970516311817,
-    "web face": 5.293306616045539
+    "web face": 5.985775756288177
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069272,
-    "web face at the main journal (main / web corner)": 5.293306616045539,
+    "web face at the main journal (main / web corner)": 6.131317490196487,
     "main / web corner at the other end of the main": 5.985775756288177
    }
   },
@@ -422,13 +425,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346191,
     "relief groove": 5.320627392187664,
     "web contour": 8.58497051631181,
-    "web face": 5.293306616045545
+    "web face": 5.985775756288176
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069268,
-    "web face at the main journal (main / web corner)": 5.293306616045545,
+    "web face at the main journal (main / web corner)": 6.1313174901965155,
     "main / web corner at the other end of the main": 5.985775756288176
    }
   },
@@ -445,13 +449,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.9355214593462033,
     "relief groove": 5.320627392187663,
     "web contour": 8.584970516311817,
-    "web face": 5.2933066160455375
+    "web face": 5.985775756288178
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069265,
-    "web face at the main journal (main / web corner)": 5.2933066160455375,
+    "web face at the main journal (main / web corner)": 6.131317490196492,
     "main / web corner at the other end of the main": 5.985775756288178
    }
   },
@@ -468,13 +473,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346198,
     "relief groove": 5.320627392187658,
     "web contour": 8.584970516311808,
-    "web face": 5.29330661604553
+    "web face": 5.985775756288176
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069259,
-    "web face at the main journal (main / web corner)": 5.29330661604553,
+    "web face at the main journal (main / web corner)": 6.131317490196501,
     "main / web corner at the other end of the main": 5.985775756288176
    }
   },
@@ -491,13 +497,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346197,
     "relief groove": 5.320627392187658,
     "web contour": 8.584970516311808,
-    "web face": 5.293306616045534
+    "web face": 5.985775756288176
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069252,
-    "web face at the main journal (main / web corner)": 5.293306616045534,
+    "web face at the main journal (main / web corner)": 6.131317490196501,
     "main / web corner at the other end of the main": 5.985775756288176
    }
   },
@@ -514,13 +521,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.9355214593461936,
     "relief groove": 5.320627392206037,
     "web contour": 8.584970516311817,
-    "web face": 5.293306616045533
+    "web face": 5.985775756288188
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069268,
-    "web face at the main journal (main / web corner)": 5.293306616045533,
+    "web face at the main journal (main / web corner)": 6.1313174901964995,
     "main / web corner at the other end of the main": 5.985775756288188
    }
   },
@@ -537,13 +545,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.9355214593461962,
     "relief groove": 5.320627392187664,
     "web contour": 8.584970516311806,
-    "web face": 5.293306616045532
+    "web face": 5.985775756288187
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069254,
-    "web face at the main journal (main / web corner)": 5.293306616045532,
+    "web face at the main journal (main / web corner)": 6.131317490196505,
     "main / web corner at the other end of the main": 5.985775756288187
    }
   },
@@ -560,13 +569,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346199,
     "relief groove": 5.320627392187677,
     "web contour": 8.5849705163118,
-    "web face": 5.29330661604553
+    "web face": 5.985775756288176
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.7369195650692415,
-    "web face at the main journal (main / web corner)": 5.29330661604553,
+    "web face at the main journal (main / web corner)": 6.1313174901964995,
     "main / web corner at the other end of the main": 5.985775756288176
    }
   },
@@ -583,13 +593,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346197,
     "relief groove": 5.320627392206038,
     "web contour": 8.584970516311817,
-    "web face": 5.29330661604553
+    "web face": 5.985775756288176
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069256,
-    "web face at the main journal (main / web corner)": 5.29330661604553,
+    "web face at the main journal (main / web corner)": 6.131317490196501,
     "main / web corner at the other end of the main": 5.985775756288176
    }
   },
@@ -606,13 +617,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346205,
     "relief groove": 5.320627392187634,
     "web contour": 8.584970516311824,
-    "web face": 5.293306616045539
+    "web face": 5.985775756288178
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069265,
-    "web face at the main journal (main / web corner)": 5.293306616045539,
+    "web face at the main journal (main / web corner)": 6.131317490196508,
     "main / web corner at the other end of the main": 5.985775756288178
    }
   },
@@ -629,13 +641,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.9355214593462184,
     "relief groove": 5.320627392188098,
     "web contour": 8.584970516311783,
-    "web face": 5.293306616045551
+    "web face": 5.985775756288141
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069243,
-    "web face at the main journal (main / web corner)": 5.293306616045551,
+    "web face at the main journal (main / web corner)": 6.131317490196519,
     "main / web corner at the other end of the main": 5.985775756288141
    }
   },
@@ -652,13 +665,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346214,
     "relief groove": 5.320627392187651,
     "web contour": 8.584970516311804,
-    "web face": 5.293306616045539
+    "web face": 5.985775756288176
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069243,
-    "web face at the main journal (main / web corner)": 5.293306616045539,
+    "web face at the main journal (main / web corner)": 6.131317490196514,
     "main / web corner at the other end of the main": 5.985775756288176
    }
   },
@@ -675,13 +689,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.935521459346245,
     "relief groove": 5.320627392187689,
     "web contour": 8.584970516311774,
-    "web face": 5.2933066160455775
+    "web face": 5.985775756288138
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069217,
-    "web face at the main journal (main / web corner)": 5.2933066160455775,
+    "web face at the main journal (main / web corner)": 6.131317490196533,
     "main / web corner at the other end of the main": 5.985775756288138
    }
   },
@@ -698,13 +713,14 @@
     "pin surface"
    ],
    "wall_mm": {
+    "main fillet": 3.9355214593461403,
     "relief groove": 5.320627392187641,
     "web contour": 8.584970516311802,
-    "web face": 5.293306616045528
+    "web face": 5.985775756288207
    },
    "wall_web_faces_mm": {
     "web face at the pin (outside the groove opening)": 7.736919565069245,
-    "web face at the main journal (main / web corner)": 5.293306616045528,
+    "web face at the main journal (main / web corner)": 6.131317490196448,
     "main / web corner at the other end of the main": 5.985775756288207
    }
   }
@@ -714,8 +730,9 @@
   "inlet_radius_with_chamfer_mm": 4.263937566452221,
   "outlet_to_big_end_shell_edge_mm": 4.643182874217729,
   "outlet_to_pin_end_mm": 5.518182874217729,
-  "inlet_to_main_shell_edge_mm": 3.7360624335477786,
-  "main_shell_groove_width_mm": 4.0
+  "inlet_to_main_shell_land_edge_mm": 2.7360624335477786,
+  "main_shell_groove_width_mm": 4.0,
+  "inlet_to_main_fillet_tangent_mm": 3.136062433547779
  },
  "drill_access": [
   {
@@ -903,10 +920,11 @@
   "drillings": 16,
   "only_pin_and_main_surfaces_cut": true,
   "min_wall_to_relief_groove_mm": 5.320627392187621,
+  "min_wall_to_main_fillet_mm": 3.9355214593461403,
   "min_wall_to_web_contour_mm": 8.584970516311774,
   "min_wall_web_faces_mm": {
    "web face at the pin (outside the groove opening)": 7.736919565069217,
-   "web face at the main journal (main / web corner)": 5.293306616045528,
+   "web face at the main journal (main / web corner)": 6.131317490196448,
    "main / web corner at the other end of the main": 5.985775756288138
   },
   "axis_to_outlet_normal_deg": 33.026883171911855,
@@ -915,6 +933,6 @@
   "drill_access_min_to_cw_radius_mm": 28.671089393782125,
   "shared_mains_min_drilling_to_drilling_mm": 3.5771075470056624,
   "shared_mains_min_inlet_separation_deg": 23.130927534972244,
-  "minutes": 0.1858999768892924
+  "minutes": 0.41435570319493614
  }
 }

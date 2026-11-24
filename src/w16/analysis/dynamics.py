@@ -116,7 +116,7 @@ def run(rpm, op=None, A_turb=None):
         mag = np.hypot(F[:, 0], F[:, 1])
         i = int(np.argmax(mag))
         mains[j] = dict(F=F, peak=float(mag.max()), mean=float(mag.mean()), peak_vec=F[i].tolist(), peak_alpha=float(AL[i]))
-    w_eff_main = P.main_width - 2.0                  # shell width less chamfers / groove allowance
+    w_eff_main = P.main_shell_width - 2 * P.main_shell_chamfer    # load-carrying land of the chamfered main shells (D-050; was 16 mm)
     w_eff_rod = P.rod_be_width - 1.5
     rod_peak_c = max(float(cf[c.no]["R"].max()) for c in L.CYLS)
     rod_peak_t = min(float(cf[c.no]["R"].min()) for c in L.CYLS)
@@ -184,25 +184,36 @@ def short_bearing_hmin(load_n, dia_mm, width_mm, rpm, clearance_ratio=0.0008, mu
 
 
 # ------------------------------------------------------------------ torsional vibration (lumped model)
-def torsional_model():
-    """Lumped model damper - throw1 ... throw8 - flywheel.  Returns J (kg m2), k (N m/rad), info."""
+def torsional_model(J_cad=None):
+    """Lumped model damper - throw1 ... throw8 - flywheel.  Returns J (kg m2), k (N m/rad), info.
+    J_cad: (dict throw -> kg m2 of pin + webs + counterweights, kg m2 of one main journal) from the CAD
+    (cranktrain.throw_inertia; D-050).  Without it the EST `J_throw_fixed` is used (fallback only: it is less than half
+    the CAD value)."""
     G = 80.0e3                                                    # MPa
     Dj, Lj, Lw, Lc, Dc, R = P.main_dia, P.main_width, P.web_thk, P.pin_width, P.pin_dia, P.throw
     W = 104.0                                                     # web width (mm, EST)
-    inv = (Lj + 0.8 * Lw) / Dj ** 4 + 0.75 * Lc / Dc ** 4 + 1.5 * R / (Lw * W ** 3)   # Carter formula, mm^-3
+    inv = (Lj + 0.8 * Lw) / Dj ** 4 + 0.75 * Lc / (Dc ** 4 - P.pin_bore ** 4) + 1.5 * R / (Lw * W ** 3)   # Carter formula, mm^-3
     k_throw = G * math.pi / (32 * inv) * 1e-3                     # N m/rad
     m_rec, m_rod_rot = masses()
     r = P.throw * 1e-3
-    J_throw = P.J_throw_fixed + (2 * m_rod_rot + 0.5 * 2 * m_rec) * r ** 2
+    J_rods = (2 * m_rod_rot + 0.5 * 2 * m_rec) * r ** 2
+    if J_cad is not None:
+        J_crank = {k: v + J_cad[1] for k, v in J_cad[0].items()}  # throw + one main journal
+        src = "CAD (pin, webs, counterweights + one main journal)"
+    else:
+        J_crank = {k: P.J_throw_fixed for k in range(1, 9)}
+        src = "EST J_throw_fixed"
+    J_th = [J_crank[k] + J_rods for k in range(1, 9)]
     k_front = G * math.pi * 50.0 ** 4 / (32 * 75.0) * 1e-3        # nose Ø50 x 75 (EST)
     k_rear = G * math.pi * Dj ** 4 / (32 * 45.0) * 1e-3
-    J = np.array([P.J_damper] + [J_throw] * 8 + [P.J_flywheel])
+    J = np.array([P.J_damper] + J_th + [P.J_flywheel])
     k = np.array([k_front] + [k_throw] * 7 + [k_rear])
-    return J, k, dict(k_throw=k_throw, J_throw=J_throw, k_front=k_front, k_rear=k_rear)
+    return J, k, dict(k_throw=k_throw, J_throw=float(np.mean(J_th)), J_throw_crank=float(np.mean(list(J_crank.values()))),
+                      J_throw_rods=J_rods, J_source=src, k_front=k_front, k_rear=k_rear)
 
 
-def torsional_modes():
-    J, k, info = torsional_model()
+def torsional_modes(J_cad=None):
+    J, k, info = torsional_model(J_cad)
     n = len(J)
     K = np.zeros((n, n))
     for i, ki in enumerate(k):
@@ -213,14 +224,14 @@ def torsional_modes():
     return f, Jh @ v, K, J, k, info
 
 
-def torsional_forced(loads, damping_ratio=0.02, c_damper=14.0):
+def torsional_forced(loads, damping_ratio=0.02, c_damper=14.0, J_cad=None):
     """Forced response to the full-load torque harmonics of every throw.
 
     loads: {rpm: result of run(rpm)}.  Structural damping (loss factor 2*zeta) plus a viscous damper
     coefficient c_damper (N m s/rad, EST) acting on the free-end inertia.
     Returns list of dicts with the vibratory torque amplitude (root-sum-square over orders) per shaft section.
     """
-    f, modes, K, J, k, info = torsional_modes()
+    f, modes, K, J, k, info = torsional_modes(J_cad)
     out = []
     for rpm, res in sorted(loads.items()):
         om = rpm * math.pi / 30

@@ -2,8 +2,22 @@
 
 _Last updated: 2026-11-24_
 
-Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-049) first. Run everything from the project root with
+Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-050) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
+
+## 2026-11-24 (later) — D-050 main fillets (option (c)), crank FE supports, torsional inertia; convergence run pending
+
+- Committed before this step: `8f95f8b` (D-049).
+- **Main fillets:** R1.6 on the journal (largest that keeps 0.36 mm axial allowance: end float, block / crank thermal growth,
+  tolerances), main shells 16 mm with 1.0 x 45 deg chamfers -> 14 mm land; main specific load 33.8 -> 38.6 MPa at the model peak.
+  If the converged main-fillet factor ends below 1.5, switch to option (b).
+- **Crank FE:** main fillets in the slice, refined like the grooves; mains supported by balanced bearing-reaction pressures on the
+  lands + 3-2-1 point support (was: journals fully fixed); chunked CG solver (identical results, less memory).
+- **Convergence tool:** refines and reports the pin groove and the main fillets with the 5 % rule; the user runs it next.
+- **Torsional:** CAD throw inertia in the model from the next regeneration (first mode about 274 Hz; order 2.5 at about 6,565 rpm,
+  inside the operating range - the report says the viscous damper must address it).
+- **Regeneration now needs the reports stage too** (torsional model, main-bearing width), plus export, crank FE, render, drawings,
+  docs and a targeted interference check of the crankshaft and the main shells.
 
 ## 2026-11-24 — D-048 converged on the hollow pin; D-049 solid pin + oil drillings; convergence re-run pending
 

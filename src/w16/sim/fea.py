@@ -153,18 +153,38 @@ def spd_solve(A, b):
     return x
 
 
+ELASTIC_CHUNK = 20000          # elements per block in the low-memory assembly / stress recovery (D-050)
+
+
 def solve_elastic(m, mt, fixed, tractions=(), body=None, thermal=None, order=2, fixed_dirs=None, pressures=(), balance=None, points=(),
-                  factor_cache=None, iterative=False):
+                  factor_cache=None, iterative=False, lowmem=None):
     """fixed: facet index array (all displacement components fixed) ; tractions: list of (facets, fn(x) -> 3 x ... array, MPa);
     body: fn(x) -> force density N/mm3; thermal: nodal temperature rise array on P1 nodes (K).
     pressures: list of (facets, p MPa) acting against the outward facet normal.  balance: (facets, fn, component) - a traction
     shape scaled so that the total applied force along that component is exactly zero (load-controlled support, e.g. a
     bearing reaction).  points: list of (node index, components) fixed at single nodes (statically determinate support).
-    factor_cache: dict shared by load cases on the same mesh, material and constraints - the factorisation is reused."""
+    factor_cache: dict shared by load cases on the same mesh, material and constraints - the factorisation is reused.
+    lowmem (default: with iterative): the stiffness and the element stresses are built in blocks of ELASTIC_CHUNK elements, so
+    the basis values at the quadrature points (~40 kB per P2 element) never exist for the whole mesh at once (D-050: same
+    matrix and stresses as the one-block path; tractions, pressures, supports only)."""
     e = ElementVector(ElementTetP2() if order == 2 else ElementTetP1())
-    ib = Basis(m, e, intorder=4 if order == 2 else 2)
+    qo = 4 if order == 2 else 2
     lam, mu = lame_parameters(mt["E"], mt["nu"])
-    K = asm(linear_elasticity(lam, mu), ib)
+    lowmem = iterative if lowmem is None else lowmem
+    if lowmem:
+        if body is not None or thermal is not None:
+            raise NotImplementedError("lowmem: body and thermal loads need the one-block path")
+        chunks = [np.arange(i, min(i + ELASTIC_CHUNK, m.t.shape[1])) for i in range(0, m.t.shape[1], ELASTIC_CHUNK)]
+        ib = Basis(m, e, intorder=1, elements=np.array([0]))           # dof numbering only (global)
+        K = None
+        for ch in chunks:
+            Kc = asm(linear_elasticity(lam, mu), Basis(m, e, intorder=qo, elements=ch))
+            K = Kc if K is None else K + Kc
+            del Kc
+        K = K.tocsr()
+    else:
+        ib = Basis(m, e, intorder=qo)
+        K = asm(linear_elasticity(lam, mu), ib)
     f = np.zeros(ib.N)
 
     def resultant(vec):
@@ -231,16 +251,21 @@ def solve_elastic(m, mt, fixed, tractions=(), body=None, thermal=None, order=2, 
         u[I] = spd_solve(K[I][:, I].tocsc(), f[I])
     t_solve = time.time() - t0
     # stresses at quadrature points -> element means and nodal displacement magnitudes
-    ui = ib.interpolate(u)
-    eps = sym_grad(ui)
-    tr = eps[0, 0] + eps[1, 1] + eps[2, 2]
-    sig = 2 * mu * eps
-    th_s = (3 * lam + 2 * mu) * mt["alpha"] * Tq.value if Tq is not None else 0.0
-    for i in range(3):
-        sig[i, i] = sig[i, i] + lam * tr - th_s
-    vm = np.sqrt(0.5 * ((sig[0, 0] - sig[1, 1]) ** 2 + (sig[1, 1] - sig[2, 2]) ** 2 + (sig[2, 2] - sig[0, 0]) ** 2) +
-                 3 * (sig[0, 1] ** 2 + sig[1, 2] ** 2 + sig[0, 2] ** 2))
-    vm_el = vm.mean(axis=1)
+
+    def vm_mean(basis, Tqv):
+        eps = sym_grad(basis.interpolate(u))
+        tr = eps[0, 0] + eps[1, 1] + eps[2, 2]
+        sig = 2 * mu * eps
+        th_s = (3 * lam + 2 * mu) * mt["alpha"] * Tqv if Tqv is not None else 0.0
+        for i in range(3):
+            sig[i, i] = sig[i, i] + lam * tr - th_s
+        vm = np.sqrt(0.5 * ((sig[0, 0] - sig[1, 1]) ** 2 + (sig[1, 1] - sig[2, 2]) ** 2 + (sig[2, 2] - sig[0, 0]) ** 2) +
+                     3 * (sig[0, 1] ** 2 + sig[1, 2] ** 2 + sig[0, 2] ** 2))
+        return vm.mean(axis=1)
+    if lowmem:
+        vm_el = np.concatenate([vm_mean(Basis(m, e, intorder=qo, elements=ch), None) for ch in chunks])
+    else:
+        vm_el = vm_mean(ib, Tq.value if Tq is not None else None)
     s1 = None
     nd = ib.nodal_dofs
     U = np.vstack([u[nd[0]], u[nd[1]], u[nd[2]]])
@@ -576,74 +601,146 @@ def case_piston(thermal_only=False):
     save("piston", rec)
 
 
-CRANK_FILLET_MESH = 1.0          # mm, element size along both pin-fillet circles (D-047 standard; was 2.4 mm in a 34 mm ball)
+CRANK_FILLET_MESH = 1.0          # mm, element size along the pin-groove and main-fillet circles (D-047 standard; D-050 mains)
 GROOVE_DEPTH = 2.5               # mm, depth of the R2.5 semicircular relief groove into the web (cranktrain.undercut_ring, D-048)
+MAIN_FILLET_BALL = 3.0           # mm, radius (and spacing) of the refinement balls along the main-fillet circles (D-050)
+CRANK_POINT_REACTION_MAX = 0.01  # the 3-2-1 point support may carry at most 1 % of the pin load (loads are self-balanced)
+
+
+def crank_geometry(k=3):
+    """Reference geometry of the crank FE slice (throw k + mains k, k + 1): pin centre, web faces, main-fillet faces."""
+    psi = math.radians(L.PIN_PHASE[k])
+    pc = np.array([L.pin_x(k), P.throw * math.sin(psi), P.throw * math.cos(psi)])
+    hm = P.main_width / 2
+    return dict(k=k, psi=psi, pc=pc, e_pin=np.array([0.0, math.sin(psi), math.cos(psi)]),
+                xa=pc[0] - P.pin_width / 2, xb=pc[0] + P.pin_width / 2,                 # pin / web faces (relief grooves)
+                xfa=L.main_x(k) + hm, xfb=L.main_x(k + 1) - hm,                         # web / main faces (main fillets)
+                mains=(L.main_x(k), L.main_x(k + 1)), Rm=P.main_fillet_r, rf0=P.pin_dia / 2 + 1.25,
+                land=P.main_shell_width - 2 * P.main_shell_chamfer)
+
+
+def crank_refine(G):
+    """Standard refinement: 1.0 mm along both pin-groove circles (40 balls of 4.5 mm, D-047) and both main-fillet circles
+    (balls of MAIN_FILLET_BALL at the same spacing, D-050)."""
+    pc, psi = G["pc"], G["psi"]
+    ref = [((G["xa"], pc[1], pc[2]), 34, 2.4), ((G["xb"], pc[1], pc[2]), 34, 2.4)]
+    e1, up = np.array([0.0, math.cos(psi), -math.sin(psi)]), np.array([0.0, math.sin(psi), math.cos(psi)])
+    for xf in (G["xa"], G["xb"]):
+        for a in np.linspace(0, 2 * math.pi, 40, endpoint=False):
+            ref.append((tuple(np.array([xf, pc[1], pc[2]]) + G["rf0"] * (math.cos(a) * e1 + math.sin(a) * up)), 4.5, CRANK_FILLET_MESH))
+    rm0 = P.main_dia / 2 + G["Rm"] / 2
+    n = int(math.ceil(2 * math.pi * rm0 / MAIN_FILLET_BALL))
+    for xf in (G["xfa"] - G["Rm"] / 2, G["xfb"] + G["Rm"] / 2):
+        for a in np.linspace(0, 2 * math.pi, n, endpoint=False):
+            ref.append(((xf, rm0 * math.sin(a), rm0 * math.cos(a)), MAIN_FILLET_BALL, CRANK_FILLET_MESH))
+    return ref
+
+
+def crank_zones(m, G):
+    """Element masks: pin groove zone (within 5 mm of either groove circle), main fillet zone (within R + 1.5 mm of the
+    arc-centre circle of either main fillet), web, ligament behind the groove; plus element centres."""
+    cen = m.p[:, m.t].mean(axis=1)
+    pc, Rm = G["pc"], G["Rm"]
+    rp = np.hypot(cen[1] - pc[1], cen[2] - pc[2])
+    ra = np.hypot(cen[1], cen[2])
+    xa, xb = G["xa"], G["xb"]
+    fz = (np.hypot(cen[0] - xa, rp - G["rf0"]) < 5.0) | (np.hypot(cen[0] - xb, rp - G["rf0"]) < 5.0)
+    rc = P.main_dia / 2 + Rm
+    mz = ((np.hypot(cen[0] - (G["xfa"] - Rm), ra - rc) < Rm + 1.5) | (np.hypot(cen[0] - (G["xfb"] + Rm), ra - rc) < Rm + 1.5)) & ~fz
+    web = (((cen[0] < xa) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb) & (cen[0] < xb + P.web_thk))) & ~fz & (ra > P.main_dia / 2 + 6.0)
+    # ligament behind the groove: web material between the groove bottom and the far web face, radially across the groove
+    # opening, outside the main-journal footprint + 6 mm (inside it the main journal continues behind the groove)
+    lig = ((((cen[0] < xa - GROOVE_DEPTH) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb + GROOVE_DEPTH) & (cen[0] < xb + P.web_thk)))
+           & (rp > P.pin_dia / 2) & (rp < P.pin_dia / 2 + 2 * GROOVE_DEPTH) & (ra > P.main_dia / 2 + 6.0))
+    return dict(pin_groove=fz, main_fillet=mz, web=web, ligament=lig), cen
+
+
+def crank_solve(m, G, F, mt):
+    """Crank slice under the pin load F (N) - D-050 supports.  Pin: cosine load towards the crank axis on the central part of
+    the pin (D-047 load model).  Mains: the bearing reactions, a compressive pressure on the 14 mm land of each main
+    shell (cosine around the half facing the load, parabolic across the land, zero at the land edges), scaled so that it
+    balances the pin load exactly; the slice is held by a statically determinate 3-2-1 point support on its two end faces,
+    which carries only the residual of the mesh (checked <= 1 %).  Until D-049 both journal surfaces were fully fixed -
+    a fixed boundary on the journal would sit on the main fillet."""
+    pc, e_pin = G["pc"], G["e_pin"]
+    pin = facets(m, lambda x: (np.hypot(x[1] - pc[1], x[2] - pc[2]) < P.pin_dia / 2 + 0.05) & (np.abs(x[0] - pc[0]) < P.pin_width / 2 - 2.6))
+    hl = G["land"] / 2
+    mx0, mx1 = G["mains"]
+    lands = facets(m, lambda x: (np.hypot(x[1], x[2]) < P.main_dia / 2 + 0.05) & ((np.abs(x[0] - mx0) <= hl + 0.01) | (np.abs(x[0] - mx1) <= hl + 0.01)))
+    fn_pin, _ = cos_load(pc, (1, 0, 0), -e_pin, F, m, pin)
+
+    def fn_land(x):
+        r = x.copy()
+        r[0] = 0.0
+        rn = r / np.maximum(np.sqrt((r * r).sum(0)), 1e-9)
+        w = np.clip(-(rn * e_pin.reshape(3, 1, 1)).sum(0), 0, None)                       # half facing -e_pin (the load)
+        xm = np.where(np.abs(x[0] - mx0) < np.abs(x[0] - mx1), mx0, mx1)
+        w = w * np.clip(1.0 - ((x[0] - xm) / hl) ** 2, 0, None)                            # parabolic across the land
+        return w * e_pin.reshape(3, 1, 1)                                                   # pushes the journal towards +e_pin
+    comp = int(np.argmax(np.abs(e_pin)))
+    x0 = mx0 - P.main_width / 2
+    x1 = mx1 + P.main_width / 2
+    node = lambda q: int(np.argmin(((m.p - np.reshape(q, (3, 1))) ** 2).sum(0)))
+    pts = [(node((x0, 0.0, 0.0)), (0, 1, 2)), (node((x1, 0.0, 0.0)), (1, 2)), (node((x1, 0.0, 0.6 * P.main_dia / 2)), (1,))]
+    s = solve_elastic(m, mt, None, tractions=[(pin, fn_pin)], balance=(lands, fn_land, comp), points=pts, iterative=True)
+    pr = float(np.linalg.norm(s["point_reaction"]))
+    if pr > CRANK_POINT_REACTION_MAX * F:
+        raise RuntimeError(f"crank: point-support reaction {pr:.1f} N > {CRANK_POINT_REACTION_MAX:.0%} of the pin load")
+    # pin deflection relative to the main lands, along the load
+    nodes = lambda fc: np.unique(m.facets[:, fc])
+    U = s["U"]
+    defl = float(((U[:, nodes(pin)].mean(1) - U[:, nodes(lands)].mean(1)) @ -e_pin))
+    info = dict(point_reaction_N=s["point_reaction"].tolist(), point_reaction_pct=100 * pr / F, balance_force_N=np.asarray(s["balance_force"]).tolist(),
+                applied_force_N=s["applied"].tolist(), pin_deflection_rel_mains_mm=defl, land_mm=G["land"], pin_facets=int(len(pin)), land_facets=int(len(lands)))
+    return s, info
+
+
+CRANK_BC = ("bay simply supported on its two main bearings (D-050): bearing reactions as compressive pressures on the 14 mm shell "
+            "lands (cosine around the loaded half, parabolic across the land), balanced to the pin load; 3-2-1 point support on the "
+            "slice end faces (carries only the mesh residual, <= 1 %); pin load on the central part of the pin (D-047); pulsating "
+            "load, alternating stress = half the peak; real main fillets R{:.1f} (D-050); bending only - combined bending + torsion "
+            "at the fillets is an open item (D-047); no oil drillings (D-049)")
 
 
 def case_crank():
-    """Crank throw 3 in bending.  D-047 (2026-11-21): undercut pin fillets (cranktrain default), 1.0 mm elements along both
-    fillet circles (40 refinement balls each), CG solver (the direct factorisation of ~1 M dof is too large), and the
-    fatigue factor on the fillet-zone peak instead of the whole-part 99.9th percentile.  D-048 (2026-11-22): the groove is a
-    semicircular relief groove (cranktrain.undercut_ring); the web stress is also reported in the 7.0 mm ligament behind the
-    groove.  The mesh-converged fillet peak is tools/crank_groove_convergence.py (this run is the standard 1.0 mm mesh).
-    D-049 (2026-11-24): solid crankpin (no lightening bore); the oil drillings are not in the FE."""
+    """Crank throw 3 in bending.  D-047 (2026-11-21): undercut pin fillets, 1.0 mm elements along both fillet circles, CG
+    solver, fatigue factor on the fillet-zone peak.  D-048 (2026-11-22): semicircular relief groove; web and ligament
+    stresses.  D-049 (2026-11-24): solid crankpin; no oil drillings in the FE.  D-050 (2026-11-24): real R1.6 main fillets
+    in the slice, refined like the grooves and reported with their own factor; the mains are supported by bearing
+    reactions on the shell lands instead of fixed journal surfaces (crank_solve).  The mesh-converged peaks of both
+    features are tools/crank_groove_convergence.py (this run is the standard 1.0 mm mesh)."""
     R = results()["dynamics"]
     from ..cad.assembly import _cw
     cw, _ = _cw()
     k = 3
-    thr = CT.throw_solid(k, (cw[k][0], cw[k][1]))
-    hm = P.main_width / 2
-    for j in (k, k + 1):
-        thr = thr + Pos(L.main_x(j) - hm, 0, 0) * Rot(Y=90) * Cylinder(P.main_dia / 2, P.main_width, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    thr = CT.fe_throw(k, (cw[k][0], cw[k][1]))
     mt = mat("steel_qt")
-    psi = math.radians(L.PIN_PHASE[k])
-    pc = np.array([L.pin_x(k), P.throw * math.sin(psi), P.throw * math.cos(psi)])
-    xa, xb = pc[0] - P.pin_width / 2, pc[0] + P.pin_width / 2
-    ref = [((xa, pc[1], pc[2]), 34, 2.4), ((xb, pc[1], pc[2]), 34, 2.4)]
-    rf0 = P.pin_dia / 2 + 1.25                                        # centre radius of the fillet zone
-    e1, up = np.array([0.0, math.cos(psi), -math.sin(psi)]), np.array([0.0, math.sin(psi), math.cos(psi)])
-    for xf in (xa, xb):
-        for a in np.linspace(0, 2 * math.pi, 40, endpoint=False):
-            ref.append((tuple(np.array([xf, pc[1], pc[2]]) + rf0 * (math.cos(a) * e1 + math.sin(a) * up)), 4.5, CRANK_FILLET_MESH))
-    m, st = mesh_shape(thr, 5.0, "crank", refine=ref)
-    mains = facets(m, lambda x: (np.hypot(x[1], x[2]) < P.main_dia / 2 + 0.05) & ((x[0] < L.main_x(k) + hm + 0.01) | (x[0] > L.main_x(k + 1) - hm - 0.01)))
-    pin = facets(m, lambda x: (np.hypot(x[1] - pc[1], x[2] - pc[2]) < P.pin_dia / 2 + 0.05) & (np.abs(x[0] - pc[0]) < P.pin_width / 2 - 2.6))
-    F = 2 * 0.0 + R["F_design_gas"]                                   # one rod at design peak pressure; partner cylinder near BDC
-    e_pin = np.array([0, math.sin(psi), math.cos(psi)])
-    fn, p0 = cos_load(pc, (1, 0, 0), -e_pin, F, m, pin)
-    s = solve_elastic(m, mt, mains, tractions=[(pin, fn)], iterative=True)
+    G = crank_geometry(k)
+    m, st = mesh_shape(thr, 5.0, "crank", refine=crank_refine(G))
+    F = R["F_design_gas"]                                             # one rod at design peak pressure; partner cylinder near BDC
+    s, info = crank_solve(m, G, F, mt)
     pk, p999, loc = peak(m, s["vm"])
     vm = np.asarray(s["vm"])
-    cen = m.p[:, m.t].mean(axis=1)
-    rp = np.hypot(cen[1] - pc[1], cen[2] - pc[2])
-    fz = (np.hypot(cen[0] - xa, rp - rf0) < 5.0) | (np.hypot(cen[0] - xb, rp - rf0) < 5.0)
-    web = (((cen[0] < xa) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb) & (cen[0] < xb + P.web_thk))) & ~fz & (np.hypot(cen[1], cen[2]) > P.main_dia / 2 + 6.0)
-    # ligament behind the groove: web material between the groove bottom (GROOVE_DEPTH into the web) and the far web face,
-    # radially across the groove opening, outside the main-journal footprint + 6 mm (as the web zone): inside it the main
-    # journal continues behind the groove, and the main-journal / web corner of this slice is unfilleted (its peak is not a
-    # ligament stress)
-    lig = ((((cen[0] < xa - GROOVE_DEPTH) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb + GROOVE_DEPTH) & (cen[0] < xb + P.web_thk)))
-           & (rp > P.pin_dia / 2) & (rp < P.pin_dia / 2 + 2 * GROOVE_DEPTH) & (np.hypot(cen[1], cen[2]) > P.main_dia / 2 + 6.0))
+    Z, cen = crank_zones(m, G)
     zone = lambda msk: dict(vm_max_MPa=float(vm[msk].max()), vm_p999_MPa=float(np.percentile(vm[msk], 99.9)),
                             at=cen[:, int(np.argmax(np.where(msk, vm, -1)))].round(2).tolist())
-    fil, wb, lg = zone(fz), zone(web), zone(lig)
+    fil, mf, wb, lg = zone(Z["pin_groove"]), zone(Z["main_fillet"]), zone(Z["web"]), zone(Z["ligament"])
     rec = dict(case="crank throw 3 in bending", material=mt, mesh=st, inputs=dict(force_N=F, direction="towards the crank axis (firing TDC)",
                                                                                  pin_fillet="semicircular relief groove R2.5 (D-047 / D-048)", fillet_mesh_mm=CRANK_FILLET_MESH,
                                                                                  web_thk_mm=P.web_thk, groove_depth_mm=GROOVE_DEPTH,
                                                                                  web_remaining_at_groove_mm=P.web_thk - GROOVE_DEPTH,
-                                                                                 pin_bore_mm=P.pin_bore,
+                                                                                 pin_bore_mm=P.pin_bore, main_fillet_r_mm=P.main_fillet_r, main_land_mm=G["land"],
                                                                                  oil_drillings="not modelled (D-049): stress at the drilling exits is not assessed"),
                results=dict(applied_force_check_N=s["applied"].tolist(), vm_max_MPa=pk, vm_p999_MPa=p999, vm_max_location=loc,
                             fillet_vm_max_MPa=fil["vm_max_MPa"], fillet_vm_p999_MPa=fil["vm_p999_MPa"], fillet_vm_max_location=fil["at"],
+                            main_fillet_vm_max_MPa=mf["vm_max_MPa"], main_fillet_vm_p999_MPa=mf["vm_p999_MPa"], main_fillet_vm_max_location=mf["at"],
                             web_vm_max_MPa=wb["vm_max_MPa"], web_vm_p999_MPa=wb["vm_p999_MPa"],
                             ligament_vm_max_MPa=lg["vm_max_MPa"], ligament_vm_p999_MPa=lg["vm_p999_MPa"], ligament_vm_max_location=lg["at"],
-                            pin_deflection_mm=float(np.sqrt((s["U"] ** 2).sum(0)).max()),
+                            pin_deflection_mm=info["pin_deflection_rel_mains_mm"], supports=info,
                             dofs=s["dofs"], solve_s=s["t_solve"], fatigue_limit_MPa=mt["fatigue"],
-                            factor_on_fillet_max=mt["fatigue"] / (0.5 * fil["vm_max_MPa"])),
-               boundary_conditions="both main-journal surfaces fully fixed (stiffer than real bearings -> fillet stress over-predicted); load on the central part of the pin; "
-                                   "pulsating load, alternating stress = half the peak; the main-journal / web corners are unfilleted in this slice, so the "
-                                   "whole-part peak can sit there - the fatigue factor uses the pin-fillet zone (within 5 mm of either fillet circle); "
-                                   "bending only - combined bending + torsion at the fillet is an open item (D-047); no oil drillings (D-049)")
+                            factor_on_fillet_max=mt["fatigue"] / (0.5 * fil["vm_max_MPa"]),
+                            factor_on_main_fillet_max=mt["fatigue"] / (0.5 * mf["vm_max_MPa"])),
+               boundary_conditions=CRANK_BC.format(P.main_fillet_r))
     picture(m, cell=s["vm"], title="von Mises", units="[MPa]", path=os.path.join(OUT, "crank_throw_vm.png"), view=(0.3, -1, 0.3), clim=(0, p999))
     save("crank", rec)
 

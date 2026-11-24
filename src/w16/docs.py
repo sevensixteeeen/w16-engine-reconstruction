@@ -125,7 +125,7 @@ MFG = [  # component, material, process, critical dimensions, tolerance class, s
      "bore plateau honed Rpk<0.2; deck Rz 6", "coolant 95-110 degC; liner top ~150-170 degC (calc.)", "135 bar design gas pressure; main bearing 37 kN; head bolt clamp", "CT scan, pressure tests, CMM, bore form"),
     ("Crankcase lower section (bearing support)", "AlSi7Mg0.3-T6 with cast-in EN-GJS-600 bearing covers", "sand casting around pre-machined iron inserts; line boring assembled with the upper section", "main bore line; joint face; insert position", "main bore IT6, coaxiality 0.02 (class)", "joint Rz 6", "oil 100-140 degC", "main bearing loads 37 kN peak, 4 bolts per bearing", "X-ray of insert bond, CMM"),
     ("Cylinder heads", "AlSi7Mg0.3-T6 (+Cu variant for hot strength)", "low-pressure sand casting, HIP, T6; valve seats and guides shrink-fitted; cam line bored with caps", "chamber volume (CR), valve seat run-out to guide, cam bore line, port positions", "seat run-out 0.03, cam bores IT6, joint flatness 0.03 (classes)", "ports as cast + CNC blended throats; joint Rz 6", "roof ~230 degC mean gas side (1-D), coolant 95-110 degC", "135 bar on roof, bolt clamp, thermal gradient", "CT scan, leak test, CMM, flow bench"),
-    ("Crankshaft", "42CrMo4 (alternative 34CrNiMo6), QT, nitrided", "closed-die forging (twisted or as-forged throws), rough machining, QT, finish turning, drilling, nitriding, grinding, lapping, balancing", "journal diameters 68/56, throw 42.868, pin phasing (non-uniform, see table), main fillets R2.5, pin relief grooves R2.5 x 2.5 deep, solid pins, dia 5 oil drilling per rod", "journals IT5, phasing +/-0.05 deg, run-out 0.02 (classes)", "journals Ra 0.1", "oil 100-150 degC", "bending from 78 kN design rod force, torsion mean 1.6 kN m + vibratory ~1.2 kN m", "MPI, CMM, hardness depth, balance"),
+    ("Crankshaft", "42CrMo4 (alternative 34CrNiMo6), QT, nitrided", "closed-die forging (twisted or as-forged throws), rough machining, QT, finish turning, drilling, nitriding, grinding, lapping, balancing", "journal diameters 68/56, throw 42.868, pin phasing (non-uniform, see table), main fillets R1.6 (main shells chamfered 1.0 x 45 deg), pin relief grooves R2.5 x 2.5 deep, solid pins, dia 5 oil drilling per rod", "journals IT5, phasing +/-0.05 deg, run-out 0.02 (classes)", "journals Ra 0.1", "oil 100-150 degC", "bending from 78 kN design rod force, torsion mean 1.6 kN m + vibratory ~1.2 kN m", "MPI, CMM, hardness depth, balance"),
     ("Connecting rods", "Ti-6Al-4V (forged, STA)", "die forging, machining, shot peening, anti-galling coating on thrust faces (CrN/MoS2)", "centre distance 164, bores, width 17.75, weight", "bores IT6, parallelism 0.02/100 (classes)", "peened; bores honed", "~150 degC", "78 kN compression (design), 20 kN tension at overspeed", "FPI, CMM, weight split"),
     ("Pistons", "AlSi12CuMgNi forged (4032) or 2618 for higher strength", "forging, CNC turning with oval/barrel skirt, pin-bore profiling, anodising, skirt coating", "skirt profile and clearance, compression height 38.5, ring grooves, crown tilt", "skirt profile +/-0.005, grooves IT6 (classes)", "pin bore Ra 0.2", "crown temperature: see the piston FE (section 8 of the report)", "135 bar gas, 31,700 m/s2 at overspeed", "CMM, ultrasonic, groove gauges"),
     ("Valves", "intake X45CrSi9-3 / titanium option; exhaust NiCr20TiAl (Nimonic 80A), hollow sodium-filled", "forging / friction welding, grinding, nitriding or chrome stem", "stem dia 6, seat angle, length (short/long types)", "stem IT5-class, seat run-out 0.02", "stem Ra 0.2", "exhaust head 750-850 degC (typical; not simulated)", "seating force, 5,300 m/s2 nose deceleration", "eddy current, X-ray of sodium fill"),
@@ -298,6 +298,17 @@ def piston_hot(E, h):
                 method=h.get("method", ""), t_oil=t_oil, uts=uts, gt=gt, rod_f=rod_f, rod_d50=rod_d50, m_rec=m_rec,
                 best_cooling=min(sens, key=lambda s: s["T_crown_mean_C"]) if sens else None,
                 T_crown=pis["results"].get("thermal", {}).get("T_crown_mean_C"))
+
+
+def torsional_note(dyn):
+    """D-050: the first-mode order-2.5 resonance, stated when it lies inside the operating range."""
+    n25 = dyn.get("torsional_crit_rpm", {}).get("2.5")
+    if n25 is None:
+        return ""
+    if n25 <= P.rpm_max:
+        return (f"; **its order-2.5 resonance at about {n25:,.0f} rpm lies inside the operating range** (up to {P.rpm_max:,.0f} rpm, "
+                f"rated {P.rpm_rated:,.0f}) - the viscous damper at the free end must address it")
+    return f"; its order-2.5 resonance (about {n25:,.0f} rpm) is above the governed speed"
 
 
 def cad_balance_note(cw):
@@ -865,7 +876,7 @@ torque with two turbochargers from about 2,000 rpm, consistent with the publishe
 
 ### 7.2 Crank train
 Rod force {dyn.get('rod_peak_comp', 0) / 1e3:.1f} kN compression at full load, {dyn.get('rod_peak_tens_overspeed', 0) / 1e3:.1f} kN tension at {P.rpm_overspeed:.0f} rpm; main bearing peak {dyn.get('main_peak', 0) / 1e3:.1f} kN.
-With fully balanced throws the free forces and moments would be {dyn.get('F_free_peak', float('nan')):.0f} N and {dyn.get('M_free_peak', float('nan')):.0f} N m at rated speed (higher orders only). First torsional mode {dyn.get('torsional_f', [0, 0])[1]:.0f} Hz (lumped model).
+With fully balanced throws the free forces and moments would be {dyn.get('F_free_peak', float('nan')):.0f} N and {dyn.get('M_free_peak', float('nan')):.0f} N m at rated speed (higher orders only). First torsional mode {dyn.get('torsional_f', [0, 0])[1]:.0f} Hz (lumped model, CAD throw inertia){torsional_note(dyn)}.
 {img('08_SIMULATIONS/analytical/torque_and_bearing_loads.png', 'Torque ripple and main-bearing load loci.', 90)}
 
 ### 7.3 Thermal, lubrication, fuel

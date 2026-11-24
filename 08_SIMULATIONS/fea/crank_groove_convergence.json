@@ -76,7 +76,10 @@
     "effective_local_size_mm": 1.0
    }
   ],
-  "pin_bore_mm": 28.0
+  "pin_bore_mm": 28.0,
+  "supports": "both main-journal surfaces fully fixed (model before D-050)",
+  "main_fillet_r_mm": null,
+  "note_model": "no main fillets in the slice (the CAD rings were misplaced until D-050)"
  },
  "semicircle_hollow_pin": {
   "volume_mm3": 505172.4966073655,
@@ -236,6 +239,9 @@
   },
   "note_ligament": "2026-11-23: the ligament_vm_* values of these runs are NOT ligament results - their maximum sits 0.5 mm inside the far web face, 34.6 mm from the crank axis, i.e. at the unfilleted main-journal / web corner of the FE slice (a modelling artefact, see fea.case_crank boundary_conditions). The ligament zone now excludes 6 mm round the main journal (as the web zone); the ligament stress is taken from the regenerated crank FE (1.0 mm is adequate there: the web stress is mesh-independent, 78.9-79.6 MPa).",
   "pin_bore_mm": 28.0,
-  "note_superseded": "Solved on the hollow pin (28 mm lightening bore) of D-048. Superseded by D-049 (solid pin, 2026-11-24): the bore reached under the main journals, so it could not be machined or plugged; the throw model changed and the convergence is re-run on the solid pin (key `semicircle`). Kept for the record."
+  "note_superseded": "Solved on the hollow pin (28 mm lightening bore) of D-048. Superseded by D-049 (solid pin, 2026-11-24): the bore reached under the main journals, so it could not be machined or plugged; the throw model changed and the convergence is re-run on the solid pin (key `semicircle`). Kept for the record.",
+  "supports": "both main-journal surfaces fully fixed (model before D-050)",
+  "main_fillet_r_mm": null,
+  "note_model": "no main fillets in the slice (the CAD rings were misplaced until D-050)"
  }
 }
