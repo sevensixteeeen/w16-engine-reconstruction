@@ -1,0 +1,241 @@
+{
+ "note": "Crank throw 3 is solved exactly as `fea.case_crank` (same load, supports, standard 1.0 mm fillet-circle mesh, CG solver), then again with extra local refinement in a ball (default radius 3 mm) centred on the fillet-zone peak of the standard mesh, at 0.7 / 0.5 / 0.35 mm.  Converged (criterion of the user, 2026-11-23): the peak in the refined ball changes by less than 5 % between the two finest meshes; otherwise the result is NOT CONVERGED and only the series is reported (no value is picked).  Each run also gives the web stress (as case_crank) and the stress in the ligament behind the groove (web 9.5 mm, 7.0 mm remaining behind the 2.5 mm groove).",
+ "semicircle_repeatability_1mm": {
+  "note": "First run 2026-11-22. NOT a convergence check: Mesh.MeshSizeMin was left at the mesh_shape default (h / 5 = 1.0 mm), so gmsh clamped the requested 0.7 / 0.5 / 0.35 mm ball sizes to 1.0 mm (+0.5 % tets). These are four 1.0 mm meshes of the semicircular groove (the extra ball only moved the 1.0 mm zone): peak 167.8-171.3 MPa, mesh-to-mesh scatter about 2 %. The cusp case was stopped by the host (low system memory) before its first solve finished.",
+  "volume_mm3": 500756.57965615904,
+  "runs": [
+   {
+    "tets": 220984,
+    "gamma_min": 0.22907444297596216,
+    "fillet_vm_max_MPa": 171.34052078793619,
+    "at": [
+     -89.622,
+     6.391,
+     -13.05
+    ],
+    "fillet_vm_p999_MPa": 156.41131453056227,
+    "r_from_pin_axis_mm": 28.54864287739524,
+    "x_from_web_face_mm": 1.8781206042905154,
+    "minutes": 14.800361478328705,
+    "factor_on_max": 6.069784282301684,
+    "requested_local_size_mm": 1.0,
+    "effective_local_size_mm": 1.0
+   },
+   {
+    "tets": 221790,
+    "gamma_min": 0.22907444297596216,
+    "fillet_vm_max_MPa": 167.79390927073408,
+    "at": [
+     -89.431,
+     12.668,
+     -9.021
+    ],
+    "fillet_vm_p999_MPa": 158.0247642899192,
+    "r_from_pin_axis_mm": 28.81763527771131,
+    "x_from_web_face_mm": 2.068583537888756,
+    "minutes": 14.060785945256551,
+    "ball_vm_max_MPa": 167.3231338447823,
+    "factor_on_max": 6.1980795639129465,
+    "requested_local_size_mm": 0.7,
+    "effective_local_size_mm": 1.0
+   },
+   {
+    "tets": 221802,
+    "gamma_min": 0.22907444297596216,
+    "fillet_vm_max_MPa": 168.33922136280333,
+    "at": [
+     -89.469,
+     11.559,
+     -9.654
+    ],
+    "fillet_vm_p999_MPa": 156.7680048330101,
+    "r_from_pin_axis_mm": 28.700067513665598,
+    "x_from_web_face_mm": 2.030796934768503,
+    "minutes": 13.491017627716065,
+    "ball_vm_max_MPa": 167.3329397183027,
+    "factor_on_max": 6.178001725210552,
+    "requested_local_size_mm": 0.5,
+    "effective_local_size_mm": 1.0
+   },
+   {
+    "tets": 222066,
+    "gamma_min": 0.22907444297596216,
+    "fillet_vm_max_MPa": 167.9275173415638,
+    "at": [
+     -89.708,
+     5.893,
+     -13.568
+    ],
+    "fillet_vm_p999_MPa": 156.49406977464994,
+    "r_from_pin_axis_mm": 28.457365434613134,
+    "x_from_web_face_mm": 1.7920480441177062,
+    "minutes": 13.764602144559225,
+    "ball_vm_max_MPa": 167.9275173415638,
+    "factor_on_max": 6.193148189552787,
+    "requested_local_size_mm": 0.35,
+    "effective_local_size_mm": 1.0
+   }
+  ],
+  "pin_bore_mm": 28.0
+ },
+ "semicircle_hollow_pin": {
+  "volume_mm3": 505172.4966073655,
+  "web_thk_mm": 9.5,
+  "groove_depth_mm": 2.5,
+  "web_remaining_at_groove_mm": 7.0,
+  "ball_radius_mm": 3.0,
+  "date": "2026-11-23",
+  "runs": [
+   {
+    "tets": 220297,
+    "gamma_min": 0.2807029711304615,
+    "mesh_size_min_mm": 1.0,
+    "fillet_vm_max_MPa": 171.22436849651993,
+    "at": [
+     -89.421,
+     8.494,
+     -11.296
+    ],
+    "fillet_vm_p999_MPa": 157.84647028184642,
+    "r_from_pin_axis_mm": 28.761464408714073,
+    "x_from_web_face_mm": 2.078962608203966,
+    "web_vm_max_MPa": 79.23112903080437,
+    "web_vm_p999_MPa": 68.17124034703282,
+    "ligament_vm_max_MPa": 149.74861117832484,
+    "ligament_vm_p999_MPa": 94.76794763272696,
+    "ligament_vm_max_location": [
+     -82.56,
+     33.56,
+     -8.44
+    ],
+    "minutes": 21.181227640310922,
+    "local_size_mm": 1.0
+   },
+   {
+    "tets": 223856,
+    "gamma_min": 0.1463058675574237,
+    "mesh_size_min_mm": 0.7,
+    "fillet_vm_max_MPa": 181.14874566630505,
+    "at": [
+     -89.452,
+     8.609,
+     -11.146
+    ],
+    "fillet_vm_p999_MPa": 163.07069508723373,
+    "r_from_pin_axis_mm": 28.826007348467346,
+    "x_from_web_face_mm": 2.047763588376341,
+    "web_vm_max_MPa": 78.87523684679452,
+    "web_vm_p999_MPa": 67.92538249252794,
+    "ligament_vm_max_MPa": 146.96675700053018,
+    "ligament_vm_p999_MPa": 94.63037140303858,
+    "ligament_vm_max_location": [
+     -82.55,
+     -5.93,
+     -34.06
+    ],
+    "minutes": 21.597200544675193,
+    "ball_vm_max_MPa": 181.14874566630505,
+    "ball_tets": 900,
+    "ball_edge_mean_mm": 0.8695460577472,
+    "fillet_vm_max_outside_ball_MPa": 173.05160779375998,
+    "local_size_mm": 0.7
+   },
+   {
+    "tets": 231253,
+    "gamma_min": 0.27867544460462446,
+    "mesh_size_min_mm": 0.5,
+    "fillet_vm_max_MPa": 193.9236420322771,
+    "at": [
+     -89.659,
+     6.144,
+     -13.126
+    ],
+    "fillet_vm_p999_MPa": 174.60507090334303,
+    "r_from_pin_axis_mm": 28.642353268845643,
+    "x_from_web_face_mm": 1.8410724969292573,
+    "web_vm_max_MPa": 79.32325601501519,
+    "web_vm_p999_MPa": 68.0219452817929,
+    "ligament_vm_max_MPa": 148.37664893451938,
+    "ligament_vm_p999_MPa": 93.47323352948833,
+    "ligament_vm_max_location": [
+     -136.48,
+     33.55,
+     -8.66
+    ],
+    "minutes": 24.2023007551829,
+    "ball_vm_max_MPa": 193.9236420322771,
+    "ball_tets": 2502,
+    "ball_edge_mean_mm": 0.6225384119411103,
+    "fillet_vm_max_outside_ball_MPa": 184.5654124604779,
+    "local_size_mm": 0.5
+   },
+   {
+    "tets": 234558,
+    "gamma_min": 0.2618667345555892,
+    "mesh_size_min_mm": 0.35,
+    "fillet_vm_max_MPa": 194.8260985701505,
+    "at": [
+     -89.659,
+     8.989,
+     -11.07
+    ],
+    "fillet_vm_p999_MPa": 186.07812638024777,
+    "r_from_pin_axis_mm": 28.68979214596527,
+    "x_from_web_face_mm": 1.841307414580939,
+    "web_vm_max_MPa": 79.56441632938719,
+    "web_vm_p999_MPa": 67.58509657235471,
+    "ligament_vm_max_MPa": 161.60075394861084,
+    "ligament_vm_p999_MPa": 95.63564958735363,
+    "ligament_vm_max_location": [
+     -136.54,
+     33.35,
+     -8.16
+    ],
+    "minutes": 56.2661007086436,
+    "ball_vm_max_MPa": 194.8260985701505,
+    "ball_tets": 7415,
+    "ball_edge_mean_mm": 0.43391096166908766,
+    "fillet_vm_max_outside_ball_MPa": 190.51053430455352,
+    "local_size_mm": 0.35
+   }
+  ],
+  "verdict": {
+   "criterion": "refined-ball peak changes < 5% between the two finest meshes",
+   "two_finest_mm": [
+    0.5,
+    0.35
+   ],
+   "peaks_MPa": [
+    193.9236420322771,
+    194.8260985701505
+   ],
+   "change_pct": 0.4632113174244262,
+   "converged": true,
+   "series": [
+    {
+     "local_size_mm": 1.0,
+     "peak_MPa": 171.22436849651993
+    },
+    {
+     "local_size_mm": 0.7,
+     "peak_MPa": 181.14874566630505
+    },
+    {
+     "local_size_mm": 0.5,
+     "peak_MPa": 193.9236420322771
+    },
+    {
+     "local_size_mm": 0.35,
+     "peak_MPa": 194.8260985701505
+    }
+   ],
+   "converged_peak_MPa": 194.8260985701505,
+   "factor_on_converged_peak": 5.338093857202248,
+   "web_vm_max_MPa": 79.56441632938719,
+   "ligament_vm_max_MPa": 161.60075394861084
+  },
+  "note_ligament": "2026-11-23: the ligament_vm_* values of these runs are NOT ligament results - their maximum sits 0.5 mm inside the far web face, 34.6 mm from the crank axis, i.e. at the unfilleted main-journal / web corner of the FE slice (a modelling artefact, see fea.case_crank boundary_conditions). The ligament zone now excludes 6 mm round the main journal (as the web zone); the ligament stress is taken from the regenerated crank FE (1.0 mm is adequate there: the web stress is mesh-independent, 78.9-79.6 MPa).",
+  "pin_bore_mm": 28.0,
+  "note_superseded": "Solved on the hollow pin (28 mm lightening bore) of D-048. Superseded by D-049 (solid pin, 2026-11-24): the bore reached under the main journals, so it could not be machined or plugged; the throw model changed and the convergence is re-run on the solid pin (key `semicircle`). Kept for the record."
+ }
+}

@@ -247,9 +247,14 @@ def validate(reg, info):
     out["envelope_long_block_mm"] = dict(min=lo_lb.tolist(), max=hi_lb.tolist(), size=(hi_lb - lo_lb).tolist())
     out["mass_total_kg"] = m_tot
     out["centre_of_mass_mm"] = (mom / m_tot).tolist()
-    # --- crank balance from CAD mass properties + equivalent rod/piston masses
-    cw = info["counterweights"]
-    out["counterweights"] = cw["report"]
+    # --- crank balance: design residual (counterweight algebra) and the as-built residual from the CAD mass properties of
+    #     the crankshaft (oil drillings included) + the rod / piston equivalents at the pins (D-049)
+    cw = dict(info["counterweights"]["report"])
+    S, Q = CT.crank_unbalance(reg["W16-05-001"].shape, cw.get("u_dyn"))
+    om2 = (P.rpm_rated * math.pi / 30) ** 2
+    cw.update(cad_residual_force_kgmm=float(np.linalg.norm(S)), cad_residual_couple_kgmm2=float(np.linalg.norm(Q)),
+              cad_residual_force_rated_N=float(np.linalg.norm(S)) * 1e-3 * om2, cad_residual_couple_rated_Nm=float(np.linalg.norm(Q)) * 1e-6 * om2)
+    out["counterweights"] = cw
     with open(os.path.join(D_ASM, "cad_validation.json"), "w", encoding="utf-8") as fh:
         json.dump(ASM_info_json(out), fh, indent=1)
     print(json.dumps(ASM_info_json({k: out[k] for k in ("cyl1", "cyl2", "envelope_dressed_mm", "envelope_long_block_mm", "mass_total_kg", "centre_of_mass_mm")}), indent=1))

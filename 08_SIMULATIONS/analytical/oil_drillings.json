@@ -1,0 +1,920 @@
+{
+ "note": "Check of the crankshaft oil drillings (D-049, 2026-11-24).",
+ "date": "2026-11-24",
+ "geometry": {
+  "diameter_mm": 5.0,
+  "outlet_phi_deg": 276.0,
+  "inlet_angle_from_pin_deg": 77.5,
+  "chamfer_mm": 0.5,
+  "pin_bore_mm": 0.0,
+  "layout": "one drilling per rod: main surface (x = main centre, under the 180-deg groove of the upper main shell) -> pin surface (x = rod centre); drilled from the pin side; mains not cross-drilled"
+ },
+ "load_polar": {
+  "rods": {
+   "1": {
+    "2000": {
+     "peak_kN": 47.79281697861841,
+     "peak_at_phi": 40.57222611320021,
+     "least_loaded_phi": 226.0,
+     "load_at_outlet_pct_of_peak": 20.072678609334154
+    },
+    "3750": {
+     "peak_kN": 49.29027629508715,
+     "peak_at_phi": 35.23082225512744,
+     "least_loaded_phi": 257.0,
+     "load_at_outlet_pct_of_peak": 15.012182200406421
+    },
+    "6700": {
+     "peak_kN": 37.90723938007936,
+     "peak_at_phi": 35.036771521027816,
+     "least_loaded_phi": 292.0,
+     "load_at_outlet_pct_of_peak": 21.068642398418756
+    }
+   },
+   "2": {
+    "2000": {
+     "peak_kN": 47.016533906636866,
+     "peak_at_phi": 40.2334697991333,
+     "least_loaded_phi": 220.0,
+     "load_at_outlet_pct_of_peak": 20.673745883476215
+    },
+    "3750": {
+     "peak_kN": 48.76609109479238,
+     "peak_at_phi": 34.356010762176886,
+     "least_loaded_phi": 260.0,
+     "load_at_outlet_pct_of_peak": 15.214760768617044
+    },
+    "6700": {
+     "peak_kN": 37.99034245883517,
+     "peak_at_phi": 34.8022667541397,
+     "least_loaded_phi": 293.0,
+     "load_at_outlet_pct_of_peak": 21.277186315969722
+    }
+   },
+   "3": {
+    "2000": {
+     "peak_kN": 47.792816978763504,
+     "peak_at_phi": 40.572226113198845,
+     "least_loaded_phi": 226.0,
+     "load_at_outlet_pct_of_peak": 20.072678609488882
+    },
+    "3750": {
+     "peak_kN": 49.29027629559511,
+     "peak_at_phi": 35.23082225511411,
+     "least_loaded_phi": 257.0,
+     "load_at_outlet_pct_of_peak": 15.012182200251733
+    },
+    "6700": {
+     "peak_kN": 37.90723937954188,
+     "peak_at_phi": 35.03677152109649,
+     "least_loaded_phi": 292.0,
+     "load_at_outlet_pct_of_peak": 21.068642399683117
+    }
+   },
+   "4": {
+    "2000": {
+     "peak_kN": 47.01653390658935,
+     "peak_at_phi": 40.2334697991337,
+     "least_loaded_phi": 220.0,
+     "load_at_outlet_pct_of_peak": 20.67374588355328
+    },
+    "3750": {
+     "peak_kN": 48.76609109479237,
+     "peak_at_phi": 34.356010762176865,
+     "least_loaded_phi": 260.0,
+     "load_at_outlet_pct_of_peak": 15.214760768617072
+    },
+    "6700": {
+     "peak_kN": 37.990342458835165,
+     "peak_at_phi": 34.80226675413966,
+     "least_loaded_phi": 293.0,
+     "load_at_outlet_pct_of_peak": 21.27718631710928
+    }
+   },
+   "5": {
+    "2000": {
+     "peak_kN": 47.792816978763504,
+     "peak_at_phi": 40.572226113198845,
+     "least_loaded_phi": 226.0,
+     "load_at_outlet_pct_of_peak": 20.072678609488882
+    },
+    "3750": {
+     "peak_kN": 49.29027629559511,
+     "peak_at_phi": 35.23082225511411,
+     "least_loaded_phi": 257.0,
+     "load_at_outlet_pct_of_peak": 15.012182200251733
+    },
+    "6700": {
+     "peak_kN": 37.90723937954188,
+     "peak_at_phi": 35.03677152109649,
+     "least_loaded_phi": 292.0,
+     "load_at_outlet_pct_of_peak": 21.068642399683117
+    }
+   },
+   "6": {
+    "2000": {
+     "peak_kN": 47.01653390658935,
+     "peak_at_phi": 40.23346979913367,
+     "least_loaded_phi": 220.0,
+     "load_at_outlet_pct_of_peak": 20.67374588355332
+    },
+    "3750": {
+     "peak_kN": 48.76609109495918,
+     "peak_at_phi": 34.356010762172474,
+     "least_loaded_phi": 260.0,
+     "load_at_outlet_pct_of_peak": 15.214760768565055
+    },
+    "6700": {
+     "peak_kN": 37.990342460426554,
+     "peak_at_phi": 34.802266753938234,
+     "least_loaded_phi": 293.0,
+     "load_at_outlet_pct_of_peak": 21.277186316217946
+    }
+   },
+   "7": {
+    "2000": {
+     "peak_kN": 47.79281697861841,
+     "peak_at_phi": 40.57222611320021,
+     "least_loaded_phi": 226.0,
+     "load_at_outlet_pct_of_peak": 20.072678609603713
+    },
+    "3750": {
+     "peak_kN": 49.29027629508715,
+     "peak_at_phi": 35.23082225512744,
+     "least_loaded_phi": 257.0,
+     "load_at_outlet_pct_of_peak": 15.012182200406421
+    },
+    "6700": {
+     "peak_kN": 37.90723938007936,
+     "peak_at_phi": 35.036771521027816,
+     "least_loaded_phi": 292.0,
+     "load_at_outlet_pct_of_peak": 21.068642398418756
+    }
+   },
+   "8": {
+    "2000": {
+     "peak_kN": 47.01653390663687,
+     "peak_at_phi": 40.23346979913324,
+     "least_loaded_phi": 220.0,
+     "load_at_outlet_pct_of_peak": 20.673745883532423
+    },
+    "3750": {
+     "peak_kN": 48.76609109479237,
+     "peak_at_phi": 34.35601076217683,
+     "least_loaded_phi": 260.0,
+     "load_at_outlet_pct_of_peak": 15.214760768617097
+    },
+    "6700": {
+     "peak_kN": 37.99034245883517,
+     "peak_at_phi": 34.802266754139616,
+     "least_loaded_phi": 293.0,
+     "load_at_outlet_pct_of_peak": 21.277186317109233
+    }
+   },
+   "9": {
+    "2000": {
+     "peak_kN": 47.792816978618404,
+     "peak_at_phi": 40.5722261132002,
+     "least_loaded_phi": 226.0,
+     "load_at_outlet_pct_of_peak": 20.07267860960372
+    },
+    "3750": {
+     "peak_kN": 49.2902762952565,
+     "peak_at_phi": 35.23082225512301,
+     "least_loaded_phi": 257.0,
+     "load_at_outlet_pct_of_peak": 15.012182200354845
+    },
+    "6700": {
+     "peak_kN": 37.90723937954187,
+     "peak_at_phi": 35.03677152109654,
+     "least_loaded_phi": 292.0,
+     "load_at_outlet_pct_of_peak": 21.06864239871749
+    }
+   },
+   "10": {
+    "2000": {
+     "peak_kN": 47.01653390663687,
+     "peak_at_phi": 40.233469799133296,
+     "least_loaded_phi": 220.0,
+     "load_at_outlet_pct_of_peak": 20.673745883476215
+    },
+    "3750": {
+     "peak_kN": 48.76609109479238,
+     "peak_at_phi": 34.356010762176886,
+     "least_loaded_phi": 260.0,
+     "load_at_outlet_pct_of_peak": 15.214760768269011
+    },
+    "6700": {
+     "peak_kN": 37.990342458835165,
+     "peak_at_phi": 34.8022667541397,
+     "least_loaded_phi": 293.0,
+     "load_at_outlet_pct_of_peak": 21.277186315969708
+    }
+   },
+   "11": {
+    "2000": {
+     "peak_kN": 47.79281697866677,
+     "peak_at_phi": 40.57222611319972,
+     "least_loaded_phi": 226.0,
+     "load_at_outlet_pct_of_peak": 20.072678609529547
+    },
+    "3750": {
+     "peak_kN": 49.29027629559512,
+     "peak_at_phi": 35.230822255114106,
+     "least_loaded_phi": 257.0,
+     "load_at_outlet_pct_of_peak": 15.012182200251733
+    },
+    "6700": {
+     "peak_kN": 37.90723937954188,
+     "peak_at_phi": 35.03677152109649,
+     "least_loaded_phi": 292.0,
+     "load_at_outlet_pct_of_peak": 21.068642399683117
+    }
+   },
+   "12": {
+    "2000": {
+     "peak_kN": 47.01653390658935,
+     "peak_at_phi": 40.2334697991337,
+     "least_loaded_phi": 220.0,
+     "load_at_outlet_pct_of_peak": 20.673745883440937
+    },
+    "3750": {
+     "peak_kN": 48.76609109479237,
+     "peak_at_phi": 34.35601076217686,
+     "least_loaded_phi": 260.0,
+     "load_at_outlet_pct_of_peak": 15.214760768617072
+    },
+    "6700": {
+     "peak_kN": 37.99034245883516,
+     "peak_at_phi": 34.80226675413965,
+     "least_loaded_phi": 293.0,
+     "load_at_outlet_pct_of_peak": 21.277186317109262
+    }
+   },
+   "13": {
+    "2000": {
+     "peak_kN": 47.79281697866677,
+     "peak_at_phi": 40.57222611319972,
+     "least_loaded_phi": 226.0,
+     "load_at_outlet_pct_of_peak": 20.072678609583434
+    },
+    "3750": {
+     "peak_kN": 49.2902762954258,
+     "peak_at_phi": 35.23082225511853,
+     "least_loaded_phi": 257.0,
+     "load_at_outlet_pct_of_peak": 15.01218220030328
+    },
+    "6700": {
+     "peak_kN": 37.90723938007935,
+     "peak_at_phi": 35.03677152102777,
+     "least_loaded_phi": 292.0,
+     "load_at_outlet_pct_of_peak": 21.068642401315696
+    }
+   },
+   "14": {
+    "2000": {
+     "peak_kN": 47.01653390658935,
+     "peak_at_phi": 40.23346979913365,
+     "least_loaded_phi": 220.0,
+     "load_at_outlet_pct_of_peak": 20.673745883440937
+    },
+    "3750": {
+     "peak_kN": 48.76609109495918,
+     "peak_at_phi": 34.3560107621725,
+     "least_loaded_phi": 260.0,
+     "load_at_outlet_pct_of_peak": 15.214760768565025
+    },
+    "6700": {
+     "peak_kN": 37.99034245936562,
+     "peak_at_phi": 34.80226675407253,
+     "least_loaded_phi": 293.0,
+     "load_at_outlet_pct_of_peak": 21.277186320230808
+    }
+   },
+   "15": {
+    "2000": {
+     "peak_kN": 47.792816978618404,
+     "peak_at_phi": 40.5722261132002,
+     "least_loaded_phi": 226.0,
+     "load_at_outlet_pct_of_peak": 20.07267860960372
+    },
+    "3750": {
+     "peak_kN": 49.2902762952565,
+     "peak_at_phi": 35.23082225512301,
+     "least_loaded_phi": 257.0,
+     "load_at_outlet_pct_of_peak": 15.012182200354845
+    },
+    "6700": {
+     "peak_kN": 37.90723937954187,
+     "peak_at_phi": 35.03677152109654,
+     "least_loaded_phi": 292.0,
+     "load_at_outlet_pct_of_peak": 21.06864239871749
+    }
+   },
+   "16": {
+    "2000": {
+     "peak_kN": 47.01653390663687,
+     "peak_at_phi": 40.23346979913323,
+     "least_loaded_phi": 220.0,
+     "load_at_outlet_pct_of_peak": 20.673745883588566
+    },
+    "3750": {
+     "peak_kN": 48.76609109479237,
+     "peak_at_phi": 34.35601076217683,
+     "least_loaded_phi": 260.0,
+     "load_at_outlet_pct_of_peak": 15.214760768617092
+    },
+    "6700": {
+     "peak_kN": 37.990342459896084,
+     "peak_at_phi": 34.802266754005345,
+     "least_loaded_phi": 293.0,
+     "load_at_outlet_pct_of_peak": 21.277186319933712
+    }
+   }
+  },
+  "over_all_rods_and_speeds": {
+   "least_loaded_phi": 277.0,
+   "its_load_pct_of_peak": 21.20757372873116,
+   "outlet_phi": 276.0,
+   "outlet_load_pct_of_peak": 21.277186320230808
+  }
+ },
+ "drillings": [
+  {
+   "cyl": 1,
+   "pin": 1,
+   "main": 1,
+   "inlet_angle_deg": 133.43453623251386,
+   "length_mm": 77.19796464279216,
+   "axis_to_outlet_normal_deg": 33.026883171911784,
+   "axis_to_inlet_normal_deg": 48.37916848152884,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187621,
+    "web contour": 8.584970516311786,
+    "web face": 5.293306616045533
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.7369195650692415,
+    "web face at the main journal (main / web corner)": 5.293306616045533,
+    "main / web corner at the other end of the main": 5.985775756288185
+   }
+  },
+  {
+   "cyl": 9,
+   "pin": 1,
+   "main": 2,
+   "inlet_angle_deg": 133.43453623251386,
+   "length_mm": 77.19796464279216,
+   "axis_to_outlet_normal_deg": 33.026883171911784,
+   "axis_to_inlet_normal_deg": 48.37916848152884,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392188123,
+    "web contour": 8.584970516311785,
+    "web face": 5.293306616045551
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069245,
+    "web face at the main journal (main / web corner)": 5.293306616045551,
+    "main / web corner at the other end of the main": 5.985775756288147
+   }
+  },
+  {
+   "cyl": 2,
+   "pin": 2,
+   "main": 2,
+   "inlet_angle_deg": 336.5654637674861,
+   "length_mm": 77.19796464279213,
+   "axis_to_outlet_normal_deg": 33.026883171911805,
+   "axis_to_inlet_normal_deg": 48.37916848152884,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187681,
+    "web contour": 8.584970516311817,
+    "web face": 5.293306616045539
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069272,
+    "web face at the main journal (main / web corner)": 5.293306616045539,
+    "main / web corner at the other end of the main": 5.985775756288177
+   }
+  },
+  {
+   "cyl": 10,
+   "pin": 2,
+   "main": 3,
+   "inlet_angle_deg": 336.5654637674861,
+   "length_mm": 77.19796464279213,
+   "axis_to_outlet_normal_deg": 33.026883171911805,
+   "axis_to_inlet_normal_deg": 48.37916848152884,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187664,
+    "web contour": 8.58497051631181,
+    "web face": 5.293306616045545
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069268,
+    "web face at the main journal (main / web corner)": 5.293306616045545,
+    "main / web corner at the other end of the main": 5.985775756288176
+   }
+  },
+  {
+   "cyl": 3,
+   "pin": 3,
+   "main": 3,
+   "inlet_angle_deg": 223.4345362325139,
+   "length_mm": 77.19796464279216,
+   "axis_to_outlet_normal_deg": 33.026883171911805,
+   "axis_to_inlet_normal_deg": 48.37916848152882,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187663,
+    "web contour": 8.584970516311817,
+    "web face": 5.2933066160455375
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069265,
+    "web face at the main journal (main / web corner)": 5.2933066160455375,
+    "main / web corner at the other end of the main": 5.985775756288178
+   }
+  },
+  {
+   "cyl": 11,
+   "pin": 3,
+   "main": 4,
+   "inlet_angle_deg": 223.4345362325139,
+   "length_mm": 77.19796464279216,
+   "axis_to_outlet_normal_deg": 33.026883171911805,
+   "axis_to_inlet_normal_deg": 48.37916848152882,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187658,
+    "web contour": 8.584970516311808,
+    "web face": 5.29330661604553
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069259,
+    "web face at the main journal (main / web corner)": 5.29330661604553,
+    "main / web corner at the other end of the main": 5.985775756288176
+   }
+  },
+  {
+   "cyl": 4,
+   "pin": 4,
+   "main": 4,
+   "inlet_angle_deg": 246.56546376748614,
+   "length_mm": 77.19796464279216,
+   "axis_to_outlet_normal_deg": 33.02688317191181,
+   "axis_to_inlet_normal_deg": 48.379168481528815,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187658,
+    "web contour": 8.584970516311808,
+    "web face": 5.293306616045534
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069252,
+    "web face at the main journal (main / web corner)": 5.293306616045534,
+    "main / web corner at the other end of the main": 5.985775756288176
+   }
+  },
+  {
+   "cyl": 12,
+   "pin": 4,
+   "main": 5,
+   "inlet_angle_deg": 246.56546376748614,
+   "length_mm": 77.19796464279216,
+   "axis_to_outlet_normal_deg": 33.02688317191181,
+   "axis_to_inlet_normal_deg": 48.379168481528815,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392206037,
+    "web contour": 8.584970516311817,
+    "web face": 5.293306616045533
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069268,
+    "web face at the main journal (main / web corner)": 5.293306616045533,
+    "main / web corner at the other end of the main": 5.985775756288188
+   }
+  },
+  {
+   "cyl": 5,
+   "pin": 5,
+   "main": 5,
+   "inlet_angle_deg": 43.43453623251389,
+   "length_mm": 77.19796464279213,
+   "axis_to_outlet_normal_deg": 33.0268831719118,
+   "axis_to_inlet_normal_deg": 48.37916848152884,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187664,
+    "web contour": 8.584970516311806,
+    "web face": 5.293306616045532
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069254,
+    "web face at the main journal (main / web corner)": 5.293306616045532,
+    "main / web corner at the other end of the main": 5.985775756288187
+   }
+  },
+  {
+   "cyl": 13,
+   "pin": 5,
+   "main": 6,
+   "inlet_angle_deg": 43.43453623251389,
+   "length_mm": 77.19796464279213,
+   "axis_to_outlet_normal_deg": 33.0268831719118,
+   "axis_to_inlet_normal_deg": 48.37916848152884,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187677,
+    "web contour": 8.5849705163118,
+    "web face": 5.29330661604553
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.7369195650692415,
+    "web face at the main journal (main / web corner)": 5.29330661604553,
+    "main / web corner at the other end of the main": 5.985775756288176
+   }
+  },
+  {
+   "cyl": 6,
+   "pin": 6,
+   "main": 6,
+   "inlet_angle_deg": 66.56546376748616,
+   "length_mm": 77.19796464279214,
+   "axis_to_outlet_normal_deg": 33.026883171911855,
+   "axis_to_inlet_normal_deg": 48.379168481528794,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392206038,
+    "web contour": 8.584970516311817,
+    "web face": 5.29330661604553
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069256,
+    "web face at the main journal (main / web corner)": 5.29330661604553,
+    "main / web corner at the other end of the main": 5.985775756288176
+   }
+  },
+  {
+   "cyl": 14,
+   "pin": 6,
+   "main": 7,
+   "inlet_angle_deg": 66.56546376748616,
+   "length_mm": 77.19796464279214,
+   "axis_to_outlet_normal_deg": 33.026883171911855,
+   "axis_to_inlet_normal_deg": 48.379168481528794,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187634,
+    "web contour": 8.584970516311824,
+    "web face": 5.293306616045539
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069265,
+    "web face at the main journal (main / web corner)": 5.293306616045539,
+    "main / web corner at the other end of the main": 5.985775756288178
+   }
+  },
+  {
+   "cyl": 7,
+   "pin": 7,
+   "main": 7,
+   "inlet_angle_deg": 313.4345362325139,
+   "length_mm": 77.19796464279216,
+   "axis_to_outlet_normal_deg": 33.026883171911784,
+   "axis_to_inlet_normal_deg": 48.37916848152882,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392188098,
+    "web contour": 8.584970516311783,
+    "web face": 5.293306616045551
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069243,
+    "web face at the main journal (main / web corner)": 5.293306616045551,
+    "main / web corner at the other end of the main": 5.985775756288141
+   }
+  },
+  {
+   "cyl": 15,
+   "pin": 7,
+   "main": 8,
+   "inlet_angle_deg": 313.4345362325139,
+   "length_mm": 77.19796464279216,
+   "axis_to_outlet_normal_deg": 33.026883171911784,
+   "axis_to_inlet_normal_deg": 48.37916848152882,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187651,
+    "web contour": 8.584970516311804,
+    "web face": 5.293306616045539
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069243,
+    "web face at the main journal (main / web corner)": 5.293306616045539,
+    "main / web corner at the other end of the main": 5.985775756288176
+   }
+  },
+  {
+   "cyl": 8,
+   "pin": 8,
+   "main": 8,
+   "inlet_angle_deg": 156.56546376748616,
+   "length_mm": 77.19796464279214,
+   "axis_to_outlet_normal_deg": 33.026883171911805,
+   "axis_to_inlet_normal_deg": 48.379168481528815,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187689,
+    "web contour": 8.584970516311774,
+    "web face": 5.2933066160455775
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069217,
+    "web face at the main journal (main / web corner)": 5.2933066160455775,
+    "main / web corner at the other end of the main": 5.985775756288138
+   }
+  },
+  {
+   "cyl": 16,
+   "pin": 8,
+   "main": 9,
+   "inlet_angle_deg": 156.56546376748616,
+   "length_mm": 77.19796464279214,
+   "axis_to_outlet_normal_deg": 33.026883171911805,
+   "axis_to_inlet_normal_deg": 48.379168481528815,
+   "faces_cut": [
+    "main surface",
+    "pin surface"
+   ],
+   "wall_mm": {
+    "relief groove": 5.320627392187641,
+    "web contour": 8.584970516311802,
+    "web face": 5.293306616045528
+   },
+   "wall_web_faces_mm": {
+    "web face at the pin (outside the groove opening)": 7.736919565069245,
+    "web face at the main journal (main / web corner)": 5.293306616045528,
+    "main / web corner at the other end of the main": 5.985775756288207
+   }
+  }
+ ],
+ "openings": {
+  "outlet_radius_with_chamfer_mm": 3.4818171257822716,
+  "inlet_radius_with_chamfer_mm": 4.263937566452221,
+  "outlet_to_big_end_shell_edge_mm": 4.643182874217729,
+  "outlet_to_pin_end_mm": 5.518182874217729,
+  "inlet_to_main_shell_edge_mm": 3.7360624335477786,
+  "main_shell_groove_width_mm": 4.0
+ },
+ "drill_access": [
+  {
+   "cyl": 1,
+   "to_web_boss_mm": 59.238952607988196,
+   "to_cw_radius_mm": 28.671089393782182
+  },
+  {
+   "cyl": 9,
+   "to_web_boss_mm": 59.238952607988196,
+   "to_cw_radius_mm": 28.671089393782182
+  },
+  {
+   "cyl": 2,
+   "to_web_boss_mm": 59.23895260798817,
+   "to_cw_radius_mm": 28.671089393782125
+  },
+  {
+   "cyl": 10,
+   "to_web_boss_mm": 59.23895260798817,
+   "to_cw_radius_mm": 28.671089393782125
+  },
+  {
+   "cyl": 3,
+   "to_web_boss_mm": 59.238952607988196,
+   "to_cw_radius_mm": 28.671089393782168
+  },
+  {
+   "cyl": 11,
+   "to_web_boss_mm": 59.238952607988196,
+   "to_cw_radius_mm": 28.671089393782168
+  },
+  {
+   "cyl": 4,
+   "to_web_boss_mm": 59.23895260798817,
+   "to_cw_radius_mm": 28.671089393782154
+  },
+  {
+   "cyl": 12,
+   "to_web_boss_mm": 59.23895260798817,
+   "to_cw_radius_mm": 28.671089393782154
+  },
+  {
+   "cyl": 5,
+   "to_web_boss_mm": 59.23895260798817,
+   "to_cw_radius_mm": 28.671089393782154
+  },
+  {
+   "cyl": 13,
+   "to_web_boss_mm": 59.23895260798817,
+   "to_cw_radius_mm": 28.671089393782154
+  },
+  {
+   "cyl": 6,
+   "to_web_boss_mm": 59.23895260798815,
+   "to_cw_radius_mm": 28.671089393782125
+  },
+  {
+   "cyl": 14,
+   "to_web_boss_mm": 59.23895260798815,
+   "to_cw_radius_mm": 28.671089393782125
+  },
+  {
+   "cyl": 7,
+   "to_web_boss_mm": 59.238952607988196,
+   "to_cw_radius_mm": 28.671089393782182
+  },
+  {
+   "cyl": 15,
+   "to_web_boss_mm": 59.238952607988196,
+   "to_cw_radius_mm": 28.671089393782182
+  },
+  {
+   "cyl": 8,
+   "to_web_boss_mm": 59.23895260798818,
+   "to_cw_radius_mm": 28.671089393782168
+  },
+  {
+   "cyl": 16,
+   "to_web_boss_mm": 59.23895260798818,
+   "to_cw_radius_mm": 28.671089393782168
+  }
+ ],
+ "shared_mains": [
+  {
+   "main": 2,
+   "cyls": [
+    9,
+    2
+   ],
+   "inlet_angles_deg": [
+    133.43453623251386,
+    336.5654637674861
+   ],
+   "inlet_separation_deg": 156.86907246502778,
+   "drilling_to_drilling_mm": 35.957243272460225,
+   "inlet_openings_arc_gap_mm": 84.56010637528217
+  },
+  {
+   "main": 3,
+   "cyls": [
+    10,
+    3
+   ],
+   "inlet_angles_deg": [
+    336.5654637674861,
+    223.4345362325139
+   ],
+   "inlet_separation_deg": 113.13092753497222,
+   "drilling_to_drilling_mm": 17.0141293779554,
+   "inlet_openings_arc_gap_mm": 58.6053686919884
+  },
+  {
+   "main": 4,
+   "cyls": [
+    11,
+    4
+   ],
+   "inlet_angles_deg": [
+    223.4345362325139,
+    246.56546376748614
+   ],
+   "inlet_separation_deg": 23.130927534972244,
+   "drilling_to_drilling_mm": 3.5771075470056624,
+   "inlet_openings_arc_gap_mm": 5.198293580961929
+  },
+  {
+   "main": 5,
+   "cyls": [
+    12,
+    5
+   ],
+   "inlet_angles_deg": [
+    246.56546376748614,
+    43.43453623251389
+   ],
+   "inlet_separation_deg": 156.86907246502778,
+   "drilling_to_drilling_mm": 35.957243272460225,
+   "inlet_openings_arc_gap_mm": 84.56010637528217
+  },
+  {
+   "main": 6,
+   "cyls": [
+    13,
+    6
+   ],
+   "inlet_angles_deg": [
+    43.43453623251389,
+    66.56546376748616
+   ],
+   "inlet_separation_deg": 23.130927534972272,
+   "drilling_to_drilling_mm": 3.5771075470060603,
+   "inlet_openings_arc_gap_mm": 5.198293580961943
+  },
+  {
+   "main": 7,
+   "cyls": [
+    14,
+    7
+   ],
+   "inlet_angles_deg": [
+    66.56546376748616,
+    313.4345362325139
+   ],
+   "inlet_separation_deg": 113.13092753497227,
+   "drilling_to_drilling_mm": 17.014129377955413,
+   "inlet_openings_arc_gap_mm": 58.60536869198843
+  },
+  {
+   "main": 8,
+   "cyls": [
+    15,
+    8
+   ],
+   "inlet_angles_deg": [
+    313.4345362325139,
+    156.56546376748616
+   ],
+   "inlet_separation_deg": 156.86907246502773,
+   "drilling_to_drilling_mm": 35.95724327246019,
+   "inlet_openings_arc_gap_mm": 84.56010637528215
+  }
+ ],
+ "summary": {
+  "drillings": 16,
+  "only_pin_and_main_surfaces_cut": true,
+  "min_wall_to_relief_groove_mm": 5.320627392187621,
+  "min_wall_to_web_contour_mm": 8.584970516311774,
+  "min_wall_web_faces_mm": {
+   "web face at the pin (outside the groove opening)": 7.736919565069217,
+   "web face at the main journal (main / web corner)": 5.293306616045528,
+   "main / web corner at the other end of the main": 5.985775756288138
+  },
+  "axis_to_outlet_normal_deg": 33.026883171911855,
+  "axis_to_inlet_normal_deg": 48.37916848152884,
+  "drill_access_min_to_web_boss_mm": 59.23895260798815,
+  "drill_access_min_to_cw_radius_mm": 28.671089393782125,
+  "shared_mains_min_drilling_to_drilling_mm": 3.5771075470056624,
+  "shared_mains_min_inlet_separation_deg": 23.130927534972244,
+  "minutes": 0.1858999768892924
+ }
+}

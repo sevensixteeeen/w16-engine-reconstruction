@@ -5,7 +5,8 @@ then again with extra local refinement in a ball (default radius 3 mm) centred o
 mesh, at 0.7 / 0.5 / 0.35 mm.  Converged (criterion of the user, 2026-11-23): the peak in the refined ball changes by less
 than 5 % between the two finest meshes; otherwise the result is NOT CONVERGED and only the series is reported (no value
 is picked).  Each run also gives the web stress (as case_crank) and the stress in the ligament behind the groove (web
-9.5 mm, 7.0 mm remaining behind the 2.5 mm groove).
+9.5 mm, 7.0 mm remaining behind the 2.5 mm groove).  Each record carries the pin bore it was solved with (D-049: solid pin
+from 2026-11-24; the D-048 run on the hollow pin is kept as `semicircle_hollow_pin`).
 
 Grooves:
   semicircle - the project geometry (`cranktrain.undercut_ring`, D-048): true R2.5 arc tangent to the journal at the web
@@ -17,8 +18,8 @@ Grooves:
 Mesh.MeshSizeMin is set to the smallest requested size: with the `mesh_shape` default (h / 5 = 1.0 mm) gmsh clamps every
 finer request to 1.0 mm (first run, 2026-11-22: the "0.7 / 0.5 / 0.35 mm" meshes were all 1.0 mm meshes).  Each run
 records the tets in the ball and their mean equivalent edge length as proof that the refinement took effect.
-Memory: about 40 kB per tet at the solve peak (238k tets at 0.35 mm in a 3 mm ball -> about 9.5 GB); about 14 min per
-solve, 4 solves.
+Memory: about 40 kB per tet at the solve peak (235k tets at 0.35 mm in a 3 mm ball -> about 9.5 GB).  Run of 2026-11-23
+(hollow pin): 21 / 22 / 24 / 56 min for the 1.0 / 0.7 / 0.5 / 0.35 mm solves.
 
     set PYTHONPATH=src
     .venv\\Scripts\\python tools\\crank_groove_convergence.py [--groove semicircle] [--sizes 0.7 0.5 0.35] [--ball 3.0]
@@ -105,7 +106,7 @@ def solve(thr, extra=None):
     fz = (np.hypot(cen[0] - xa, rp - rf0) < 5.0) | (np.hypot(cen[0] - xb, rp - rf0) < 5.0)
     web = (((cen[0] < xa) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb) & (cen[0] < xb + P.web_thk))) & ~fz & (np.hypot(cen[1], cen[2]) > P.main_dia / 2 + 6.0)
     lig = ((((cen[0] < xa - gd) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb + gd) & (cen[0] < xb + P.web_thk)))
-           & (rp > P.pin_dia / 2) & (rp < P.pin_dia / 2 + 2 * gd) & (np.hypot(cen[1], cen[2]) > P.main_dia / 2))
+           & (rp > P.pin_dia / 2) & (rp < P.pin_dia / 2 + 2 * gd) & (np.hypot(cen[1], cen[2]) > P.main_dia / 2 + 6.0))
     i = int(np.argmax(np.where(fz, vm, -1)))
     out = dict(tets=st["tets"], gamma_min=st["quality_gamma_min"], mesh_size_min_mm=h_min,
                fillet_vm_max_MPa=float(vm[i]), at=cen[:, i].round(3).tolist(), fillet_vm_p999_MPa=float(np.percentile(vm[fz], 99.9)),
@@ -159,7 +160,7 @@ def main():
     res["note"] = __doc__.split("\n\n")[1].replace("\n", " ")
     for g in a.groove:
         thr = throw(g)
-        rec = dict(volume_mm3=float(thr.volume), web_thk_mm=P.web_thk, groove_depth_mm=F.GROOVE_DEPTH,
+        rec = dict(volume_mm3=float(thr.volume), pin_bore_mm=P.pin_bore, web_thk_mm=P.web_thk, groove_depth_mm=F.GROOVE_DEPTH,
                    web_remaining_at_groove_mm=P.web_thk - F.GROOVE_DEPTH, ball_radius_mm=a.ball,
                    date=time.strftime("%Y-%m-%d"), runs=[])
         res[g] = rec

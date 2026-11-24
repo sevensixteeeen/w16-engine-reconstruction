@@ -585,7 +585,8 @@ def case_crank():
     fillet circles (40 refinement balls each), CG solver (the direct factorisation of ~1 M dof is too large), and the
     fatigue factor on the fillet-zone peak instead of the whole-part 99.9th percentile.  D-048 (2026-11-22): the groove is a
     semicircular relief groove (cranktrain.undercut_ring); the web stress is also reported in the 7.0 mm ligament behind the
-    groove.  The mesh-converged fillet peak is tools/crank_groove_convergence.py (this run is the standard 1.0 mm mesh)."""
+    groove.  The mesh-converged fillet peak is tools/crank_groove_convergence.py (this run is the standard 1.0 mm mesh).
+    D-049 (2026-11-24): solid crankpin (no lightening bore); the oil drillings are not in the FE."""
     R = results()["dynamics"]
     from ..cad.assembly import _cw
     cw, _ = _cw()
@@ -618,16 +619,20 @@ def case_crank():
     fz = (np.hypot(cen[0] - xa, rp - rf0) < 5.0) | (np.hypot(cen[0] - xb, rp - rf0) < 5.0)
     web = (((cen[0] < xa) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb) & (cen[0] < xb + P.web_thk))) & ~fz & (np.hypot(cen[1], cen[2]) > P.main_dia / 2 + 6.0)
     # ligament behind the groove: web material between the groove bottom (GROOVE_DEPTH into the web) and the far web face,
-    # radially across the groove opening, outside the main-journal footprint (where the main journal continues behind it)
+    # radially across the groove opening, outside the main-journal footprint + 6 mm (as the web zone): inside it the main
+    # journal continues behind the groove, and the main-journal / web corner of this slice is unfilleted (its peak is not a
+    # ligament stress)
     lig = ((((cen[0] < xa - GROOVE_DEPTH) & (cen[0] > xa - P.web_thk)) | ((cen[0] > xb + GROOVE_DEPTH) & (cen[0] < xb + P.web_thk)))
-           & (rp > P.pin_dia / 2) & (rp < P.pin_dia / 2 + 2 * GROOVE_DEPTH) & (np.hypot(cen[1], cen[2]) > P.main_dia / 2))
+           & (rp > P.pin_dia / 2) & (rp < P.pin_dia / 2 + 2 * GROOVE_DEPTH) & (np.hypot(cen[1], cen[2]) > P.main_dia / 2 + 6.0))
     zone = lambda msk: dict(vm_max_MPa=float(vm[msk].max()), vm_p999_MPa=float(np.percentile(vm[msk], 99.9)),
                             at=cen[:, int(np.argmax(np.where(msk, vm, -1)))].round(2).tolist())
     fil, wb, lg = zone(fz), zone(web), zone(lig)
     rec = dict(case="crank throw 3 in bending", material=mt, mesh=st, inputs=dict(force_N=F, direction="towards the crank axis (firing TDC)",
                                                                                  pin_fillet="semicircular relief groove R2.5 (D-047 / D-048)", fillet_mesh_mm=CRANK_FILLET_MESH,
                                                                                  web_thk_mm=P.web_thk, groove_depth_mm=GROOVE_DEPTH,
-                                                                                 web_remaining_at_groove_mm=P.web_thk - GROOVE_DEPTH),
+                                                                                 web_remaining_at_groove_mm=P.web_thk - GROOVE_DEPTH,
+                                                                                 pin_bore_mm=P.pin_bore,
+                                                                                 oil_drillings="not modelled (D-049): stress at the drilling exits is not assessed"),
                results=dict(applied_force_check_N=s["applied"].tolist(), vm_max_MPa=pk, vm_p999_MPa=p999, vm_max_location=loc,
                             fillet_vm_max_MPa=fil["vm_max_MPa"], fillet_vm_p999_MPa=fil["vm_p999_MPa"], fillet_vm_max_location=fil["at"],
                             web_vm_max_MPa=wb["vm_max_MPa"], web_vm_p999_MPa=wb["vm_p999_MPa"],
@@ -638,7 +643,7 @@ def case_crank():
                boundary_conditions="both main-journal surfaces fully fixed (stiffer than real bearings -> fillet stress over-predicted); load on the central part of the pin; "
                                    "pulsating load, alternating stress = half the peak; the main-journal / web corners are unfilleted in this slice, so the "
                                    "whole-part peak can sit there - the fatigue factor uses the pin-fillet zone (within 5 mm of either fillet circle); "
-                                   "bending only - combined bending + torsion at the fillet is an open item (D-047)")
+                                   "bending only - combined bending + torsion at the fillet is an open item (D-047); no oil drillings (D-049)")
     picture(m, cell=s["vm"], title="von Mises", units="[MPa]", path=os.path.join(OUT, "crank_throw_vm.png"), view=(0.3, -1, 0.3), clim=(0, p999))
     save("crank", rec)
 

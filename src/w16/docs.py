@@ -125,7 +125,7 @@ MFG = [  # component, material, process, critical dimensions, tolerance class, s
      "bore plateau honed Rpk<0.2; deck Rz 6", "coolant 95-110 degC; liner top ~150-170 degC (calc.)", "135 bar design gas pressure; main bearing 37 kN; head bolt clamp", "CT scan, pressure tests, CMM, bore form"),
     ("Crankcase lower section (bearing support)", "AlSi7Mg0.3-T6 with cast-in EN-GJS-600 bearing covers", "sand casting around pre-machined iron inserts; line boring assembled with the upper section", "main bore line; joint face; insert position", "main bore IT6, coaxiality 0.02 (class)", "joint Rz 6", "oil 100-140 degC", "main bearing loads 37 kN peak, 4 bolts per bearing", "X-ray of insert bond, CMM"),
     ("Cylinder heads", "AlSi7Mg0.3-T6 (+Cu variant for hot strength)", "low-pressure sand casting, HIP, T6; valve seats and guides shrink-fitted; cam line bored with caps", "chamber volume (CR), valve seat run-out to guide, cam bore line, port positions", "seat run-out 0.03, cam bores IT6, joint flatness 0.03 (classes)", "ports as cast + CNC blended throats; joint Rz 6", "roof ~230 degC mean gas side (1-D), coolant 95-110 degC", "135 bar on roof, bolt clamp, thermal gradient", "CT scan, leak test, CMM, flow bench"),
-    ("Crankshaft", "42CrMo4 (alternative 34CrNiMo6), QT, nitrided", "closed-die forging (twisted or as-forged throws), rough machining, QT, finish turning, drilling, nitriding, grinding, lapping, balancing", "journal diameters 68/56, throw 42.868, pin phasing (non-uniform, see table), fillets R2.5", "journals IT5, phasing +/-0.05 deg, run-out 0.02 (classes)", "journals Ra 0.1", "oil 100-150 degC", "bending from 78 kN design rod force, torsion mean 1.6 kN m + vibratory ~1.2 kN m", "MPI, CMM, hardness depth, balance"),
+    ("Crankshaft", "42CrMo4 (alternative 34CrNiMo6), QT, nitrided", "closed-die forging (twisted or as-forged throws), rough machining, QT, finish turning, drilling, nitriding, grinding, lapping, balancing", "journal diameters 68/56, throw 42.868, pin phasing (non-uniform, see table), main fillets R2.5, pin relief grooves R2.5 x 2.5 deep, solid pins, dia 5 oil drilling per rod", "journals IT5, phasing +/-0.05 deg, run-out 0.02 (classes)", "journals Ra 0.1", "oil 100-150 degC", "bending from 78 kN design rod force, torsion mean 1.6 kN m + vibratory ~1.2 kN m", "MPI, CMM, hardness depth, balance"),
     ("Connecting rods", "Ti-6Al-4V (forged, STA)", "die forging, machining, shot peening, anti-galling coating on thrust faces (CrN/MoS2)", "centre distance 164, bores, width 17.75, weight", "bores IT6, parallelism 0.02/100 (classes)", "peened; bores honed", "~150 degC", "78 kN compression (design), 20 kN tension at overspeed", "FPI, CMM, weight split"),
     ("Pistons", "AlSi12CuMgNi forged (4032) or 2618 for higher strength", "forging, CNC turning with oval/barrel skirt, pin-bore profiling, anodising, skirt coating", "skirt profile and clearance, compression height 38.5, ring grooves, crown tilt", "skirt profile +/-0.005, grooves IT6 (classes)", "pin bore Ra 0.2", "crown temperature: see the piston FE (section 8 of the report)", "135 bar gas, 31,700 m/s2 at overspeed", "CMM, ultrasonic, groove gauges"),
     ("Valves", "intake X45CrSi9-3 / titanium option; exhaust NiCr20TiAl (Nimonic 80A), hollow sodium-filled", "forging / friction welding, grinding, nitriding or chrome stem", "stem dia 6, seat angle, length (short/long types)", "stem IT5-class, seat run-out 0.02", "stem Ra 0.2", "exhaust head 750-850 degC (typical; not simulated)", "seating force, 5,300 m/s2 nose deceleration", "eddy current, X-ray of sodium fill"),
@@ -298,6 +298,15 @@ def piston_hot(E, h):
                 method=h.get("method", ""), t_oil=t_oil, uts=uts, gt=gt, rod_f=rod_f, rod_d50=rod_d50, m_rec=m_rec,
                 best_cooling=min(sens, key=lambda s: s["T_crown_mean_C"]) if sens else None,
                 T_crown=pis["results"].get("thermal", {}).get("T_crown_mean_C"))
+
+
+def cad_balance_note(cw):
+    """As-built crank balance (D-049): CAD mass properties of the crankshaft with its oil drillings + rod / piston equivalents."""
+    if "cad_residual_force_kgmm" not in cw:
+        return f" (residual {cw.get('residual_force_kgmm', 0):.1e} kg mm, {cw.get('residual_couple_kgmm2', 0):.1e} kg mm2)"
+    return (f": the CAD crankshaft with its oil drillings and the rod / piston equivalents leaves {cw['cad_residual_force_kgmm']:.3f} kg mm and "
+            f"{cw['cad_residual_couple_kgmm2']:.1f} kg mm2 ({cw['cad_residual_force_rated_N']:.0f} N and {cw['cad_residual_couple_rated_Nm']:.1f} N m at "
+            f"{P.rpm_rated:,.0f} rpm); the final balance is set on the balancing machine")
 
 
 def heat_cases(heat, pis):
@@ -797,9 +806,9 @@ connected volume of {V.get('jacket_block_bank_l', float('nan')):.2f} L surroundi
 Oil: central gallery dia {P.oil_gallery_dia:.0f} mm to the nine main bearings and the inner-row piston jets; two side galleries for the outer-row jets.
 
 ### 5.2 Crank train
-Crankshaft assembly group {m05} kg, eight bored pins, R2.5 fillets, drilled oil ways. The webs are only {P.web_thk} mm thick and the rods pass between them at BDC,
+Crankshaft assembly group {m05} kg, eight solid pins with R2.5 relief grooves, one straight oil drilling per rod (main journal -> pin). The webs are only {P.web_thk} mm thick and the rods pass between them at BDC,
 so counterweights cannot be wider than the webs: each throw is balanced internally to {min(ib) * 100:.0f}-{max(ib) * 100:.0f} % and the sixteen
-counterweights are sized so that the resultant force and couple of the complete crank are zero (residual {cw.get('residual_force_kgmm', 0):.1e} kg mm, {cw.get('residual_couple_kgmm2', 0):.1e} kg mm2).
+counterweights are sized so that the resultant force and couple of the complete crank are zero{cad_balance_note(cw)}.
 Titanium I-beam rods with trapezoidal small end; forged pistons with a crown tilted {P.crown_tilt_axis:.2f} deg to the pin-axis normal, three rings, slipper skirt.
 
 {img('06_ASSEMBLIES/views/crank_train_isometric.png', 'Crankshaft, rods and pistons.', 70)}
@@ -922,7 +931,7 @@ See `11_MANUFACTURING_DOCUMENTATION/MANUFACTURING_SPEC.md` (materials, processes
 2. No 3-D CFD of any kind (ports, plenum, coolant jacket, combustion). Flow results are 0-D / 1-D.
 3. The cycle model is uncalibrated; enrichment, boost and temperatures are plausible estimates. Knock is not modelled.
 4. Turbomachinery is sized, not designed: wheels and volutes are representative shapes; there are no compressor or turbine maps.
-5. FE is linear and local (see section 8). No fatigue, no bearing elasto-hydrodynamics, no valve-train dynamics, no crank 3-D torsional/bending model, no thermal-mechanical head analysis with valve-bridge detail.
+5. FE is linear and local (see section 8). No fatigue, no bearing elasto-hydrodynamics, no valve-train dynamics, no crank 3-D torsional/bending model, no thermal-mechanical head analysis with valve-bridge detail. The crank FE has no oil drillings, so the stress at the drilling exits is not assessed.
 6. Purchased units (injectors, coils, sensors, pumps, alternator, phasers, tensioners) are envelopes. Seals, O-rings, dowels, clips, brackets, most small fasteners, hoses and the detailed harness are not modelled.
 7. Castings have no draft, fillets or wall-thickness optimisation; mass is therefore indicative.
 8. Tolerances are classes, not a stack-up. Drawings are layout drawings.

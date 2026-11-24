@@ -1,9 +1,23 @@
 # Progress — resume from here
 
-_Last updated: 2026-11-21_
+_Last updated: 2026-11-24_
 
-Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-047) first. Run everything from the project root with
+Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-049) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
+
+## 2026-11-24 — D-048 converged on the hollow pin; D-049 solid pin + oil drillings; convergence re-run pending
+
+- Committed before this step: `d4d9b66` (D-048 groove form and convergence tool).
+- **D-048 convergence (hollow pin, user's terminal 2026-11-23):** converged, 194.8 MPa, factor 5.34 (0.46 % between 0.5 and 0.35 mm);
+  the standard 1.0 mm mesh reads 12 % low. Kept as `semicircle_hollow_pin` in `fea/crank_groove_convergence.json`.
+- **D-049 (option A of the user):** solid pins; one straight dia 5 drilling per rod (main surface -> pin at 276 deg, chamfered, no
+  plugs, no cross-drillings); counterweights re-solved on the CAD (as-built residual 0.004 kg mm / 2.4 kg mm2). Walls >= 5.29 mm on
+  all 16 drillings (`tools/check_oil_drillings.py`). Crank 34.22 kg (+1.69). The crank FE has no oil drillings (limitation).
+- **Next:** the user re-runs the convergence on the solid pin (`tools/crank_groove_convergence.py`); then the partial
+  regeneration (export, crank FE, render, drawings, docs + targeted crankshaft interference check), the report with the converged
+  factor, D-048 / D-049 in the report, scoped commit and publish.
+- **Found, decisions needed (DECISIONS.md, open items):** the CAD main-journal fillets are mirrored into the webs (main / web
+  corners sharp); the torsional model's EST throw inertia is less than half the CAD value (first mode 273 instead of 302 Hz).
 
 ## 2026-11-21 (evening) — user decisions applied (D-047); regeneration ready, not run
 

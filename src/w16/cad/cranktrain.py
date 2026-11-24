@@ -98,8 +98,9 @@ def throw_solid(k, cw=None, pin_fillet="undercut"):
         fr = Pos(px - hw, py, pz) * fillet_ring(P.pin_dia / 2, 2.5)
         fr2 = Pos(px + hw, py, pz) * Rot(Z=180) * fillet_ring(P.pin_dia / 2, 2.5)
         body = body + fr + fr2
-    # lightening bore through the pin (plugged in service)
-    body = body - Pos(px - hw - P.web_thk - 1, py, pz) * Rot(Y=90) * Cylinder(P.pin_bore / 2, P.pin_width + 2 * P.web_thk + 2, align=CMIN)
+    # lightening bore through the pin: none since D-049 (pin_bore = 0, solid pin)
+    if P.pin_bore > 0:
+        body = body - Pos(px - hw - P.web_thk - 1, py, pz) * Rot(Y=90) * Cylinder(P.pin_bore / 2, P.pin_width + 2 * P.web_thk + 2, align=CMIN)
     return body
 
 
@@ -130,13 +131,19 @@ def design_counterweights(mr_dyn, cw_angle):
     th, cap, mr_geom, m_throw = _cw_capacity_curve(1)
     c_max = float(cap[-1])
     ks = range(1, 9)
-    # unbalance of each throw in the crank frame (y, z components): geometry (pin + webs) + dynamic equivalent
-    U = {}
+    # material removed by the oil drillings of each throw (D-049): the drilling between inlet and outlet as a line mass at
+    # its mid-point; the two drillings of a throw are mirror images about the pin centre plane, so they add no couple there
+    a_hole = math.pi * OIL_R ** 2 * RHO_STEEL * 1e-9                       # kg per mm of drilling
+    u_drill = {k: np.zeros(2) for k in ks}
+    for d in oil_drillings():
+        u_drill[d["pin"]] = u_drill[d["pin"]] - a_hole * d["length"] * 0.5 * (d["I"][1:] + d["O"][1:])
+    # unbalance of each throw in the crank frame (y, z components): geometry (pin + webs) + oil drillings + dynamic equivalent
+    U, U_dyn = {}, {}
     for k in ks:
         psi = L.PIN_PHASE[k]
         u_geo = mr_geom * np.array(_yz(psi, 1.0))
-        u_dyn = -mr_dyn[k] * np.array(_yz(psi + cw_angle[k], 1.0))        # unbalance = minus the ideal counterweight
-        U[k] = u_geo + u_dyn
+        U_dyn[k] = -mr_dyn[k] * np.array(_yz(psi + cw_angle[k], 1.0))     # unbalance = minus the ideal counterweight
+        U[k] = u_geo + u_drill[k] + U_dyn[k]
     x = np.array([L.pin_x(k) for k in ks])
     A = np.zeros((4, 16))
     for i in range(8):
@@ -151,19 +158,53 @@ def design_counterweights(mr_dyn, cw_angle):
             break
         frac -= 0.01
     res = {}
+    cw_err = {}
+    ang = lambda v: math.degrees(math.atan2(v[0], v[1]))
+    s_max = math.sin(math.radians(CW_THETA_MAX))
     for k in ks:
         w = W[k]
         mag = float(np.linalg.norm(w))
-        direction = math.degrees(math.atan2(w[0], w[1]))
-        theta = float(np.interp(mag, cap, th))
+        direction = ang(w)
+        # m*r of the sector grows like sin(half-angle) (annular sector outside the web boss): interpolate in sin, then
+        # correct on the CAD of this throw (polygonal sector, web overlap at this direction) - D-049, the linear interpolation
+        # in the angle left up to 0.35 kg mm per throw
+        theta = math.degrees(math.asin(min(float(np.interp(mag, cap, np.sin(np.radians(th)))), s_max)))
+        s_base = mr_geom * np.array(_yz(L.PIN_PHASE[k], 1.0))
+        for it in range(4):
+            m, c = mass_props(throw_solid(k, (direction, theta)), RHO_STEEL)
+            got = m * c[1:] - s_base
+            err = float(np.linalg.norm(got - w))
+            if err < 2e-3 * mag or it == 3:
+                break
+            theta = math.degrees(math.asin(min(math.sin(math.radians(theta)) * mag / float(np.linalg.norm(got)), s_max)))
+            direction += (ang(w) - ang(got) + 180.0) % 360.0 - 180.0
         res[k] = (direction, theta, mag)
+        cw_err[k] = err
     rep = dict(c_max=c_max, mr_geom=mr_geom, m_throw_bare=m_throw, frac=frac,
                unbalance={k: float(np.linalg.norm(U[k])) for k in ks},
                provided={k: res[k][2] for k in ks},
                internal_balance={k: res[k][2] / float(np.linalg.norm(U[k])) for k in ks},
                residual_force_kgmm=float(np.linalg.norm(A[:2] @ r)), residual_couple_kgmm2=float(np.linalg.norm(A[2:] @ r)),
-               U=U, W=W)
+               cw_cad_error_kgmm={k: cw_err[k] for k in ks}, drill_unbalance_kgmm={k: float(np.linalg.norm(u_drill[k])) for k in ks},
+               u_dyn={k: U_dyn[k].tolist() for k in ks}, U=U, W=W)
     return res, rep
+
+
+def crank_unbalance(shape, u_dyn=None):
+    """Static unbalance S = int (y, z) dm [kg mm] and couple Q = int x (y, z) dm about x = 0 [kg mm2] of a crankshaft solid
+    (uniform steel), optionally plus the rod / piston equivalents u_dyn {throw: (y, z) kg mm} at the pin positions."""
+    from OCP.BRepGProp import BRepGProp
+    from OCP.GProp import GProp_GProps
+    g = GProp_GProps()
+    BRepGProp.VolumeProperties_s(shape.wrapped, g)
+    f = RHO_STEEL * 1e-9
+    m, c, M = g.Mass() * f, g.CentreOfMass(), g.MatrixOfInertia()
+    S = np.array([m * c.Y(), m * c.Z()])
+    Q = np.array([-M.Value(1, 2) * f + m * c.X() * c.Y(), -M.Value(1, 3) * f + m * c.X() * c.Z()])     # OCC: Ixy = -int x y dm
+    for k, u in (u_dyn or {}).items():
+        S = S + np.asarray(u)
+        Q = Q + L.pin_x(int(k)) * np.asarray(u)
+    return S, Q
 
 
 def crankshaft(cw):
@@ -199,18 +240,66 @@ def crankshaft(cw):
         y, z = _yz(40 * i, 45.0)
         body = body - Pos(x_r + REAR_SEAT + REAR_SEAL - 11, y, z) * Rot(Y=90) * Cylinder(5.1, 26.0, align=CMIN)                 # 9 x M12x1.5 flywheel bolts
     body = body - Pos(x_r + REAR_SEAT + REAR_SEAL, 0, 0) * Rot(Y=90) * Cylinder(17.5, 15.0, align=CMIN)                    # pilot bore
-    # oil drillings: main j -> pin j (inclined), cross-drilling in the main, outlet in the pin
-    for k in range(1, 9):
-        psi = L.PIN_PHASE[k]
-        mx = L.main_x(k)
-        px = L.pin_x(k)
-        cy, cz = _yz(psi, P.throw - 21.0)                                  # in the pin wall, crank-centre side
-        body = body - cyl_between((mx, 0, 0), (px, cy, cz), 2.5)
-        oy, oz = _yz(psi, P.throw - P.pin_dia / 2 - 1)
-        body = body - cyl_between((px, cy, cz), (px, oy, oz), 2.5)
-        ay, az = _yz(psi + 90, P.main_dia / 2 + 1)
-        body = body - cyl_between((mx, -ay, -az), (mx, ay, az), 2.5)
+    # oil drillings (D-049): one straight drilling per rod, main journal surface -> pin surface
+    for cut in oil_drilling_cutters():
+        body = body - cut
     return body, seg_props
+
+
+# oil drillings (D-049): one straight dia-5 drilling per rod, from the surface of the adjacent main journal (main k for the
+# rod on the -x side of pin k, main k + 1 for the +x rod) to the pin surface at the centre of that rod's shell.  Open at both
+# ends, drilled from the pin side (the drill clears the opposite web), so no plugs.  The mains are not cross-drilled: each
+# inlet is fed while it passes under the 180-deg groove of the upper main shell (a cross-drilling through every inlet comes
+# within 0.08 mm of the neighbouring drilling on mains 2, 4, 5, 6 and 8, whose two inlets are 23 deg apart or 23 deg off
+# opposite).  The D-048 drillings ran from the main centre to a point in the pin wall and broke out at the pin / web corner;
+# they relied on a plugged hollow pin.
+OIL_R = 2.5
+OIL_PHI = 276.0        # outlet angle on the pin, pin frame (0 = outer side, towards psi + 90): least-loaded zone of the
+                       # big-end load polar over 2,000-6,700 rpm (load there <= 21 % of the peak)
+OIL_THETA_REL = 77.5   # inlet angle on the main journal, deg from the pin direction psi (towards psi + 90): balances the walls
+                       # to the pin relief groove and to the main-journal / web corner
+OIL_CHAMFER = 0.5      # 45-deg chamfer at every opening, measured on the opening's major axis
+
+
+def oil_drillings():
+    """Geometry of the straight oil drillings (D-049), one dict per rod: inlet I on the main journal surface (x = main
+    centre, under the groove of the upper main shell), outlet O on the pin surface (x = rod centre), unit axis e (I -> O),
+    outward surface normals nI / nO and the angles between the axis and those normals."""
+    out = []
+    for c in sorted(L.CYLS, key=lambda c: c.x):
+        k = c.pin
+        psi = L.PIN_PHASE[k]
+        px = L.pin_x(k)
+        j = k if c.x < px else k + 1
+        cy, cz = _yz(psi, P.throw)
+        oy, oz = _yz(psi + OIL_PHI, P.pin_dia / 2)
+        th = psi + OIL_THETA_REL
+        I = np.array([L.main_x(j), *_yz(th, P.main_dia / 2)])
+        O = np.array([c.x, cy + oy, cz + oz])
+        e = (O - I) / np.linalg.norm(O - I)
+        nI, nO = np.array([0.0, *_yz(th, 1.0)]), np.array([0.0, *_yz(psi + OIL_PHI, 1.0)])
+        out.append(dict(cyl=c.no, pin=k, main=j, theta=th % 360.0, I=I, O=O, e=e, nI=nI, nO=nO, length=float(np.linalg.norm(O - I)),
+                        a_in=math.degrees(math.acos(abs(float(e @ nI)))), a_out=math.degrees(math.acos(abs(float(e @ nO))))))
+    return out
+
+
+def _countersink(p, n, r_open):
+    """45-deg chamfer cutter at an opening centred on p: cone about the outward surface normal n, radius r_open + OIL_CHAMFER
+    on the surface (r_open = major semi-axis of the opening), base 1 mm proud of the surface, apex inside."""
+    from build123d import Cone
+    h = r_open + OIL_CHAMFER + 1.0
+    return Plane(origin=tuple(p + n * 1.0), z_dir=tuple(-n)) * Cone(h, 0.0, h, align=CMIN)
+
+
+def oil_drilling_cutters():
+    """Solids to subtract for the oil drillings: per rod the inclined drilling and the chamfers at its outlet and inlet."""
+    cuts = []
+    for d in oil_drillings():
+        I, O, e = d["I"], d["O"], d["e"]
+        cuts.append(cyl_between(I - 2.0 * e, O + 2.0 * e, OIL_R))
+        cuts.append(_countersink(O, d["nO"], OIL_R / math.cos(math.radians(d["a_out"]))))
+        cuts.append(_countersink(I, d["nI"], OIL_R / math.cos(math.radians(d["a_in"]))))
+    return cuts
 
 
 # ====================================================================== connecting rod

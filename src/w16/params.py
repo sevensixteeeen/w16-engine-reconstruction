@@ -86,7 +86,8 @@ a("web_thk", 9.5, "mm", "EST", "crank web thickness; main + 2 webs + pin = cylin
 a("rod_be_width", 17.75, "mm", "EST", "big-end width")
 a("rod_side_clear", 0.25, "mm", "EST", "total axial float of the rod pair on the pin")
 a("cw_radius", 90.0, "mm", "EST", "counterweight outer radius (limited by the piston skirt at BDC)")
-a("pin_bore", 28.0, "mm", "EST", "lightening bore through each crankpin")
+a("pin_bore", 0.0, "mm", "EST", "crankpin lightening bore; 0 = solid pin (D-049: the 28 mm bore of earlier versions reached "
+  "under the main journals, so it could not be machined or plugged)")
 a("deck_clearance", 0.8, "mm", "EST", "piston crown to block deck at TDC")
 a("gasket_thk", 1.0, "mm", "EST", "compressed MLS head-gasket thickness")
 a("gasket_bore", 87.5, "mm", "EST", "head-gasket fire-ring bore")

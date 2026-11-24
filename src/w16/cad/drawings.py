@@ -165,10 +165,13 @@ def main(which=None):
         "crankshaft": lambda: sheet(g("W16-05-001").shape, "W16-05-001", "Crankshaft", MAT["steel_qt"], m(g("W16-05-001")), rows(
             ("Stroke", "stroke"), ("Crank throw (offset bores)", "throw"), ("Main journal dia", "main_dia"), ("Main journal width", "main_width"),
             ("Crankpin dia", "pin_dia"), ("Crankpin width", "pin_width"), ("Web thickness", "web_thk"), ("Throw pitch", "cyl_pitch"),
-            ("Counterweight radius", "cw_radius"), ("Pin lightening bore", "pin_bore"),
+            ("Counterweight radius", "cw_radius"), ("Crankpins", "solid, no lightening bore (D-049)"),
             ("Crankpin phases 1-8 [deg]", ", ".join(f"{L.PIN_PHASE[k]:.2f}" for k in range(1, 9))),
-            ("Journal fillets", "R2.5, rolled; no undercut"), ("Journal tolerance", "main h5 / pin h5 (class, provisional); Ra 0.1 um ground + lapped"),
-            ("Runout", "main journals 0.02 mm total indicated (class)"), ("Oil drillings", "dia 5, main j -> pin j; edges radiused and polished"),
+            ("Journal fillets", "pins: R2.5 semicircular relief groove, 2.5 deep into the web (D-048); mains: R2.5, rolled"),
+            ("Journal tolerance", "main h5 / pin h5 (class, provisional); Ra 0.1 um ground + lapped"),
+            ("Runout", "main journals 0.02 mm total indicated (class)"),
+            ("Oil drillings", f"dia 5, one per rod: main surface -> pin surface at {CT.OIL_PHI:.0f} deg (pin frame, low-load zone); "
+                              "inlet at the main centre (180-deg groove of the upper shell); 0.5 x 45 deg chamfers, polished (D-049)"),
             ("Balance", "dynamic, with bob weights for the rotating + 50 % of the reciprocating masses; see dynamics report"),
             ("Heat treatment", "QT to 1000-1100 MPa, gas nitrided 0.3-0.5 mm"), ("Inspection", "MPI 100 %, CMM journals, hardness, balance")),
             "W16-05-001_crankshaft", hidden=False),
