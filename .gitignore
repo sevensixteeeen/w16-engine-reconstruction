@@ -15,5 +15,8 @@ regen_logs_console.log
 regen_logs_d050/
 regen_logs_d050_console.log
 
+# low-resolution video previews of tools/render_videos.py - watched locally, not tracked
+09_ANIMATIONS/video_preview/
+
 # third-party source documents (copyrighted) - consulted locally, cited in 01_RESEARCH/RESEARCH_LOG.md, never published
 01_RESEARCH/sources/
