@@ -303,12 +303,14 @@ def main_shell():
     r_b = P.main_dia / 2 + 0.027
     sh = Rot(Y=90) * (Cylinder(r_mb, w, align=(Align.CENTER, Align.CENTER, Align.CENTER))
                       - Cylinder(r_b, w + 2, align=(Align.CENTER, Align.CENTER, Align.CENTER)))
-    # 45-deg chamfers at both bore edges (D-050): clear the R main_fillet_r journal fillets; land = w - 2 c
+    # 45-deg chamfers at the bore edges when main_shell_chamfer > 0 (none in D-050 option (b): the 12.2 mm shells clear the
+    # R2.5 journal fillets by their width); land = w - 2 c
     c = P.main_shell_chamfer
-    from build123d import Axis, revolve
-    for sx in (1, -1):
-        tri = [(sx * (w / 2 + 0.5), r_b + c + 0.5), (sx * (w / 2 + 0.5), r_b - 0.5), (sx * (w / 2 - c - 0.5), r_b - 0.5)]
-        sh = sh - revolve(Plane.XY * poly(tri), axis=Axis.X)
+    if c > 0:
+        from build123d import Axis, revolve
+        for sx in (1, -1):
+            tri = [(sx * (w / 2 + 0.5), r_b + c + 0.5), (sx * (w / 2 + 0.5), r_b - 0.5), (sx * (w / 2 - c - 0.5), r_b - 0.5)]
+            sh = sh - revolve(Plane.XY * poly(tri), axis=Axis.X)
     sh = sh & Pos(0, 0, 0.05) * Box(100, 100, 60, align=CMIN)
     sh = sh - Cylinder(3.5, 60, align=CMIN)                                                          # oil hole
     sh = sh - (Rot(Y=90) * (Cylinder(P.main_dia / 2 + 1.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.CENTER))

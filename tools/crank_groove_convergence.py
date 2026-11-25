@@ -8,8 +8,9 @@ balls (default radius 3 mm), one on the pin-groove peak and one on the main-fill
 its peak in its refined ball changes by less than 5 % between the two finest meshes; otherwise NOT CONVERGED and only
 the series is reported (no value is picked).  The feature peak is the maximum over ball and feature zone (the zones of
 `fea.crank_zones`), so a stress outside the feature cannot be taken for it; the zone peak outside the ball must stay below
-the refined peak.  Decision rule of the user (D-050): if the converged main-fillet factor is below 1.5, the main fillets
-switch to option (b) (R2.5 on the journal with narrower main shells).  Official values (D-050, decision of the user
+the refined peak.  Rule of the user (D-050): a main fillet below 1.5 - judged on the combined bending + torsion factor of
+tools/crank_main_fillet_torsion.py - switches to option (b); decided 2026-11-25: option (b), R2.5 main fillets with 12.2 mm
+unchamfered shells (the R1.6 run of option (c) is kept as `semicircle_r16_option_c`).  Official values (D-050, decision of the user
 2026-11-25): the zero-size linear extrapolation of the two finest meshes, because the element-mean peak keeps rising by
 about the same amount per refinement step; `--reverdict` recomputes the verdicts from the saved runs without any FE.
 Each run also gives the web and the ligament
@@ -57,7 +58,7 @@ from w16.sim import fea as F  # noqa: E402
 
 OUT = os.path.join(ROOT, "08_SIMULATIONS", "fea", "crank_groove_convergence.json")
 CRITERION = 0.05
-MAIN_FACTOR_MIN = 1.5          # D-050: below this converged main-fillet factor the main fillets switch to option (b)
+MAIN_FACTOR_MIN = 1.5          # D-050 criterion (judged on the combined bending + torsion factor, tools/crank_main_fillet_torsion.py)
 FEATURES = ("pin_groove", "main_fillet")
 
 

@@ -73,31 +73,38 @@ def journal_fillet(r, rf):
 MAIN_FIT = dict(thrust_main=5, t_assembly_c=20.0, t_block_hot_c=110.0, t_crank_hot_c=130.0, t_cold_c=-30.0, tolerance_mm=0.08)
 
 
-def main_fillet_fit(R=None):
-    """D-050: the largest main-journal fillet radius that clears the chamfered main shells.
+def main_fillet_fit(R=None, shell_width=None, chamfer=None):
+    """D-050: fit of a main-journal fillet (radius R, on the journal) to the main shells; defaults = the model parameters.
     Section through a main journal / web corner: s = axial distance from the web face.  The shell edge is at
-    g = (main_width - main_shell_width) / 2, its 45-deg bore chamfer c ends at s = g + c on the journal; the fillet R is
+    g = (main_width - shell_width) / 2, a 45-deg bore chamfer c (0 = none) ends at s = g + c on the journal; the fillet is
     tangent to the journal at s = R.  Axial allowance per side = half the crank end float (thrust bearing at main 5)
     + the differential thermal growth of the A356 block against the steel crank at the main farthest from the thrust
-    bearing (hot or cold, the larger) + a tolerance stack.  R = the largest 0.1 mm step with g + c - R >= allowance, and
-    the shell corner (s = g, r = r_j + c) stays inside the fillet's free space when the shell is shifted towards the web
-    by the allowance.  Returns the derivation (mm)."""
+    bearing (hot or cold, the larger) + a tolerance stack.  The shell clears the fillet when g + c - R >= allowance and,
+    with a chamfer, when its corner (s = g, r = r_j + c) stays inside the fillet's free space with the shell shifted
+    towards the web by the allowance.  Returns the derivation (mm), with r_max = the largest radius for this shell and
+    shell_width_max = the largest unchamfered shell width for this radius (both in 0.1 mm steps).  Option (c) was R1.6
+    with 16 mm shells chamfered 1.0 mm (r_max); option (b), the decision, is R2.5 with 12.2 mm unchamfered shells
+    (shell_width_max)."""
     f = MAIN_FIT
     a_al, a_st = MATERIALS[MAT["al_cast"]]["alpha"], MATERIALS[MAT["steel_qt"]]["alpha"]
     d_max = max(abs(L.main_x(j) - L.main_x(f["thrust_main"])) for j in range(1, P.n_main + 1))
     hot = (a_al * (f["t_block_hot_c"] - f["t_assembly_c"]) - a_st * (f["t_crank_hot_c"] - f["t_assembly_c"])) * d_max
     cold = (a_al - a_st) * (f["t_cold_c"] - f["t_assembly_c"]) * d_max
     allow = P.crank_end_float / 2 + max(abs(hot), abs(cold)) + f["tolerance_mm"]
-    g = (P.main_width - P.main_shell_width) / 2
-    c = P.main_shell_chamfer
+    R = P.main_fillet_r if R is None else R
+    W = P.main_shell_width if shell_width is None else shell_width
+    c = P.main_shell_chamfer if chamfer is None else chamfer
+    g = (P.main_width - W) / 2
     r_max = math.floor((g + c - allow) / 0.1 + 1e-9) * 0.1
-    R = r_max if R is None else R
+    w_max = math.floor((P.main_width - 2 * (R + allow)) / 0.1 + 1e-9) * 0.1
     rj = P.main_dia / 2
     corner = lambda shift: R - math.hypot(R - (g - shift), R - c)          # > 0: corner inside the fillet's free space
-    return dict(shell_edge_from_web_mm=g, chamfer_mm=c, land_mm=P.main_shell_width - 2 * c, end_float_half_mm=P.crank_end_float / 2,
+    return dict(shell_width_mm=W, shell_edge_from_web_mm=g, chamfer_mm=c, land_mm=W - 2 * c, end_float_half_mm=P.crank_end_float / 2,
                 thermal_hot_mm=hot, thermal_cold_mm=cold, farthest_main_from_thrust_mm=d_max, tolerance_mm=f["tolerance_mm"],
-                allowance_mm=allow, r_max_mm=round(r_max, 3), R_mm=R, axial_gap_nominal_mm=g + c - R, axial_gap_worst_mm=g + c - R - allow,
-                corner_clearance_nominal_mm=corner(0.0), corner_clearance_worst_mm=corner(allow), journal_radius_mm=rj)
+                allowance_mm=allow, r_max_mm=round(r_max, 3), shell_width_max_mm=round(w_max, 3), R_mm=R,
+                axial_gap_nominal_mm=g + c - R, axial_gap_worst_mm=g + c - R - allow,
+                corner_clearance_nominal_mm=corner(0.0) if c > 0 else None, corner_clearance_worst_mm=corner(allow) if c > 0 else None,
+                journal_radius_mm=rj)
 
 
 def undercut_ring(r, rf):

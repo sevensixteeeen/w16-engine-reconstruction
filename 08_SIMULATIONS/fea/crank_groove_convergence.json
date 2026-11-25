@@ -244,7 +244,7 @@
   "main_fillet_r_mm": null,
   "note_model": "no main fillets in the slice (the CAD rings were misplaced until D-050)"
  },
- "semicircle": {
+ "semicircle_r16_option_c": {
   "volume_mm3": 537617.7003712741,
   "pin_bore_mm": 0.0,
   "main_fillet_r_mm": 1.6,
@@ -637,6 +637,7 @@
    "main_fillet_decision": "bending alone: official main-fillet factor 1.78 >= 1.5; the combined bending + torsion factor (tools/crank_main_fillet_torsion.py) decides",
    "web_vm_max_MPa": 107.51298554536096,
    "ligament_vm_max_MPa": 107.51298554536096
-  }
+  },
+  "note_option": "D-050 option (c): R1.6 main fillets, 16 mm main shells chamfered 1.0 x 45 deg (14 mm land). The basis of the option comparison (crank_main_fillet_options.json); superseded by option (b), decision of the user 2026-11-25 - the R2.5 convergence is the key 'semicircle'."
  }
 }

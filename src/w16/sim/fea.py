@@ -657,7 +657,7 @@ def crank_zones(m, G):
 
 def crank_solve(m, G, F, mt):
     """Crank slice under the pin load F (N) - D-050 supports.  Pin: cosine load towards the crank axis on the central part of
-    the pin (D-047 load model).  Mains: the bearing reactions, a compressive pressure on the 14 mm land of each main
+    the pin (D-047 load model).  Mains: the bearing reactions, a compressive pressure on the land of each main
     shell (cosine around the half facing the load, parabolic across the land, zero at the land edges), scaled so that it
     balances the pin load exactly; the slice is held by a statically determinate 3-2-1 point support on its two end faces,
     which carries only the residual of the mesh (checked <= 1 %).  Until D-049 both journal surfaces were fully fixed -
@@ -695,18 +695,18 @@ def crank_solve(m, G, F, mt):
     return s, info
 
 
-CRANK_BC = ("bay simply supported on its two main bearings (D-050): bearing reactions as compressive pressures on the 14 mm shell "
-            "lands (cosine around the loaded half, parabolic across the land), balanced to the pin load; 3-2-1 point support on the "
-            "slice end faces (carries only the mesh residual, <= 1 %); pin load on the central part of the pin (D-047); pulsating "
-            "load, alternating stress = half the peak; real main fillets R{:.1f} (D-050); bending only - combined bending + torsion "
-            "at the fillets is an open item (D-047); no oil drillings (D-049)")
+CRANK_BC = ("bay simply supported on its two main bearings (D-050): bearing reactions as compressive pressures on the {land:.1f} mm "
+            "shell lands (cosine around the loaded half, parabolic across the land), balanced to the pin load; 3-2-1 point support on "
+            "the slice end faces (carries only the mesh residual, <= 1 %); pin load on the central part of the pin (D-047); pulsating "
+            "load, alternating stress = half the peak; real main fillets R{R:.1f} (D-050); bending only in the FE - combined bending + "
+            "torsion at the main fillet by hand calculation (tools/crank_main_fillet_torsion.py); no oil drillings (D-049)")
 
 
 def case_crank():
     """Crank throw 3 in bending.  D-047 (2026-11-21): undercut pin fillets, 1.0 mm elements along both fillet circles, CG
     solver, fatigue factor on the fillet-zone peak.  D-048 (2026-11-22): semicircular relief groove; web and ligament
-    stresses.  D-049 (2026-11-24): solid crankpin; no oil drillings in the FE.  D-050 (2026-11-24): real R1.6 main fillets
-    in the slice, refined like the grooves and reported with their own factor; the mains are supported by bearing
+    stresses.  D-049 (2026-11-24): solid crankpin; no oil drillings in the FE.  D-050 (2026-11-24 / 25): real main fillets
+    (R2.5, option (b)) in the slice, refined like the grooves and reported with their own factor; the mains are supported by bearing
     reactions on the shell lands instead of fixed journal surfaces (crank_solve).  The mesh-converged peaks of both
     features are tools/crank_groove_convergence.py (this run is the standard 1.0 mm mesh)."""
     R = results()["dynamics"]
@@ -740,7 +740,7 @@ def case_crank():
                             dofs=s["dofs"], solve_s=s["t_solve"], fatigue_limit_MPa=mt["fatigue"],
                             factor_on_fillet_max=mt["fatigue"] / (0.5 * fil["vm_max_MPa"]),
                             factor_on_main_fillet_max=mt["fatigue"] / (0.5 * mf["vm_max_MPa"])),
-               boundary_conditions=CRANK_BC.format(P.main_fillet_r))
+               boundary_conditions=CRANK_BC.format(land=G["land"], R=P.main_fillet_r))
     picture(m, cell=s["vm"], title="von Mises", units="[MPa]", path=os.path.join(OUT, "crank_throw_vm.png"), view=(0.3, -1, 0.3), clim=(0, p999))
     save("crank", rec)
 

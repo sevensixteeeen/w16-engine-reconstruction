@@ -5,6 +5,19 @@ _Last updated: 2026-11-24_
 Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-050) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
 
+## 2026-11-25 (later) — D-050 option (b): R2.5 main fillets, 12.2 mm unchamfered shells; convergence run next
+
+- **Decision of the user:** option (b) - main fillet R2.5, shells 12.2 mm, no chamfer; criterion combined bending + torsion >= 1.5
+  (estimate 1.73); Goodman (1.21) and M53 Q (1.35) as sensitivities. Comparison table in DECISIONS.md under the decision table.
+- **Applied:** params (`main_fillet_r` 2.5, `main_shell_width` 12.2 CALC, `main_shell_chamfer` 0), CAD (crank fillets, main shell),
+  crank FE slice, dynamics bearing width 12.2 mm (44.3 MPa, film 1.14 um), drawing note, report section 8.3.
+- **Checked:** shell / fillet 0.401 mm nominal, 0.049 mm shifted by the allowance, no overlap; oil-drilling inlets 1.84 mm inside the shell
+  edge, 2.24 mm from the fillet tangent; crankshaft 34.26 kg, valid.
+- **Convergence records:** the R1.6 run is kept as `semicircle_r16_option_c`; the R2.5 run writes `semicircle`. The torsion hand calc
+  refuses a record of another radius.
+- **Next:** the user runs `tools/crank_groove_convergence.py` (R2.5); then `run_regeneration_d050.cmd`; then the scoped commit of the
+  regenerated outputs and the publish.
+
 ## 2026-11-25 — D-050: convergence accepted, supports recorded; main fillet does not meet 1.5 combined (open); regeneration waits
 
 - **Convergence (user's run, 4.9 h):** both features converged by the 5 % rule. Official values = zero-size extrapolation (user):

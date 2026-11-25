@@ -1,5 +1,5 @@
 {
- "note": "--compare (2026-11-25, at the user's request, before the decision on D-050): option (c) as modelled (R1.6, 16 mm shells with 1.0 mm chamfers, 14 mm land) against option (b) (R2.5 on the journal, unchamfered shells narrowed to fit: the largest land in 0.1 mm steps that keeps the same axial allowance as `cranktrain.main_fillet_fit`).  The bending peak of (b) is the official (c) peak scaled by the ratio of the M53 journal-fillet bending factors, which differ only in f_B(r) = 0.1908 r^(-0.5568), r = R_G / D (M53.3.3, p. 19): (2.5 / 1.6)^(-0.5568) = 0.780 - the nominal web bending stress does not change with the fillet radius.  Main bearing per option: land width, specific load at the model peak and the quasi-static Ocvirk film at 6,700 rpm (the method of the dynamics report).",
+ "note": "--compare (2026-11-25, at the user's request, the basis of the D-050 decision for option (b)): option (c) (R1.6, 16 mm shells with 1.0 mm chamfers, 14 mm land; its FE convergence is kept as `semicircle_r16_option_c`) against option (b) (R2.5 on the journal, unchamfered shells narrowed to fit: the largest width in 0.1 mm steps that keeps the same axial allowance, `cranktrain.main_fillet_fit`).  The bending peak of (b) is the official (c) peak scaled by the ratio of the M53 journal-fillet bending factors, which differ only in f_B(r) = 0.1908 r^(-0.5568), r = R_G / D (M53.3.3, p. 19): (2.5 / 1.6)^(-0.5568) = 0.780 - the nominal web bending stress does not change with the fillet radius.  Main bearing per option: land width, specific load at the model peak and the quasi-static Ocvirk film at 6,700 rpm (the method of the dynamics report).",
  "date": "2026-11-25",
  "source": "IACS UR M53 Rev.4 (2019): bending factor of the journal fillet M53.3.3 (p. 19), f_B(r) = 0.1908 r^(-0.5568), r = R_G / D; torsion factor M53.3.3 / 3.2; equivalent stress M53.5.2",
  "bending_scaling": {
@@ -11,7 +11,7 @@
  "axial_allowance_mm": 0.35958000000000007,
  "options": {
   "c": {
-   "description": "R1.6 on the journal, 16 mm shells with 1.0 x 45 deg chamfers (as modelled)",
+   "description": "R1.6 on the journal, 16 mm shells with 1.0 x 45 deg chamfers",
    "shell_width_mm": 16.0,
    "chamfer_mm": 1.0,
    "axial_gap_nominal_mm": 0.3999999999999999,
@@ -54,29 +54,29 @@
    },
    "stresses": {
     "W_P_mm3": 61738.57882834662,
-    "tau_N_alt_MPa": 37.67883711920661,
+    "tau_N_alt_MPa": 37.68661451139345,
     "tau_N_mean_MPa": 28.15878196679982,
-    "tau_alt_MPa": 127.95448929212418,
+    "tau_alt_MPa": 127.98090072945551,
     "tau_mean_MPa": 95.62509995335054,
-    "sigma_v_alt_MPa": 366.2743406204436,
+    "sigma_v_alt_MPa": 366.302022191366,
     "sigma_v_mean_MPa": 335.36892794381026
    },
    "factors": {
     "fatigue_strength_MPa": 520,
     "uts_MPa": 1100,
-    "combined_alternating": 1.4197008698975628,
-    "combined_goodman_with_mean": 0.9908302862608757,
+    "combined_alternating": 1.4195935826101937,
+    "combined_goodman_with_mean": 0.9907780270282315,
     "bending_only": 1.783167458507991,
     "target": 1.5,
     "meets_target_combined": false,
     "m53_sigma_DW_MPa": 414.3174073891148,
-    "m53_Q": 1.1311668917000561,
+    "m53_Q": 1.1310814090255399,
     "m53_Q_min": 1.15,
     "m53_sigma_DW_note": "M53.6 (p. 22), drop-forged K = 1.05, sigma_B = UTS, R_G taken as not less than 2 mm, no credit for nitriding"
    },
    "torque_limit_for_target": {
     "M_TN_max_Nm": 1967.5514927884299,
-    "reduction_pct": 15.419161113976154,
+    "reduction_pct": 15.436616074153308,
     "note": "alternating torque at the most loaded section that would give the 1.5 target - information for the decision, not a requirement"
    },
    "bearing": {
@@ -89,9 +89,9 @@
   },
   "b": {
    "description": "R2.5 on the journal, unchamfered shells narrowed to fit (land in 0.1 mm steps, same axial allowance)",
-   "shell_width_mm": 12.200000000000001,
+   "shell_width_mm": 12.2,
    "chamfer_mm": 0.0,
-   "axial_gap_nominal_mm": 0.39999999999999947,
+   "axial_gap_nominal_mm": 0.40000000000000036,
    "main_fillet_r_mm": 2.5,
    "bending": {
     "peak_MPa": 454.9065800955571,
@@ -131,33 +131,33 @@
    },
    "stresses": {
     "W_P_mm3": 61738.57882834662,
-    "tau_N_alt_MPa": 37.67883711920661,
+    "tau_N_alt_MPa": 37.68661451139345,
     "tau_N_mean_MPa": 28.15878196679982,
-    "tau_alt_MPa": 114.18186943489843,
+    "tau_alt_MPa": 114.20543802796334,
     "tau_mean_MPa": 85.33231415308103,
-    "sigma_v_alt_MPa": 301.40918545476256,
+    "sigma_v_alt_MPa": 301.43597227112065,
     "sigma_v_mean_MPa": 271.2559873435409
    },
    "factors": {
     "fatigue_strength_MPa": 520,
     "uts_MPa": 1100,
-    "combined_alternating": 1.7252294392270435,
-    "combined_goodman_with_mean": 1.2103176172265075,
+    "combined_alternating": 1.725076128380246,
+    "combined_goodman_with_mean": 1.2102421619890442,
     "bending_only": 2.2861836814528798,
     "target": 1.5,
     "meets_target_combined": true,
     "m53_sigma_DW_MPa": 407.315965813634,
-    "m53_Q": 1.3513721063247643,
+    "m53_Q": 1.351252017948547,
     "m53_Q_min": 1.15,
     "m53_sigma_DW_note": "M53.6 (p. 22), drop-forged K = 1.05, sigma_B = UTS, R_G taken as not less than 2 mm, no credit for nitriding"
    },
    "torque_limit_for_target": {
     "M_TN_max_Nm": 3077.2314234506166,
-    "reduction_pct": -32.28361046501653,
+    "reduction_pct": -32.25631107684342,
     "note": "alternating torque at the most loaded section that would give the 1.5 target - information for the decision, not a requirement"
    },
    "bearing": {
-    "land_mm": 12.200000000000001,
+    "land_mm": 12.2,
     "specific_load_MPa": 44.27146963862079,
     "ocvirk_eps": 0.9579984047635217,
     "ocvirk_hmin_um": 1.1424433904322095,
@@ -171,5 +171,6 @@
   "ocvirk_eps": 0.9371840731159775,
   "ocvirk_hmin_um": 1.708593211245412,
   "note": "model main peak 36.73 kN at 6700 rpm, quasi-static short bearing (as the dynamics report)"
- }
+ },
+ "minutes": 0.23265865643819172
 }

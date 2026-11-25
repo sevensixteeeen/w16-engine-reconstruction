@@ -308,107 +308,130 @@ def piston_hot(E, h):
 
 def crank_md(E):
     """Report section 8.3 (D-050): crank throw supports, mesh convergence of both fillet features with the official
-    (zero-size extrapolated) values, combined bending + torsion at the main fillet, targeted interference re-check."""
-    C = E.get("crank_conv", {}).get("semicircle")
-    if not C or "verdict" not in C:
-        return ""
-    v, runs = C["verdict"], C["runs"]
-    old = E.get("crank_conv", {}).get("semicircle_hollow_pin", {}).get("verdict", {})
+    (zero-size extrapolated) values, combined bending + torsion at the main fillet (option (b), decision of the user
+    2026-11-25; criterion combined >= 1.5, Goodman and M53 Q as sensitivities), the option comparison it was decided on,
+    oil drillings, targeted interference re-check.  Values of another fillet radius than the model's are not shown as its
+    results."""
+    CC = E.get("crank_conv", {})
+    C = CC.get("semicircle")
+    R = P.main_fillet_r
+    same = lambda rec: rec is not None and abs((rec.get("main_fillet_r_mm") or -1.0) - R) < 1e-9
     T = E.get("crank_tors", {})
+    OPT = E.get("crank_opts", {})
     fat = MATERIALS["42CrMo4 QT + nitrided"]["fatigue"]                # crank material (cad.common.MAT["steel_qt"])
-    names = dict(pin_groove="Pin relief groove", main_fillet="Main-journal fillet")
-    rows = []
-    for ft in ("pin_groove", "main_fillet"):
-        x = v.get(ft, {})
-        if not x.get("converged"):
-            rows.append((names[ft], *[f"{s['peak_MPa']:.1f}" for s in x.get("series", [])], "NOT CONVERGED", "-", "-"))
-            continue
-        rows.append((names[ft], *[f"{s['peak_MPa']:.1f}" for s in x["series"]], f"{x['change_pct']:.2f} %",
-                     f"{x['converged_peak_MPa']:.1f} ({x['factor_on_converged_peak']:.2f})",
-                     f"**{x['official']['peak_MPa']:.0f} ({x['official']['factor']:.2f})**"))
-    sizes = [f"{r['local_size_mm']:.1f} mm" if r["local_size_mm"] >= 1 else f"{r['local_size_mm']:g} mm" for r in runs]
-    cr = E["fea"].get("crank", {}).get("results", {})
-    std = ""
-    if cr.get("fillet_vm_max_MPa") and cr.get("main_fillet_vm_max_MPa") and v.get("pin_groove", {}).get("official"):
-        std = (f" The standard crank FE record (1.0 mm, section 8 table) gives {cr['fillet_vm_max_MPa']:.0f} / {cr['main_fillet_vm_max_MPa']:.0f} MPa, "
-               f"{100 * (1 - cr['fillet_vm_max_MPa'] / v['pin_groove']['official']['peak_MPa']):.0f} % / "
-               f"{100 * (1 - cr['main_fillet_vm_max_MPa'] / v['main_fillet']['official']['peak_MPa']):.0f} % below the official values.")
     land = P.main_shell_width - 2 * P.main_shell_chamfer
+    shell = (f"main shells **{P.main_shell_width:.1f} mm** wide with {P.main_shell_chamfer:.1f} x 45 deg bore chamfers, so the load-carrying land is "
+             f"**{land:.1f} mm**" if P.main_shell_chamfer > 0 else f"unchamfered main shells **{P.main_shell_width:.1f} mm** wide (the load-carrying width)")
+    ob = OPT.get("options", {}).get("b", {})
+    fit_txt = (f" ({OPT['axial_allowance_mm']:.2f} mm for end float, block / crank thermal growth and tolerances; gap {ob['axial_gap_nominal_mm']:.2f} mm "
+               f"nominal, {ob['axial_gap_nominal_mm'] - OPT['axial_allowance_mm']:.2f} mm worst case)" if OPT and ob else "")
     out = [f"""### 8.3 Crank throw: supports, mesh convergence and combined fatigue of the fillets (D-047 to D-050)
 
 **Geometry.** Solid crankpins (D-049); pin relief grooves R2.5, 2.5 mm into the {P.web_thk} mm webs, {P.web_thk - 2.5:.1f} mm of web left behind them
-(D-048); main-journal fillets **R{P.main_fillet_r:.1f}** on the journal, main shells **{P.main_shell_width:.0f} mm** wide with {P.main_shell_chamfer:.1f} x 45 deg bore
-chamfers, so the load-carrying land is **{land:.0f} mm** (option (c) of D-050 as modelled - the choice between (b) and (c) is open, see below; R1.6 is the
-largest radius that keeps the axial allowance for end float, block / crank thermal growth and tolerances to the chamfered shell).
+(D-048); main-journal fillets **R{R:.1f}** on the journal at every web, {shell} - option (b) of D-050, decision of the user 2026-11-25: the
+shells are narrowed to the largest width, in 0.1 mm steps, that keeps the axial allowance to the fillets{fit_txt}. Option (c), R1.6 with
+16 mm shells chamfered 1.0 x 45 deg, did not meet the combined criterion (comparison below).
 
 **Boundary conditions (D-050).** Until D-049 the slice was clamped: both main-journal surfaces fully fixed. A clamped journal cannot turn, so the
 throw acts as a frame fixed at both ends and most of its bending moment stays in the journals; the {P.web_thk} mm webs see little of it. The slice is
-now a bay simply supported on its two main bearings: the bearing reactions are compressive pressures on the {land:.0f} mm shell lands (cosine around
-the loaded half, parabolic across the land), balanced to the pin load, and a statically determinate 3-2-1 point support carries only the mesh
-residual ({max(r['supports']['point_reaction_pct'] for r in runs):.0e} % of the load). This is the support of the dynamics bay model and of the
-classification method for crankshafts (IACS UR M53: a throw on two main bearings, statically determinate). Real bearings let the journal tilt
-within their clearance and the oil film cannot clamp it, while the neighbouring bays add some restraint: reality lies between the two models,
-nearer to simple support, so the new model is the more realistic and the conservative one. A fixed journal surface would also have sat on the main
-fillets. The change, together with the solid pin, moved the pin-groove peak from {old.get('converged_peak_MPa', float('nan')):.1f} MPa
-(factor {old.get('factor_on_converged_peak', float('nan')):.2f}; hollow pin, clamped, D-048) to the values below.
-
-**Mesh convergence** (`tools/crank_groove_convergence.py`, two refinement balls in every refined mesh; element-mean von Mises peak at the design
-gas force, pulsating load, factor = fatigue strength {fat:.0f} MPa / half the peak; converged = less than 5 % between the two finest meshes):
+now a bay simply supported on its two main bearings: the bearing reactions are compressive pressures on the {land:.1f} mm shell lands (cosine
+around the loaded half, parabolic across the land), balanced to the pin load, and a statically determinate 3-2-1 point support carries only the
+mesh residual. This is the support of the dynamics bay model and of the classification method for crankshafts (IACS UR M53: a throw on two main
+bearings, statically determinate). Real bearings let the journal tilt within their clearance and the oil film cannot clamp it, while the
+neighbouring bays add some restraint: reality lies between the two models, nearer to simple support, so the new model is the more realistic and
+the conservative one. A fixed journal surface would also have sat on the main fillets. With the solid pin, the change moved the pin-groove factor
+from {CC.get('semicircle_hollow_pin', {}).get('verdict', {}).get('factor_on_converged_peak', float('nan')):.2f} (hollow pin, clamped, D-048) to
+{CC.get('semicircle_r16_option_c', {}).get('verdict', {}).get('pin_groove', {}).get('factor_on_converged_peak', float('nan')):.2f} at 0.35 mm /
+{CC.get('semicircle_r16_option_c', {}).get('verdict', {}).get('pin_groove', {}).get('official', {}).get('factor', float('nan')):.2f} official (R1.6 main
+fillets, the run of option (c)).
+"""]
+    if same(C) and "verdict" in C:
+        v, runs = C["verdict"], C["runs"]
+        names = dict(pin_groove="Pin relief groove", main_fillet=f"Main-journal fillet R{R:.1f}")
+        rows = []
+        for ft in ("pin_groove", "main_fillet"):
+            x = v.get(ft, {})
+            if not x.get("converged"):
+                rows.append((names[ft], *[f"{s['peak_MPa']:.1f}" for s in x.get("series", [])], "NOT CONVERGED", "-", "-"))
+                continue
+            rows.append((names[ft], *[f"{s['peak_MPa']:.1f}" for s in x["series"]], f"{x['change_pct']:.2f} %",
+                         f"{x['converged_peak_MPa']:.1f} ({x['factor_on_converged_peak']:.2f})",
+                         f"**{x['official']['peak_MPa']:.0f} ({x['official']['factor']:.2f})**"))
+        sizes = [f"{r['local_size_mm']:.1f} mm" if r["local_size_mm"] >= 1 else f"{r['local_size_mm']:g} mm" for r in runs]
+        cr = E["fea"].get("crank", {})
+        crr = cr.get("results", {})
+        std = ""
+        if abs((cr.get("inputs", {}).get("main_fillet_r_mm") or -1.0) - R) < 1e-9 and v.get("pin_groove", {}).get("official") and v.get("main_fillet", {}).get("official"):
+            std = (f" The standard crank FE record (1.0 mm, section 8 table) gives {crr['fillet_vm_max_MPa']:.0f} / {crr['main_fillet_vm_max_MPa']:.0f} MPa, "
+                   f"{100 * (1 - crr['fillet_vm_max_MPa'] / v['pin_groove']['official']['peak_MPa']):.0f} % / "
+                   f"{100 * (1 - crr['main_fillet_vm_max_MPa'] / v['main_fillet']['official']['peak_MPa']):.0f} % below the official values.")
+        out.append(f"""**Mesh convergence** (`tools/crank_groove_convergence.py`, two refinement balls in every refined mesh; element-mean von Mises peak at the
+design gas force, pulsating load, factor = fatigue strength {fat:.0f} MPa / half the peak; converged = less than 5 % between the two finest meshes;
+point support reaction <= {max(r['supports']['point_reaction_pct'] for r in runs):.0e} % of the load):
 
 {tab(rows, ["Feature", *sizes, "change, two finest", "0.35 mm value (factor)", "official: zero-size extrapolation (factor)"])}
 
-The peak rises by about the same amount per refinement step ({", ".join(f"{d:+.1f}" for d in v.get("pin_groove", {}).get("increments_MPa", []))} MPa at
-the groove, {", ".join(f"{d:+.1f}" for d in v.get("main_fillet", {}).get("increments_MPa", []))} MPa at the main fillet): the element-mean stress
-approaches the surface value about linearly with the element size. The **official values are the zero-size linear extrapolation of the two
-finest meshes** (decision D-050) - conservative against the 0.35 mm values.{std} Web {v.get('web_vm_max_MPa', float('nan')):.0f} MPa,
-ligament behind the groove {v.get('ligament_vm_max_MPa', float('nan')):.0f} MPa (0.35 mm mesh). Bending alone, the main fillet reaches the
-factor {v.get('main_fillet', {}).get('official', {}).get('factor', float('nan')):.2f}; the D-050 rule (main fillet below 1.5 -> option (b)) is judged on the
-combined bending + torsion factor below.
-"""]
-    if T:
+Increments per refinement step: {", ".join(f"{d:+.1f}" for d in v.get("pin_groove", {}).get("increments_MPa", []))} MPa at the groove,
+{", ".join(f"{d:+.1f}" for d in v.get("main_fillet", {}).get("increments_MPa", []))} MPa at the main fillet. The **official values are the zero-size linear
+extrapolation of the two finest meshes** (decision D-050: the element-mean stress approaches the surface value about linearly with the element
+size, so the increments do not shrink) - conservative against the 0.35 mm values.{std} Web {v.get('web_vm_max_MPa', float('nan')):.0f} MPa,
+ligament behind the groove {v.get('ligament_vm_max_MPa', float('nan')):.0f} MPa (0.35 mm mesh).
+""")
+    else:
+        out.append(f"**Mesh convergence of the R{R:.1f} main fillets: pending** (`tools/crank_groove_convergence.py`, run by the user before the regeneration).\n")
+    if same(T) and T.get("converged"):
         sc, tq, st, fa = T["torsion_scf"], T["torque"], T["stresses"], T["factors"]
         g = tq["governing"]
-        below = fa["combined_alternating"] < fa["target"]
-        status = T.get("status", "")
-        O = E.get("crank_opts", {}).get("options", {})
-        opt_md = ""
-        if O:
-            orow = []
-            for k_ in ("c", "b"):
-                o = O[k_]
-                bb, ff = o["bearing"], o["factors"]
-                orow.append((f"({k_}) R{o['main_fillet_r_mm']:.1f}", f"{o['shell_width_mm']:.1f} / {bb['land_mm']:.1f}",
-                             f"{o['bending']['peak_MPa']:.0f} ({ff['bending_only']:.2f})", f"{o['torsion_scf']['beta_T_used']:.2f}",
-                             f"**{ff['combined_alternating']:.2f}**", f"{ff['combined_goodman_with_mean']:.2f}", f"{ff['m53_Q']:.2f}",
-                             f"{bb['specific_load_MPa']:.1f}", f"{bb['ocvirk_hmin_um']:.2f}", f"{o['torque_limit_for_target']['M_TN_max_Nm']:,.0f}"))
-            ref = E["crank_opts"].get("reference_16mm", {})
-            opt_md = ("\n\nOptions under decision (light calculation, `tools/crank_main_fillet_torsion.py --compare`; the bending peak of (b) is the "
-                      f"official (c) peak x {E['crank_opts']['bending_scaling']['ratio_b_over_c']:.3f}, the ratio of the M53 journal-fillet bending factors "
-                      "f_B(r) = 0.1908 r^-0.5568, M53.3.3; same torque, damper and combination; shells of (b) unchamfered, narrowed to keep the same "
-                      "axial allowance):\n\n"
-                      + tab(orow, ["Option", "shell / land [mm]", "bending peak [MPa] (factor)", "beta_T", "combined factor", "with mean (Goodman)",
-                                   "M53 Q", "main specific load [MPa]", "Ocvirk film at 6,700 rpm [um]", "alternating torque for 1.5 [N m]"])
-                      + f"\n\nReference, 16 mm land before D-050: {ref.get('specific_load_MPa', float('nan')):.1f} MPa, "
-                        f"{ref.get('ocvirk_hmin_um', float('nan')):.2f} um.")
-        dec = (f"**Main-journal fillet: {status}** (D-050 rule: main fillet below 1.5 -> option (b); decision pending)." if status else "") + opt_md
-        out.append(f"""**Main-journal fillet, bending + torsion** (hand calculation, `tools/crank_main_fillet_torsion.py`; no FE). Bending: the official peak,
-alternating {T['bending']['alternating_MPa']:.0f} MPa. Torsion: stress concentration factor of the journal fillet from IACS UR M53 Rev.4 (2019), M53.3.3 / 3.2,
-beta_T = 0.8 f(r,s) f(b) f(w) = **{sc['beta_T_used']:.2f}** (r = R_G / D_G = {sc['geometry']['r']:.4f}, w = W / D = {sc['geometry']['w']:.3f}, both below M53's
-ranges (r >= 0.03, w >= 0.2): extrapolated; {sc['beta_T_range_limits']:.2f} at the range limits); alternating torque **{g['M_TN_max_Nm']:,.0f} N m** at
-{g['rpm']:,} rpm (most loaded section; harmonic synthesis of orders 0.5-12 as M53 2.2.2 of the torsional model with the CAD inertia and the EST
-damper; order 2.5 alone {g['order25_amp_max_Nm']:,.0f} N m - its resonance is at {tq['order25_resonance_rpm']:,.0f} rpm), mean {tq['T_mean_Nm']:,.0f} N m;
-nominal shear {st['tau_N_alt_MPa']:.1f} / {st['tau_N_mean_MPa']:.1f} MPa alternating / mean, {st['tau_alt_MPa']:.0f} / {st['tau_mean_MPa']:.0f} MPa with
-beta_T. Equivalent alternating stress (M53 5.2) sqrt(sigma_B,a^2 + 3 tau_a^2) = {st['sigma_v_alt_MPa']:.0f} MPa, bending and torsion peaks taken in
-phase at the same point -> **combined factor {fa['combined_alternating']:.2f}** (target 1.5{'; below it' if below else ''}; bending alone
-{fa['bending_only']:.2f}). With the mean stresses (Goodman on the von Mises equivalents, ultimate {fa['uts_MPa']:.0f} MPa): {fa['combined_goodman_with_mean']:.2f}.
-M53's own fatigue strength without credit for nitriding ({fa['m53_sigma_DW_MPa']:.0f} MPa) gives Q = {fa['m53_Q']:.2f} (M53 asks >= 1.15).
-{dec}
+        verdict = "meets" if fa["combined_alternating"] >= fa["target"] else "does not meet"
+        out.append(f"""**Main-journal fillet, bending + torsion** (hand calculation, `tools/crank_main_fillet_torsion.py`; no FE). Bending: the official peak
+of the R{R:.1f} fillet, alternating {T['bending']['alternating_MPa']:.0f} MPa. Torsion: stress concentration factor of the journal fillet from IACS UR M53
+Rev.4 (2019), M53.3.3 / 3.2, beta_T = 0.8 f(r,s) f(b) f(w) = **{sc['beta_T_used']:.2f}** (r = R_G / D_G = {sc['geometry']['r']:.4f}, w = W / D =
+{sc['geometry']['w']:.3f}; outside M53's ranges r >= 0.03 / w >= 0.2 the larger of the extrapolated and the range-limit value is used:
+{sc['beta_T_extrapolated']:.2f} / {sc['beta_T_range_limits']:.2f}); alternating torque **{g['M_TN_max_Nm']:,.0f} N m** at {g['rpm']:,} rpm (most loaded
+section; harmonic synthesis of orders 0.5-12 as M53 2.2.2 of the torsional model with the CAD inertia and the EST damper; order 2.5 alone
+{g['order25_amp_max_Nm']:,.0f} N m - its resonance is at {tq['order25_resonance_rpm']:,.0f} rpm), mean {tq['T_mean_Nm']:,.0f} N m; nominal shear
+{st['tau_N_alt_MPa']:.1f} / {st['tau_N_mean_MPa']:.1f} MPa alternating / mean, {st['tau_alt_MPa']:.0f} / {st['tau_mean_MPa']:.0f} MPa with beta_T.
+Equivalent alternating stress (M53 5.2) sqrt(sigma_B,a^2 + 3 tau_a^2) = {st['sigma_v_alt_MPa']:.0f} MPa, bending and torsion peaks taken in phase at
+the same point.
+
+**Main-journal fillet R{R:.1f} (option (b), D-050): combined factor {fa['combined_alternating']:.2f} - {verdict} the 1.5 criterion.** Sensitivities,
+not criteria: with the mean stresses (Goodman on the von Mises equivalents, ultimate {fa['uts_MPa']:.0f} MPa) {fa['combined_goodman_with_mean']:.2f};
+M53 Q with M53's own fatigue strength without credit for nitriding ({fa['m53_sigma_DW_MPa']:.0f} MPa) {fa['m53_Q']:.2f} (M53 asks >= 1.15).
+Bending alone {fa['bending_only']:.2f}.
+""")
+    elif same(T):
+        out.append(f"**Main-journal fillet R{R:.1f}, bending + torsion:** {T.get('status', 'not evaluated')}.\n")
+    else:
+        out.append(f"**Main-journal fillet R{R:.1f}, bending + torsion: pending** - evaluated on the R{R:.1f} FE convergence in the regeneration "
+                   f"(`tools/crank_main_fillet_torsion.py`); the decision estimate is in the comparison below.\n")
+    O = OPT.get("options", {})
+    if O:
+        orow = []
+        for k_ in ("c", "b"):
+            o = O[k_]
+            bb, ff = o["bearing"], o["factors"]
+            orow.append((f"({k_}) R{o['main_fillet_r_mm']:.1f}", f"{o['shell_width_mm']:.1f} / {bb['land_mm']:.1f}",
+                         f"{o['bending']['peak_MPa']:.0f} ({ff['bending_only']:.2f})", f"{o['torsion_scf']['beta_T_used']:.2f}",
+                         f"**{ff['combined_alternating']:.2f}**", f"{ff['combined_goodman_with_mean']:.2f}", f"{ff['m53_Q']:.2f}",
+                         f"{bb['specific_load_MPa']:.1f}", f"{bb['ocvirk_hmin_um']:.2f}", f"{o['torque_limit_for_target']['M_TN_max_Nm']:,.0f}"))
+        ref = OPT.get("reference_16mm", {})
+        out.append(f"""**Option comparison on which D-050 was decided** (light calculation, `tools/crank_main_fillet_torsion.py --compare`, 2026-11-25; the bending peak
+of (b) was the official R1.6 FE peak x {OPT['bending_scaling']['ratio_b_over_c']:.3f}, the ratio of the M53 journal-fillet bending factors f_B(r) = 0.1908
+r^-0.5568 (M53.3.3); same torque, damper and combination; rule of the user: main fillet below 1.5 combined -> option (b)):
+
+{tab(orow, ["Option", "shell / land [mm]", "bending peak [MPa] (factor)", "beta_T", "combined factor", "with mean (Goodman)", "M53 Q",
+            "main specific load [MPa]", "Ocvirk film at 6,700 rpm [um]", "alternating torque for 1.5 [N m]"])}
+
+Reference, 16 mm shells before D-050: {ref.get('specific_load_MPa', float('nan')):.1f} MPa, {ref.get('ocvirk_hmin_um', float('nan')):.2f} um.
 """)
     oil = E.get("oil", {}).get("summary")
     if oil:
+        op = E["oil"].get("openings", {})
         out.append(f"""**Oil drillings** (D-049, `tools/check_oil_drillings.py`; not in the FE): one dia 5 drilling per rod, main surface -> pin surface at
 {E['oil']['geometry']['outlet_phi_deg']:.0f} deg; only the pin and main surfaces are cut; walls >= {min(oil['min_wall_to_relief_groove_mm'], *oil['min_wall_web_faces_mm'].values()):.2f} mm
-to the relief groove and the web faces; {oil.get('min_wall_to_main_fillet_mm', float('nan')):.2f} mm to the main-fillet tangent on the inlet's exit ramp.
+to the relief groove and the web faces; {oil.get('min_wall_to_main_fillet_mm', float('nan')):.2f} mm to the main-fillet tangent on the inlet's exit ramp;
+inlet openings {op.get('inlet_to_main_shell_land_edge_mm', float('nan')):.2f} mm inside the main-shell edge and {op.get('inlet_to_main_fillet_tangent_mm', float('nan')):.2f} mm
+from the fillet tangent.
 """)
     ict = [x for x in (E.get("ic_crank_static"), E.get("ic_crank_kin")) if x]
     if ict:

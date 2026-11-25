@@ -116,7 +116,7 @@ def run(rpm, op=None, A_turb=None):
         mag = np.hypot(F[:, 0], F[:, 1])
         i = int(np.argmax(mag))
         mains[j] = dict(F=F, peak=float(mag.max()), mean=float(mag.mean()), peak_vec=F[i].tolist(), peak_alpha=float(AL[i]))
-    w_eff_main = P.main_shell_width - 2 * P.main_shell_chamfer    # load-carrying land of the chamfered main shells (D-050; was 16 mm)
+    w_eff_main = P.main_shell_width - 2 * P.main_shell_chamfer    # load-carrying land of the main shells (D-050 option (b): 12.2 mm; was 16 mm)
     w_eff_rod = P.rod_be_width - 1.5
     rod_peak_c = max(float(cf[c.no]["R"].max()) for c in L.CYLS)
     rod_peak_t = min(float(cf[c.no]["R"].min()) for c in L.CYLS)

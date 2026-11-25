@@ -24,19 +24,22 @@ von Mises equivalents (sigma_m from the pulsating bending and the mean torque). 
 would give the 1.5 target with the same bending, SCF and combination is reported (`torque_limit_for_target`) - a
 number for the decision, not a requirement.
 
---compare (2026-11-25, at the user's request, before the decision on D-050): option (c) as modelled (R1.6, 16 mm shells
-with 1.0 mm chamfers, 14 mm land) against option (b) (R2.5 on the journal, unchamfered shells narrowed to fit: the
-largest land in 0.1 mm steps that keeps the same axial allowance as `cranktrain.main_fillet_fit`).  The bending peak of
+--compare (2026-11-25, at the user's request, the basis of the D-050 decision for option (b)): option (c) (R1.6, 16 mm
+shells with 1.0 mm chamfers, 14 mm land; its FE convergence is kept as `semicircle_r16_option_c`) against option (b) (R2.5
+on the journal, unchamfered shells narrowed to fit: the largest width in 0.1 mm steps that keeps the same axial allowance,
+`cranktrain.main_fillet_fit`).  The bending peak of
 (b) is the official (c) peak scaled by the ratio of the M53 journal-fillet bending factors, which differ only in
 f_B(r) = 0.1908 r^(-0.5568), r = R_G / D (M53.3.3, p. 19): (2.5 / 1.6)^(-0.5568) = 0.780 - the nominal web bending stress
 does not change with the fillet radius.  Main bearing per option: land width, specific load at the model peak and the
 quasi-static Ocvirk film at 6,700 rpm (the method of the dynamics report).
 
+The default mode evaluates the modelled fillet (P.main_fillet_r) on its own convergence record (key `semicircle`) and stops
+if that record is for another radius; with an unconverged main-fillet peak it writes 'not converged' and no factor.
+
     set PYTHONPATH=src
     .venv\\Scripts\\python tools\\crank_main_fillet_torsion.py [--compare]
 
-Output: 08_SIMULATIONS/analytical/crank_main_fillet_torsion.json (the modelled option); with --compare also
-08_SIMULATIONS/analytical/crank_main_fillet_options.json.
+Output: 08_SIMULATIONS/analytical/crank_main_fillet_torsion.json (default) or crank_main_fillet_options.json (--compare).
 """
 from __future__ import annotations
 import argparse
@@ -169,47 +172,77 @@ def bearing(land, main_peak_N, rpm=6700.0):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--compare", action="store_true", help="also evaluate option (b) and write crank_main_fillet_options.json")
+    ap.add_argument("--compare", action="store_true", help="reproduce the option comparison of D-050 (crank_main_fillet_options.json)")
     a = ap.parse_args()
     t0 = time.time()
-    conv = json.load(open(CONV, encoding="utf-8"))["semicircle"]["verdict"]["main_fillet"]
-    off = conv["official"]
+    allc = json.load(open(CONV, encoding="utf-8"))
+    if a.compare:
+        compare(allc, t0)
+        return
+    rec = allc.get("semicircle", {})
+    R = P.main_fillet_r
+    if abs(rec.get("main_fillet_r_mm", -1.0) - R) > 1e-9:
+        raise SystemExit(f"the convergence record 'semicircle' is for a main fillet R{rec.get('main_fillet_r_mm')}, the model has R{R}: run "
+                         f"tools/crank_groove_convergence.py first")
+    mf = rec.get("verdict", {}).get("main_fillet", {})
+    base = dict(note=__doc__.split("\n\n")[0].replace("\n", " "), date=time.strftime("%Y-%m-%d"), main_fillet_r_mm=R,
+                shell_width_mm=P.main_shell_width, chamfer_mm=P.main_shell_chamfer,
+                source_scf="IACS UR M53 Rev.4 (2019), M53.3.2 / M53.3.3 (p. 19), ranges p. 18; equivalent stress M53.5.2 (p. 22); Q >= 1.15 M53.7")
+    if not mf.get("converged") or "official" not in mf:
+        out = dict(base, status="main-fillet peak not converged - no combined factor", converged=False, series=mf.get("series"))
+        with open(OUT, "w", encoding="utf-8") as fh:
+            json.dump(out, fh, indent=1)
+        print(out["status"]); print("written", OUT)
+        return
+    off = mf["official"]
     tq = torque_scan()
-    c = evaluate(P.main_fillet_r, off["peak_MPa"], tq)
-    out = dict(note=__doc__.split("\n\n")[0].replace("\n", " "), date=time.strftime("%Y-%m-%d"),
-               source_scf="IACS UR M53 Rev.4 (2019), M53.3.2 / M53.3.3 (p. 19), ranges p. 18; equivalent stress M53.5.2 (p. 22); Q >= 1.15 M53.7",
-               status="does not meet 1.5 combined; open" if not c["factors"]["meets_target_combined"] else "meets 1.5 combined",
-               bending=dict(official_peak_MPa=off["peak_MPa"], basis=off["basis"], alternating_MPa=c["bending"]["alternating_MPa"],
-                            mean_MPa=c["bending"]["mean_MPa"], factor_bending_only=c["bending"]["factor_bending_only"]),
-               torsion_scf=c["torsion_scf"], torque=tq, stresses=c["stresses"], factors=c["factors"],
-               torque_limit_for_target=c["torque_limit_for_target"], minutes=(time.time() - t0) / 60)
+    m = evaluate(R, off["peak_MPa"], tq)
+    ok = m["factors"]["meets_target_combined"]
+    out = dict(base, converged=True,
+               status="meets the 1.5 combined criterion" if ok else "does not meet the 1.5 combined criterion; open",
+               bending=dict(official_peak_MPa=off["peak_MPa"], basis=off["basis"], alternating_MPa=m["bending"]["alternating_MPa"],
+                            mean_MPa=m["bending"]["mean_MPa"], factor_bending_only=m["bending"]["factor_bending_only"]),
+               torsion_scf=m["torsion_scf"], torque=tq, stresses=m["stresses"], factors=m["factors"],
+               torque_limit_for_target=m["torque_limit_for_target"], minutes=(time.time() - t0) / 60)
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(out, fh, indent=1)
-    print(json.dumps(dict(option_c=dict(stresses=c["stresses"], factors=c["factors"])), indent=1))
+    print(json.dumps(dict(R=R, status=out["status"], stresses=m["stresses"], factors=m["factors"]), indent=1))
     print("written", OUT)
-    if not a.compare:
-        return
-    fit = CT.main_fillet_fit()
-    allow = fit["allowance_mm"]
-    land_c = P.main_shell_width - 2 * P.main_shell_chamfer
-    land_b = math.floor((P.main_width - 2 * (R_B + allow)) / 0.1 + 1e-9) * 0.1
-    ratio = (R_B / P.main_fillet_r) ** (-0.5568)
+
+
+# option (c) as evaluated for the D-050 decision (2026-11-25): its FE convergence is kept under this key
+OPT_C = dict(R=1.6, shell_width=16.0, chamfer=1.0, conv_key="semicircle_r16_option_c")
+
+
+def compare(allc, t0):
+    """The option comparison of D-050 (decision basis): (c) on its own FE convergence, (b) scaled from it (M53 bending factor)."""
+    rec_c = allc[OPT_C["conv_key"]]
+    assert abs(rec_c["main_fillet_r_mm"] - OPT_C["R"]) < 1e-9
+    off = rec_c["verdict"]["main_fillet"]["official"]
+    tq = torque_scan()
+    c = evaluate(OPT_C["R"], off["peak_MPa"], tq)
+    fit_c = CT.main_fillet_fit(R=OPT_C["R"], shell_width=OPT_C["shell_width"], chamfer=OPT_C["chamfer"])
+    fit_b = CT.main_fillet_fit(R=R_B, shell_width=None, chamfer=0.0)
+    land_c = OPT_C["shell_width"] - 2 * OPT_C["chamfer"]
+    land_b = fit_b["shell_width_max_mm"]
+    fit_b = CT.main_fillet_fit(R=R_B, shell_width=land_b, chamfer=0.0)
+    ratio = (R_B / OPT_C["R"]) ** (-0.5568)
     b = evaluate(R_B, off["peak_MPa"] * ratio, tq)
     mp = tq["main_peak_rated_N"]
     opt = dict(
         note=__doc__.split("\n\n")[2].replace("\n", " "), date=time.strftime("%Y-%m-%d"),
         source="IACS UR M53 Rev.4 (2019): bending factor of the journal fillet M53.3.3 (p. 19), f_B(r) = 0.1908 r^(-0.5568), r = R_G / D; "
                "torsion factor M53.3.3 / 3.2; equivalent stress M53.5.2",
-        bending_scaling=dict(r_c=P.main_fillet_r / P.pin_dia, r_b=R_B / P.pin_dia, ratio_b_over_c=ratio,
+        bending_scaling=dict(r_c=OPT_C["R"] / P.pin_dia, r_b=R_B / P.pin_dia, ratio_b_over_c=ratio,
                              note="r_c = 0.029 is just below M53's 0.03; r_b = 0.045 is inside the range"),
-        axial_allowance_mm=allow,
+        axial_allowance_mm=fit_c["allowance_mm"],
         options={
-            "c": dict(description=f"R{P.main_fillet_r:.1f} on the journal, {P.main_shell_width:.0f} mm shells with {P.main_shell_chamfer:.1f} x 45 deg "
-                                  f"chamfers (as modelled)", shell_width_mm=P.main_shell_width, chamfer_mm=P.main_shell_chamfer,
-                      axial_gap_nominal_mm=fit["axial_gap_nominal_mm"], **c, bearing=bearing(land_c, mp)),
+            "c": dict(description=f"R{OPT_C['R']:.1f} on the journal, {OPT_C['shell_width']:.0f} mm shells with {OPT_C['chamfer']:.1f} x 45 deg chamfers",
+                      shell_width_mm=OPT_C["shell_width"], chamfer_mm=OPT_C["chamfer"], axial_gap_nominal_mm=fit_c["axial_gap_nominal_mm"],
+                      **c, bearing=bearing(land_c, mp)),
             "b": dict(description=f"R{R_B:.1f} on the journal, unchamfered shells narrowed to fit (land in 0.1 mm steps, same axial allowance)",
-                      shell_width_mm=land_b, chamfer_mm=0.0, axial_gap_nominal_mm=(P.main_width - land_b) / 2 - R_B, **b, bearing=bearing(land_b, mp))},
-        reference_16mm=bearing(16.0, mp))
+                      shell_width_mm=land_b, chamfer_mm=0.0, axial_gap_nominal_mm=fit_b["axial_gap_nominal_mm"], **b, bearing=bearing(land_b, mp))},
+        reference_16mm=bearing(16.0, mp), minutes=(time.time() - t0) / 60)
     with open(OUT_OPT, "w", encoding="utf-8") as fh:
         json.dump(opt, fh, indent=1)
     for k in ("c", "b"):

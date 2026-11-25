@@ -4,12 +4,12 @@
 
 Stages, each its own process, in order, stopping at the first failure (runner of tools/regenerate_d042.py; logs and peak
 memory per stage in regen_logs_d050/):
-  1 reports          analytical package: torsional model with the CAD throw inertia, main-bearing width = 14 mm land
-  2 assembly         CAD build + summary (solid pins, oil drillings, R1.6 main fillets, chamfered main shells)
+  1 reports          analytical package: torsional model with the CAD throw inertia, main-bearing width = 12.2 mm shell
+  2 assembly         CAD build + summary (solid pins, oil drillings, R2.5 main fillets, 12.2 mm main shells - D-050 option (b))
   3 export           STEP / BREP / STL exports, hierarchy, validation (as-built crank balance)
   4 fea_crank        crank FE, standard 1.0 mm mesh, bearing-reaction supports (~2 h, 488k tets)
   5 oil_drillings    tools/check_oil_drillings.py
-  6 main_fillet_torsion  tools/crank_main_fillet_torsion.py (hand calc, bending + torsion)
+  6 main_fillet_torsion  tools/crank_main_fillet_torsion.py (hand calc, bending + torsion; needs the R2.5 convergence record)
   7 ic_static        targeted static interference: crankshaft, main shells, big-end shells (all their candidate pairs)
   8 ic_kinematic     targeted kinematic interference: pistons / rods / shells (groups 03, 04) vs crankshaft, 12 crank angles
   9 render, 10 drawings, 11 docs

@@ -132,11 +132,12 @@ a("rod_be_od", 68.0, "mm", "EST", "big-end outer diameter across the eye")
 a("rod_bolt_dia", 8.0, "mm", "EST", "M8x1 rod bolts")
 a("bearing_shell_thk", 1.8, "mm", "EST", "rod bearing shell wall")
 a("main_shell_thk", 2.5, "mm", "EST", "main bearing shell wall")
-a("main_shell_width", 16.0, "mm", "EST", "main bearing shell width (axial), centred on the 18 mm journal")
-a("main_shell_chamfer", 1.0, "mm", "EST", "45-deg chamfer at both bore edges of the main shells (D-050); load-carrying land = "
-  "shell width - 2 x chamfer = 14 mm")
-a("main_fillet_r", 1.6, "mm", "CALC", "main-journal fillet radius (D-050): the largest radius, in 0.1 mm steps, that keeps the "
-  "axial allowance to the chamfered main shell (cranktrain.main_fillet_fit)")
+a("main_shell_width", 12.2, "mm", "CALC", "main bearing shell width (axial), centred on the 18 mm journal: the largest width, in 0.1 mm "
+  "steps, that keeps the axial allowance to the R2.5 main fillets (D-050 option (b); cranktrain.main_fillet_fit); 16 mm before D-050")
+a("main_shell_chamfer", 0.0, "mm", "EST", "45-deg chamfer at the bore edges of the main shells: none (D-050 option (b)); load-carrying "
+  "land = shell width - 2 x chamfer")
+a("main_fillet_r", 2.5, "mm", "EST", "main-journal fillet radius, on the journal at every web (D-050 option (b), decision of the user "
+  "2026-11-25; option (c) was R1.6 with 16 mm shells chamfered 1.0 x 45 deg)")
 a("crank_end_float", 0.20, "mm", "EST", "total axial float of the crankshaft; thrust bearing assumed at main 5 (none is modelled)")
 
 # ---------------------------------------------------------------- block
