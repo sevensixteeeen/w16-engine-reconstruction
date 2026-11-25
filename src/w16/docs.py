@@ -247,6 +247,11 @@ def evidence():
     E = dict(R=R, S=S, V=V, I=I, q=q, rows=rows, fea=fea, exp=exp, aexp=aexp)
     E["heat"] = J("08_SIMULATIONS", "analytical", "piston_heat_input_study.json")
     E["hot"] = piston_hot(E, J("08_SIMULATIONS", "fea", "piston_section_fatigue.json"))
+    E["crank_conv"] = J("08_SIMULATIONS", "fea", "crank_groove_convergence.json")
+    E["crank_tors"] = J("08_SIMULATIONS", "analytical", "crank_main_fillet_torsion.json")
+    E["oil"] = J("08_SIMULATIONS", "analytical", "oil_drillings.json")
+    E["ic_crank_static"] = J("06_ASSEMBLIES", "interference", "targeted_d050_static.json")
+    E["ic_crank_kin"] = J("06_ASSEMBLIES", "interference", "targeted_d050_kinematic.json")
     return E
 
 
@@ -298,6 +303,101 @@ def piston_hot(E, h):
                 method=h.get("method", ""), t_oil=t_oil, uts=uts, gt=gt, rod_f=rod_f, rod_d50=rod_d50, m_rec=m_rec,
                 best_cooling=min(sens, key=lambda s: s["T_crown_mean_C"]) if sens else None,
                 T_crown=pis["results"].get("thermal", {}).get("T_crown_mean_C"))
+
+
+def crank_md(E):
+    """Report section 8.3 (D-050): crank throw supports, mesh convergence of both fillet features with the official
+    (zero-size extrapolated) values, combined bending + torsion at the main fillet, targeted interference re-check."""
+    C = E.get("crank_conv", {}).get("semicircle")
+    if not C or "verdict" not in C:
+        return ""
+    v, runs = C["verdict"], C["runs"]
+    old = E.get("crank_conv", {}).get("semicircle_hollow_pin", {}).get("verdict", {})
+    T = E.get("crank_tors", {})
+    fat = MATERIALS["42CrMo4 QT + nitrided"]["fatigue"]                # crank material (cad.common.MAT["steel_qt"])
+    names = dict(pin_groove="Pin relief groove", main_fillet="Main-journal fillet")
+    rows = []
+    for ft in ("pin_groove", "main_fillet"):
+        x = v.get(ft, {})
+        if not x.get("converged"):
+            rows.append((names[ft], *[f"{s['peak_MPa']:.1f}" for s in x.get("series", [])], "NOT CONVERGED", "-", "-"))
+            continue
+        rows.append((names[ft], *[f"{s['peak_MPa']:.1f}" for s in x["series"]], f"{x['change_pct']:.2f} %",
+                     f"{x['converged_peak_MPa']:.1f} ({x['factor_on_converged_peak']:.2f})",
+                     f"**{x['official']['peak_MPa']:.0f} ({x['official']['factor']:.2f})**"))
+    sizes = [f"{r['local_size_mm']:.1f} mm" if r["local_size_mm"] >= 1 else f"{r['local_size_mm']:g} mm" for r in runs]
+    cr = E["fea"].get("crank", {}).get("results", {})
+    std = ""
+    if cr.get("fillet_vm_max_MPa") and cr.get("main_fillet_vm_max_MPa") and v.get("pin_groove", {}).get("official"):
+        std = (f" The standard crank FE record (1.0 mm, section 8 table) gives {cr['fillet_vm_max_MPa']:.0f} / {cr['main_fillet_vm_max_MPa']:.0f} MPa, "
+               f"{100 * (1 - cr['fillet_vm_max_MPa'] / v['pin_groove']['official']['peak_MPa']):.0f} % / "
+               f"{100 * (1 - cr['main_fillet_vm_max_MPa'] / v['main_fillet']['official']['peak_MPa']):.0f} % below the official values.")
+    land = P.main_shell_width - 2 * P.main_shell_chamfer
+    out = [f"""### 8.3 Crank throw: supports, mesh convergence and combined fatigue of the fillets (D-047 to D-050)
+
+**Geometry.** Solid crankpins (D-049); pin relief grooves R2.5, 2.5 mm into the {P.web_thk} mm webs, {P.web_thk - 2.5:.1f} mm of web left behind them
+(D-048); main-journal fillets **R{P.main_fillet_r:.1f}** on the journal, main shells **{P.main_shell_width:.0f} mm** wide with {P.main_shell_chamfer:.1f} x 45 deg bore
+chamfers, so the load-carrying land is **{land:.0f} mm** (option (c) of D-050: the largest radius that keeps the axial allowance for end float, block / crank
+thermal growth and tolerances to the chamfered shell).
+
+**Boundary conditions (D-050).** Until D-049 the slice was clamped: both main-journal surfaces fully fixed. A clamped journal cannot turn, so the
+throw acts as a frame fixed at both ends and most of its bending moment stays in the journals; the {P.web_thk} mm webs see little of it. The slice is
+now a bay simply supported on its two main bearings: the bearing reactions are compressive pressures on the {land:.0f} mm shell lands (cosine around
+the loaded half, parabolic across the land), balanced to the pin load, and a statically determinate 3-2-1 point support carries only the mesh
+residual ({max(r['supports']['point_reaction_pct'] for r in runs):.0e} % of the load). This is the support of the dynamics bay model and of the
+classification method for crankshafts (IACS UR M53: a throw on two main bearings, statically determinate). Real bearings let the journal tilt
+within their clearance and the oil film cannot clamp it, while the neighbouring bays add some restraint: reality lies between the two models,
+nearer to simple support, so the new model is the more realistic and the conservative one. A fixed journal surface would also have sat on the main
+fillets. The change, together with the solid pin, moved the pin-groove peak from {old.get('converged_peak_MPa', float('nan')):.1f} MPa
+(factor {old.get('factor_on_converged_peak', float('nan')):.2f}; hollow pin, clamped, D-048) to the values below.
+
+**Mesh convergence** (`tools/crank_groove_convergence.py`, two refinement balls in every refined mesh; element-mean von Mises peak at the design
+gas force, pulsating load, factor = fatigue strength {fat:.0f} MPa / half the peak; converged = less than 5 % between the two finest meshes):
+
+{tab(rows, ["Feature", *sizes, "change, two finest", "0.35 mm value (factor)", "official: zero-size extrapolation (factor)"])}
+
+The peak rises by about the same amount per refinement step ({", ".join(f"{d:+.1f}" for d in v.get("pin_groove", {}).get("increments_MPa", []))} MPa at
+the groove, {", ".join(f"{d:+.1f}" for d in v.get("main_fillet", {}).get("increments_MPa", []))} MPa at the main fillet): the element-mean stress
+approaches the surface value about linearly with the element size. The **official values are the zero-size linear extrapolation of the two
+finest meshes** (decision D-050) - conservative against the 0.35 mm values.{std} Web {v.get('web_vm_max_MPa', float('nan')):.0f} MPa,
+ligament behind the groove {v.get('ligament_vm_max_MPa', float('nan')):.0f} MPa (0.35 mm mesh). The main-fillet rule of D-050 (option (b) below a
+factor of 1.5) gives: {v.get('main_fillet_decision', '-')}.
+"""]
+    if T:
+        sc, tq, st, fa = T["torsion_scf"], T["torque"], T["stresses"], T["factors"]
+        g = tq["governing"]
+        below = fa["combined_alternating"] < fa["target"]
+        dr = T.get("damper_requirement")
+        dec = (f"**Decision (D-050, 2026-11-25): option (c) is kept, and the viscous damper at the free end must hold the alternating torque at the "
+               f"most loaded crank section to <= {dr['M_TN_max_Nm']:,.0f} N m ({dr['reduction_pct']:.0f} % below the estimated damper) over the whole "
+               f"speed range** - that gives the combined factor of {dr['target_factor']:.1f}; damper sizing and tuning is an open item." if dr else "")
+        out.append(f"""**Main-journal fillet, bending + torsion** (hand calculation, `tools/crank_main_fillet_torsion.py`; no FE). Bending: the official peak,
+alternating {T['bending']['alternating_MPa']:.0f} MPa. Torsion: stress concentration factor of the journal fillet from IACS UR M53 Rev.4 (2019), M53.3.3 / 3.2,
+beta_T = 0.8 f(r,s) f(b) f(w) = **{sc['beta_T_used']:.2f}** (r = R_G / D_G = {sc['geometry']['r']:.4f}, w = W / D = {sc['geometry']['w']:.3f}, both below M53's
+ranges (r >= 0.03, w >= 0.2): extrapolated; {sc['beta_T_range_limits']:.2f} at the range limits); alternating torque **{g['M_TN_max_Nm']:,.0f} N m** at
+{g['rpm']:,} rpm (most loaded section; harmonic synthesis of orders 0.5-12 as M53 2.2.2 of the torsional model with the CAD inertia and the EST
+damper; order 2.5 alone {g['order25_amp_max_Nm']:,.0f} N m - its resonance is at {tq['order25_resonance_rpm']:,.0f} rpm), mean {tq['T_mean_Nm']:,.0f} N m;
+nominal shear {st['tau_N_alt_MPa']:.1f} / {st['tau_N_mean_MPa']:.1f} MPa alternating / mean, {st['tau_alt_MPa']:.0f} / {st['tau_mean_MPa']:.0f} MPa with
+beta_T. Equivalent alternating stress (M53 5.2) sqrt(sigma_B,a^2 + 3 tau_a^2) = {st['sigma_v_alt_MPa']:.0f} MPa, bending and torsion peaks taken in
+phase at the same point -> **combined factor {fa['combined_alternating']:.2f}** (target 1.5{'; below it' if below else ''}; bending alone
+{fa['bending_only']:.2f}). With the mean stresses (Goodman on the von Mises equivalents, ultimate {fa['uts_MPa']:.0f} MPa): {fa['combined_goodman_with_mean']:.2f}.
+M53's own fatigue strength without credit for nitriding ({fa['m53_sigma_DW_MPa']:.0f} MPa) gives Q = {fa['m53_Q']:.2f} (M53 asks >= 1.15).
+{dec}
+""")
+    oil = E.get("oil", {}).get("summary")
+    if oil:
+        out.append(f"""**Oil drillings** (D-049, `tools/check_oil_drillings.py`; not in the FE): one dia 5 drilling per rod, main surface -> pin surface at
+{E['oil']['geometry']['outlet_phi_deg']:.0f} deg; only the pin and main surfaces are cut; walls >= {min(oil['min_wall_to_relief_groove_mm'], *oil['min_wall_web_faces_mm'].values()):.2f} mm
+to the relief groove and the web faces; {oil.get('min_wall_to_main_fillet_mm', float('nan')):.2f} mm to the main-fillet tangent on the inlet's exit ramp.
+""")
+    ict = [x for x in (E.get("ic_crank_static"), E.get("ic_crank_kin")) if x]
+    if ict:
+        txt = "; ".join(f"{x.get('what') or ' / '.join(x.get('patterns', []))}: {', '.join(f'{k} {n}' for k, n in sorted(x['counts'].items()))}" for x in ict)
+        out.append(f"**Targeted interference re-check after D-049 / D-050** (the full check of section 9 ran on the D-047 geometry): {txt}.\n")
+    out.append("Limitations: one throw slice under one rod's design gas force spread over the pin (D-047 load model), bending only in the FE, "
+               "element-mean stresses, no oil drillings in the FE, torsion stress concentration from M53 formulae outside their ranges, "
+               "torsional damper and damping estimated.\n")
+    return "\n".join(out)
 
 
 def torsional_note(dyn):
@@ -903,6 +1003,7 @@ Peak values at re-entrant corners and at fixed boundaries are mesh-dependent; th
 
 {hot_fatigue_md(H) if 'piston' in fea else ''}
 {heat_input_md(E) if 'piston' in fea else ''}
+{crank_md(E)}
 Limitations of the FE work: linear elastic, no contact, no bolt preload, no bearing films, simplified supports, slices instead of the complete
 castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factors are simple ratios against handbook limits).
 

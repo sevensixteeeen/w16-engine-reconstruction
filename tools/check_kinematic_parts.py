@@ -26,6 +26,7 @@ def main():
     ap.add_argument("a")
     ap.add_argument("b")
     ap.add_argument("--step", type=float, default=60.0)
+    ap.add_argument("--json", help="write the counts and the worst clash / error per pair here")
     a = ap.parse_args()
     pa, pb = re.compile(a.a), re.compile(a.b)
     t0 = time.time()
@@ -51,6 +52,11 @@ def main():
         print(f"  {st.upper()} {x} | {y} max {v:.2f} mm3")
     if not worst:
         print("  no clashes, no errors")
+    if a.json:
+        import json
+        with open(a.json, "w", encoding="utf-8") as fh:
+            json.dump(dict(what=f"kinematic {a.a} vs {a.b}, {len(np.arange(0.0, 720.0, a.step))} crank angles", patterns=[a.a, a.b], counts=dict(tot),
+                           worst=[dict(a=x, b=y, status=st, max_volume_mm3=v) for (x, y, st), v in sorted(worst.items(), key=lambda kv: -kv[1])]), fh, indent=1)
 
 
 if __name__ == "__main__":

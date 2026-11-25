@@ -5,6 +5,19 @@ _Last updated: 2026-11-24_
 Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-050) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
 
+## 2026-11-25 — D-050 completed: convergence accepted, supports recorded, main-fillet torsion, damper requirement; partial regeneration pending
+
+- **Convergence (user's run, 4.9 h):** both features converged by the 5 % rule. Official values = zero-size extrapolation (user):
+  pin groove 407 MPa, factor 2.56; main fillet 583 MPa, factor 1.78 (0.35 mm: 2.83 / 1.92). Option (c) kept.
+- **Supports recorded as a decision (D-050 item 2):** clamped journals -> simply supported bay; with the solid pin it moved the pin-groove
+  factor 5.34 -> 2.83 (0.35 mm) / 2.56 (official).
+- **Main fillet bending + torsion** (`tools/crank_main_fillet_torsion.py`, M53 SCF 3.40, alternating torque 2,326 N m): combined factor
+  1.42 -> user: keep (c), the viscous damper must hold the alternating torque at the most loaded section to <= 1,968 N m (factor 1.50).
+- **Report:** new section 8.3 (supports, convergence table with the official values, combined factor, decision, drillings, targeted
+  interference); torsional resonance statement (D-050).
+- **Next:** the user runs `run_regeneration_d050.cmd` (reports, assembly, export, crank FE ~2 h, drilling check, torsion hand calc, targeted
+  static + kinematic interference, render, drawings, docs); then the scoped commit with the regenerated outputs and the publish.
+
 ## 2026-11-24 (later) — D-050 main fillets (option (c)), crank FE supports, torsional inertia; convergence run pending
 
 - Committed before this step: `8f95f8b` (D-049).

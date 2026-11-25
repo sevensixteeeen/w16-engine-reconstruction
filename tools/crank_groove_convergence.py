@@ -9,7 +9,10 @@ its peak in its refined ball changes by less than 5 % between the two finest mes
 the series is reported (no value is picked).  The feature peak is the maximum over ball and feature zone (the zones of
 `fea.crank_zones`), so a stress outside the feature cannot be taken for it; the zone peak outside the ball must stay below
 the refined peak.  Decision rule of the user (D-050): if the converged main-fillet factor is below 1.5, the main fillets
-switch to option (b) (R2.5 on the journal with narrower main shells).  Each run also gives the web and the ligament
+switch to option (b) (R2.5 on the journal with narrower main shells).  Official values (D-050, decision of the user
+2026-11-25): the zero-size linear extrapolation of the two finest meshes, because the element-mean peak keeps rising by
+about the same amount per refinement step; `--reverdict` recomputes the verdicts from the saved runs without any FE.
+Each run also gives the web and the ligament
 stresses (web 9.5 mm, 7.0 mm remaining behind the 2.5 mm groove).  Each record carries the pin bore and the main fillet
 radius it was solved with; earlier records (hollow pin, fixed journals, no main fillets) are kept under their own keys.
 
@@ -135,13 +138,23 @@ def verdict(rows):
         if v["converged"]:
             v["converged_peak_MPa"] = f["ball_vm_max_MPa"]
             v["factor_on_converged_peak"] = fat / (0.5 * f["ball_vm_max_MPa"])
+            # official value (decision of the user, D-050): the element-mean peak creeps up about linearly with the element
+            # size (the increments do not shrink), so the two finest meshes are extrapolated linearly in the mean element
+            # edge of the ball to zero size - conservative against the 0.35 mm value
+            h1, h0 = s["ball_edge_mean_mm"], f["ball_edge_mean_mm"]
+            x0 = f["ball_vm_max_MPa"] + (f["ball_vm_max_MPa"] - s["ball_vm_max_MPa"]) / (h1 - h0) * h0
+            v["increments_MPa"] = [b["peak_MPa"] - a_["peak_MPa"] for a_, b in zip(series[:-1], series[1:])]
+            v["extrapolated_peak_MPa"] = x0
+            v["factor_on_extrapolated_peak"] = fat / (0.5 * x0)
+            v["official"] = dict(peak_MPa=x0, factor=fat / (0.5 * x0),
+                                 basis="zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050")
         out[ft] = v
     mf = out["main_fillet"]
     out["main_fillet_decision"] = (
         "pending (not converged - no factor)" if not mf.get("converged") else
-        f"switch to option (b): converged main-fillet factor {mf['factor_on_converged_peak']:.2f} < {MAIN_FACTOR_MIN}"
-        if mf["factor_on_converged_peak"] < MAIN_FACTOR_MIN else
-        f"keep option (c): converged main-fillet factor {mf['factor_on_converged_peak']:.2f} >= {MAIN_FACTOR_MIN}")
+        f"switch to option (b): official main-fillet factor {mf['official']['factor']:.2f} < {MAIN_FACTOR_MIN}"
+        if mf["official"]["factor"] < MAIN_FACTOR_MIN else
+        f"keep option (c): official main-fillet factor {mf['official']['factor']:.2f} >= {MAIN_FACTOR_MIN}")
     if rows:
         out["web_vm_max_MPa"], out["ligament_vm_max_MPa"] = rows[-1]["web_vm_max_MPa"], rows[-1]["ligament_vm_max_MPa"]
     return out
@@ -152,9 +165,17 @@ def main():
     ap.add_argument("--groove", nargs="+", default=["semicircle"], choices=["semicircle", "cusp"])
     ap.add_argument("--sizes", nargs="+", type=float, default=[0.7, 0.5, 0.35])
     ap.add_argument("--ball", type=float, default=3.0, help="radius of the local refinement balls, mm")
+    ap.add_argument("--reverdict", action="store_true", help="recompute the verdicts of the saved runs only (no FE)")
     a = ap.parse_args()
-    F.OUT = tempfile.mkdtemp(prefix="w16_crank_conv_")
     res = json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else {}
+    if a.reverdict:
+        for g in a.groove:
+            res[g]["verdict"] = verdict(res[g]["runs"])
+            print(g, json.dumps({ft: res[g]["verdict"][ft].get("official") for ft in FEATURES}), res[g]["verdict"]["main_fillet_decision"])
+        with open(OUT, "w", encoding="utf-8") as fh:
+            json.dump(res, fh, indent=1)
+        return
+    F.OUT = tempfile.mkdtemp(prefix="w16_crank_conv_")
     res["note"] = __doc__.split("\n\n")[1].replace("\n", " ")
     for g in a.groove:
         thr = throw(g)
