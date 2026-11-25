@@ -307,7 +307,7 @@ Nominal torsional shear stress in the crankpin (dia {P.pin_dia} mm) for mean + v
 {16 * (d['T_mean'] + float(tors[-1]['sec_torque'].max())) / (math.pi * (P.pin_dia * 1e-3) ** 3) / 1e6:.0f} MPa (before stress concentration).
 A viscous damper is required at the free end; its tuning needs measured crank stiffness - listed under limitations.
 The table is the root-sum-square of the orders. The crank fillet check (final report section 8.3, D-050) uses the harmonic synthesis of
-IACS UR M53 (larger), and D-050 sets the damper requirement on it: the alternating torque at the most loaded section must stay <= 1,968 N m.
+IACS UR M53 (larger); on that basis the main-journal fillet does not meet the 1.5 target combined (D-050, open).
 """
     _w(os.path.join(OUT, "02_cranktrain_dynamics.md"), md_dyn)
 

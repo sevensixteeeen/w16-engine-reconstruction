@@ -150,11 +150,13 @@ def verdict(rows):
                                  basis="zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050")
         out[ft] = v
     mf = out["main_fillet"]
+    # bending alone; the D-050 rule (main fillet below 1.5 -> option (b)) is decided on the combined bending + torsion factor
+    # of tools/crank_main_fillet_torsion.py
     out["main_fillet_decision"] = (
         "pending (not converged - no factor)" if not mf.get("converged") else
-        f"switch to option (b): official main-fillet factor {mf['official']['factor']:.2f} < {MAIN_FACTOR_MIN}"
-        if mf["official"]["factor"] < MAIN_FACTOR_MIN else
-        f"keep option (c): official main-fillet factor {mf['official']['factor']:.2f} >= {MAIN_FACTOR_MIN}")
+        f"bending alone: official main-fillet factor {mf['official']['factor']:.2f} "
+        f"{'<' if mf['official']['factor'] < MAIN_FACTOR_MIN else '>='} {MAIN_FACTOR_MIN}; the combined bending + torsion factor "
+        f"(tools/crank_main_fillet_torsion.py) decides")
     if rows:
         out["web_vm_max_MPa"], out["ligament_vm_max_MPa"] = rows[-1]["web_vm_max_MPa"], rows[-1]["ligament_vm_max_MPa"]
     return out

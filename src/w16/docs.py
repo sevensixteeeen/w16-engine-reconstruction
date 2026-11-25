@@ -249,6 +249,7 @@ def evidence():
     E["hot"] = piston_hot(E, J("08_SIMULATIONS", "fea", "piston_section_fatigue.json"))
     E["crank_conv"] = J("08_SIMULATIONS", "fea", "crank_groove_convergence.json")
     E["crank_tors"] = J("08_SIMULATIONS", "analytical", "crank_main_fillet_torsion.json")
+    E["crank_opts"] = J("08_SIMULATIONS", "analytical", "crank_main_fillet_options.json")
     E["oil"] = J("08_SIMULATIONS", "analytical", "oil_drillings.json")
     E["ic_crank_static"] = J("06_ASSEMBLIES", "interference", "targeted_d050_static.json")
     E["ic_crank_kin"] = J("06_ASSEMBLIES", "interference", "targeted_d050_kinematic.json")
@@ -337,8 +338,8 @@ def crank_md(E):
 
 **Geometry.** Solid crankpins (D-049); pin relief grooves R2.5, 2.5 mm into the {P.web_thk} mm webs, {P.web_thk - 2.5:.1f} mm of web left behind them
 (D-048); main-journal fillets **R{P.main_fillet_r:.1f}** on the journal, main shells **{P.main_shell_width:.0f} mm** wide with {P.main_shell_chamfer:.1f} x 45 deg bore
-chamfers, so the load-carrying land is **{land:.0f} mm** (option (c) of D-050: the largest radius that keeps the axial allowance for end float, block / crank
-thermal growth and tolerances to the chamfered shell).
+chamfers, so the load-carrying land is **{land:.0f} mm** (option (c) of D-050 as modelled - the choice between (b) and (c) is open, see below; R1.6 is the
+largest radius that keeps the axial allowance for end float, block / crank thermal growth and tolerances to the chamfered shell).
 
 **Boundary conditions (D-050).** Until D-049 the slice was clamped: both main-journal surfaces fully fixed. A clamped journal cannot turn, so the
 throw acts as a frame fixed at both ends and most of its bending moment stays in the journals; the {P.web_thk} mm webs see little of it. The slice is
@@ -360,17 +361,36 @@ The peak rises by about the same amount per refinement step ({", ".join(f"{d:+.1
 the groove, {", ".join(f"{d:+.1f}" for d in v.get("main_fillet", {}).get("increments_MPa", []))} MPa at the main fillet): the element-mean stress
 approaches the surface value about linearly with the element size. The **official values are the zero-size linear extrapolation of the two
 finest meshes** (decision D-050) - conservative against the 0.35 mm values.{std} Web {v.get('web_vm_max_MPa', float('nan')):.0f} MPa,
-ligament behind the groove {v.get('ligament_vm_max_MPa', float('nan')):.0f} MPa (0.35 mm mesh). The main-fillet rule of D-050 (option (b) below a
-factor of 1.5) gives: {v.get('main_fillet_decision', '-')}.
+ligament behind the groove {v.get('ligament_vm_max_MPa', float('nan')):.0f} MPa (0.35 mm mesh). Bending alone, the main fillet reaches the
+factor {v.get('main_fillet', {}).get('official', {}).get('factor', float('nan')):.2f}; the D-050 rule (main fillet below 1.5 -> option (b)) is judged on the
+combined bending + torsion factor below.
 """]
     if T:
         sc, tq, st, fa = T["torsion_scf"], T["torque"], T["stresses"], T["factors"]
         g = tq["governing"]
         below = fa["combined_alternating"] < fa["target"]
-        dr = T.get("damper_requirement")
-        dec = (f"**Decision (D-050, 2026-11-25): option (c) is kept, and the viscous damper at the free end must hold the alternating torque at the "
-               f"most loaded crank section to <= {dr['M_TN_max_Nm']:,.0f} N m ({dr['reduction_pct']:.0f} % below the estimated damper) over the whole "
-               f"speed range** - that gives the combined factor of {dr['target_factor']:.1f}; damper sizing and tuning is an open item." if dr else "")
+        status = T.get("status", "")
+        O = E.get("crank_opts", {}).get("options", {})
+        opt_md = ""
+        if O:
+            orow = []
+            for k_ in ("c", "b"):
+                o = O[k_]
+                bb, ff = o["bearing"], o["factors"]
+                orow.append((f"({k_}) R{o['main_fillet_r_mm']:.1f}", f"{o['shell_width_mm']:.1f} / {bb['land_mm']:.1f}",
+                             f"{o['bending']['peak_MPa']:.0f} ({ff['bending_only']:.2f})", f"{o['torsion_scf']['beta_T_used']:.2f}",
+                             f"**{ff['combined_alternating']:.2f}**", f"{ff['combined_goodman_with_mean']:.2f}", f"{ff['m53_Q']:.2f}",
+                             f"{bb['specific_load_MPa']:.1f}", f"{bb['ocvirk_hmin_um']:.2f}", f"{o['torque_limit_for_target']['M_TN_max_Nm']:,.0f}"))
+            ref = E["crank_opts"].get("reference_16mm", {})
+            opt_md = ("\n\nOptions under decision (light calculation, `tools/crank_main_fillet_torsion.py --compare`; the bending peak of (b) is the "
+                      f"official (c) peak x {E['crank_opts']['bending_scaling']['ratio_b_over_c']:.3f}, the ratio of the M53 journal-fillet bending factors "
+                      "f_B(r) = 0.1908 r^-0.5568, M53.3.3; same torque, damper and combination; shells of (b) unchamfered, narrowed to keep the same "
+                      "axial allowance):\n\n"
+                      + tab(orow, ["Option", "shell / land [mm]", "bending peak [MPa] (factor)", "beta_T", "combined factor", "with mean (Goodman)",
+                                   "M53 Q", "main specific load [MPa]", "Ocvirk film at 6,700 rpm [um]", "alternating torque for 1.5 [N m]"])
+                      + f"\n\nReference, 16 mm land before D-050: {ref.get('specific_load_MPa', float('nan')):.1f} MPa, "
+                        f"{ref.get('ocvirk_hmin_um', float('nan')):.2f} um.")
+        dec = (f"**Main-journal fillet: {status}** (D-050 rule: main fillet below 1.5 -> option (b); decision pending)." if status else "") + opt_md
         out.append(f"""**Main-journal fillet, bending + torsion** (hand calculation, `tools/crank_main_fillet_torsion.py`; no FE). Bending: the official peak,
 alternating {T['bending']['alternating_MPa']:.0f} MPa. Torsion: stress concentration factor of the journal fillet from IACS UR M53 Rev.4 (2019), M53.3.3 / 3.2,
 beta_T = 0.8 f(r,s) f(b) f(w) = **{sc['beta_T_used']:.2f}** (r = R_G / D_G = {sc['geometry']['r']:.4f}, w = W / D = {sc['geometry']['w']:.3f}, both below M53's

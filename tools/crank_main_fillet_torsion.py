@@ -8,9 +8,9 @@ concentration factor of the journal fillet of IACS UR M53 Rev.4 (2019) section M
     beta_T = 0.8 f(r,s) f(b) f(w),  f(r,s) = r^(-0.322 + 0.1015 (1 - s)),  f(b) = 7.8955 - 10.654 b + 5.3482 b^2 - 0.857 b^3,
     f(w) = w^(-0.145),  with r = R_G / D_G (journal fillet over journal diameter, crankpin and journal differ), s = S / D
     (pin overlap over crankpin diameter), w = W / D (web thickness), b = B / D (web width).
-M53's validity ranges are 0.03 <= r <= 0.13, 0.2 <= w <= 0.8, 1.1 <= b <= 2.2, s <= 0.5 (p. 18); this crank has r = 0.024
-and w = 0.17, outside them: the factor is evaluated both at the range limits and extrapolated, and the larger is used.
-The web width B is taken at the pin boss (the narrower width, larger f(b)).
+M53's validity ranges are 0.03 <= r <= 0.13, 0.2 <= w <= 0.8, 1.1 <= b <= 2.2, s <= 0.5 (p. 18); outside them the factor is
+evaluated both at the range limits and extrapolated, and the larger is used.  The web width B is taken at the pin boss (the
+narrower width, larger f(b)).
 Torques: mean = the engine mean torque at full load (the section next to the flywheel carries all of it); vibratory =
 harmonic synthesis over orders 0.5-12 (M53 2.2.2) of the forced response of the lumped torsional model with the CAD throw
 inertia (dynamics, D-050; damper and damping EST), M_TN = (M_max - M_min) / 2 per section, at the most loaded section,
@@ -18,18 +18,28 @@ scanned in speed across the first-mode order-2.5 resonance and at rated speed; t
 Combination (M53 5.2, journal fillet, p. 22): sigma_v = sqrt(sigma_B,a^2 + 3 tau_a^2), bending and torsion peaks assumed in
 phase at the same point (conservative: the bending peak of throw 3 at the design gas force with the torque of the most
 loaded section).  Factor = fatigue strength / sigma_v - the project convention (alternating stresses, target 1.5); M53
-asks Q >= 1.15 (p. 23).  Mean stresses are in no project factor; their effect is given as a Goodman sensitivity on the
+asks Q >= 1.15 (p. 23).  Mean stresses are in no other project factor; their effect is given as a Goodman value on the
 von Mises equivalents (sigma_m from the pulsating bending and the mean torque).  M53's own fatigue-strength formula
-(p. 22, no credit for nitriding, R_G taken as 2 mm) is given for comparison.  Decision of the user (D-050, 2026-11-25):
-option (c) is kept and the viscous damper must hold the alternating torque at the most loaded section to the value that
-gives the 1.5 target (damper_requirement).
+(p. 22, no credit for nitriding, R_G taken as not less than 2 mm) is given for comparison.  The alternating torque that
+would give the 1.5 target with the same bending, SCF and combination is reported (`torque_limit_for_target`) - a
+number for the decision, not a requirement.
+
+--compare (2026-11-25, at the user's request, before the decision on D-050): option (c) as modelled (R1.6, 16 mm shells
+with 1.0 mm chamfers, 14 mm land) against option (b) (R2.5 on the journal, unchamfered shells narrowed to fit: the
+largest land in 0.1 mm steps that keeps the same axial allowance as `cranktrain.main_fillet_fit`).  The bending peak of
+(b) is the official (c) peak scaled by the ratio of the M53 journal-fillet bending factors, which differ only in
+f_B(r) = 0.1908 r^(-0.5568), r = R_G / D (M53.3.3, p. 19): (2.5 / 1.6)^(-0.5568) = 0.780 - the nominal web bending stress
+does not change with the fillet radius.  Main bearing per option: land width, specific load at the model peak and the
+quasi-static Ocvirk film at 6,700 rpm (the method of the dynamics report).
 
     set PYTHONPATH=src
-    .venv\\Scripts\\python tools\\crank_main_fillet_torsion.py
+    .venv\\Scripts\\python tools\\crank_main_fillet_torsion.py [--compare]
 
-Output: 08_SIMULATIONS/analytical/crank_main_fillet_torsion.json
+Output: 08_SIMULATIONS/analytical/crank_main_fillet_torsion.json (the modelled option); with --compare also
+08_SIMULATIONS/analytical/crank_main_fillet_options.json.
 """
 from __future__ import annotations
+import argparse
 import json
 import math
 import os
@@ -48,8 +58,11 @@ from w16.cad.assembly import _cw  # noqa: E402
 from w16.cad.common import MAT  # noqa: E402
 
 OUT = os.path.join(ROOT, "08_SIMULATIONS", "analytical", "crank_main_fillet_torsion.json")
+OUT_OPT = os.path.join(ROOT, "08_SIMULATIONS", "analytical", "crank_main_fillet_options.json")
 CONV = os.path.join(ROOT, "08_SIMULATIONS", "fea", "crank_groove_convergence.json")
 ORDERS_H = range(1, 25)          # h cycles per 720 deg -> orders 0.5 ... 12 (M53 2.2.2, 4-stroke)
+TARGET = 1.5
+R_B = 2.5                        # option (b) main fillet radius
 
 
 def beta_T(r, s, w, b):
@@ -85,80 +98,129 @@ def section_torques(res, J_cad, damping_ratio=0.02, c_damper=14.0):
     return mtn, a25, mean, f
 
 
-def main():
-    t0 = time.time()
-    mt = MATERIALS[MAT["steel_qt"]]
-    conv = json.load(open(CONV, encoding="utf-8"))["semicircle"]["verdict"]["main_fillet"]
-    off = conv["official"]
-    s_peak = off["peak_MPa"]
-    sb_a = sb_m = 0.5 * s_peak
-    # torsion SCF (M53)
-    D_pin, D_G, W = P.pin_dia, P.main_dia, P.web_thk
-    S = (D_pin + D_G) / 2 - P.throw                                 # pin overlap
-    B = 2 * CT.R_PIN_WEB                                            # web width at the pin boss (narrower -> larger f(b))
-    geo = dict(r=P.main_fillet_r / D_G, s=S / D_pin, w=W / D_pin, b=B / D_pin)
-    bt_ext, f_ext = beta_T(**geo)
-    clamp = dict(r=max(geo["r"], 0.03), s=min(geo["s"], 0.5), w=max(geo["w"], 0.2), b=min(max(geo["b"], 1.1), 2.2))
-    bt_clamp, f_clamp = beta_T(**clamp)
-    bT = max(bt_ext, bt_clamp)
-    W_P = math.pi * D_G ** 3 / 16                                   # mm3, solid journal
-    # torques
+def torque_scan():
     cw, _ = _cw()
     J_cad = CT.throw_inertia(cw)
     f = D.torsional_modes(J_cad)[0]
     n25 = f[1] * 60 / 2.5
     A_t = cycle.size_turbine()
     speeds = sorted({round(x) for x in np.arange(n25 - 300, n25 + 301, 50) if x <= P.rpm_max} | {round(n25), round(P.rpm_rated)})
-    scan = []
+    scan, main_peak_rated = [], None
     for rpm in speeds:
         res = D.run(float(rpm), A_turb=A_t)
+        if rpm == round(P.rpm_rated):
+            main_peak_rated = float(res["main_peak"])
         mtn, a25, mean, _ = section_torques(res, J_cad)
         i = int(np.argmax(mtn))
         scan.append(dict(rpm=rpm, M_TN_max_Nm=float(mtn[i]), section=i, order25_amp_at_section_Nm=float(a25[i]),
                          order25_amp_max_Nm=float(a25.max()), T_mean_engine_Nm=float(res["T_mean"]), mean_at_section_Nm=float(abs(mean[i]))))
         print(f"{rpm:5d} rpm: M_TN max {mtn[i]:7.1f} N m (section {i}), order 2.5 there {a25[i]:6.1f} (max {a25.max():6.1f}), "
               f"mean torque {res['T_mean']:.0f} N m", flush=True)
-    g = max(scan, key=lambda x: x["M_TN_max_Nm"])
-    T_m = max(x["T_mean_engine_Nm"] for x in scan)                  # full engine mean torque (flywheel-side section)
-    tauN_a = g["M_TN_max_Nm"] * 1e3 / W_P
-    tauN_m = T_m * 1e3 / W_P
+    return dict(first_mode_Hz=float(f[1]), order25_resonance_rpm=n25, scan=scan, governing=max(scan, key=lambda x: x["M_TN_max_Nm"]),
+                T_mean_Nm=max(x["T_mean_engine_Nm"] for x in scan), main_peak_rated_N=main_peak_rated,
+                damper="EST: 22 g m2, 14 N m s/rad; structural damping ratio 0.02 (dynamics.torsional_forced)")
+
+
+def evaluate(R, s_peak, tq):
+    """Combined bending + torsion at a main fillet of radius R (mm) with the bending peak s_peak (MPa, von Mises)."""
+    mt = MATERIALS[MAT["steel_qt"]]
+    fat, uts = mt["fatigue"], mt["uts"]
+    sb_a = sb_m = 0.5 * s_peak
+    D_pin, D_G, W = P.pin_dia, P.main_dia, P.web_thk
+    S = (D_pin + D_G) / 2 - P.throw                                 # pin overlap
+    B = 2 * CT.R_PIN_WEB                                            # web width at the pin boss (narrower -> larger f(b))
+    geo = dict(r=R / D_G, s=S / D_pin, w=W / D_pin, b=B / D_pin)
+    bt_ext, f_ext = beta_T(**geo)
+    clamp = dict(r=max(geo["r"], 0.03), s=min(geo["s"], 0.5), w=max(geo["w"], 0.2), b=min(max(geo["b"], 1.1), 2.2))
+    bt_clamp, f_clamp = beta_T(**clamp)
+    bT = max(bt_ext, bt_clamp)
+    W_P = math.pi * D_G ** 3 / 16
+    g = tq["governing"]
+    tauN_a, tauN_m = g["M_TN_max_Nm"] * 1e3 / W_P, tq["T_mean_Nm"] * 1e3 / W_P
     tau_a, tau_m = bT * tauN_a, bT * tauN_m
     sv_a = math.sqrt(sb_a ** 2 + 3 * tau_a ** 2)
     sv_m = math.sqrt(sb_m ** 2 + 3 * tau_m ** 2)
-    fat, uts = mt["fatigue"], mt["uts"]
-    # D-050 decision of the user (2026-11-25): keep option (c); the viscous damper must hold the alternating torque at the most
-    # loaded section to the value that gives the target factor 1.5 with the same bending, SCF and combination
-    TARGET = 1.5
+    R_x = max(R, 2.0)
+    s_dw = 1.05 * (0.42 * uts + 39.3) * (0.264 + 1.073 * D_G ** -0.2 + (785 - uts) / 4900 + 196 / uts * math.sqrt(1 / R_x))
     tau_req = math.sqrt(max((fat / TARGET) ** 2 - sb_a ** 2, 0.0) / 3)
     M_req = tau_req / bT * W_P / 1e3
-    R_x = max(P.main_fillet_r, 2.0)
-    sB = uts
-    s_dw = 1.05 * (0.42 * sB + 39.3) * (0.264 + 1.073 * D_G ** -0.2 + (785 - sB) / 4900 + 196 / sB * math.sqrt(1 / R_x))
-    out = dict(
-        note=__doc__.split("\n\n")[0].replace("\n", " "), date=time.strftime("%Y-%m-%d"),
-        source_scf="IACS UR M53 Rev.4 (2019), M53.3.2 / M53.3.3 (p. 19), ranges p. 18; equivalent stress M53.5.2 (p. 22); Q >= 1.15 M53.7",
-        bending=dict(official_peak_MPa=s_peak, basis=off["basis"], alternating_MPa=sb_a, mean_MPa=sb_m, factor_bending_only=fat / sb_a),
+    return dict(
+        main_fillet_r_mm=R,
+        bending=dict(peak_MPa=s_peak, alternating_MPa=sb_a, mean_MPa=sb_m, factor_bending_only=fat / sb_a),
         torsion_scf=dict(geometry=geo, beta_T_extrapolated=bt_ext, sub_extrapolated=f_ext, at_range_limits=clamp, beta_T_range_limits=bt_clamp,
                          sub_range_limits=f_clamp, beta_T_used=bT, web_width_B_mm=B, pin_overlap_S_mm=S,
-                         validity="M53: 0.03 <= r <= 0.13, 0.2 <= w <= 0.8, 1.1 <= b <= 2.2, s <= 0.5 - r and w are outside"),
-        torque=dict(first_mode_Hz=float(f[1]), order25_resonance_rpm=n25, scan=scan, governing=g, T_mean_Nm=T_m,
-                    damper="EST: 22 g m2, 14 N m s/rad; structural damping ratio 0.02 (dynamics.torsional_forced)"),
+                         validity="M53: 0.03 <= r <= 0.13, 0.2 <= w <= 0.8, 1.1 <= b <= 2.2, s <= 0.5"),
         stresses=dict(W_P_mm3=W_P, tau_N_alt_MPa=tauN_a, tau_N_mean_MPa=tauN_m, tau_alt_MPa=tau_a, tau_mean_MPa=tau_m,
                       sigma_v_alt_MPa=sv_a, sigma_v_mean_MPa=sv_m),
-        factors=dict(fatigue_strength_MPa=fat, uts_MPa=uts,
-                     combined_alternating=fat / sv_a, combined_goodman_with_mean=1 / (sv_a / fat + sv_m / uts),
-                     bending_only=fat / sb_a, target=1.5,
+        factors=dict(fatigue_strength_MPa=fat, uts_MPa=uts, combined_alternating=fat / sv_a, combined_goodman_with_mean=1 / (sv_a / fat + sv_m / uts),
+                     bending_only=fat / sb_a, target=TARGET, meets_target_combined=bool(fat / sv_a >= TARGET),
                      m53_sigma_DW_MPa=s_dw, m53_Q=s_dw / sv_a, m53_Q_min=1.15,
-                     m53_sigma_DW_note="M53.6 (p. 22), drop-forged K = 1.05, sigma_B = UTS, R_G taken as 2 mm, no credit for nitriding"),
-        damper_requirement=dict(M_TN_max_Nm=M_req, reduction_pct=100 * (1 - M_req / g["M_TN_max_Nm"]), target_factor=TARGET,
-                                decision="D-050, user 2026-11-25: option (c) kept; the viscous damper must hold the alternating torque at the "
-                                         "most loaded crank section (harmonic synthesis, orders 0.5-12, whole speed range) to this value"),
-        minutes=(time.time() - t0) / 60)
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+                     m53_sigma_DW_note="M53.6 (p. 22), drop-forged K = 1.05, sigma_B = UTS, R_G taken as not less than 2 mm, no credit for nitriding"),
+        torque_limit_for_target=dict(M_TN_max_Nm=M_req, reduction_pct=100 * (1 - M_req / g["M_TN_max_Nm"]),
+                                     note="alternating torque at the most loaded section that would give the 1.5 target - information for "
+                                          "the decision, not a requirement"))
+
+
+def bearing(land, main_peak_N, rpm=6700.0):
+    eps, h = D.short_bearing_hmin(main_peak_N, P.main_dia, land, rpm)
+    return dict(land_mm=land, specific_load_MPa=main_peak_N / (P.main_dia * land), ocvirk_eps=eps, ocvirk_hmin_um=h,
+                note=f"model main peak {main_peak_N / 1e3:.2f} kN at {rpm:.0f} rpm, quasi-static short bearing (as the dynamics report)")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--compare", action="store_true", help="also evaluate option (b) and write crank_main_fillet_options.json")
+    a = ap.parse_args()
+    t0 = time.time()
+    conv = json.load(open(CONV, encoding="utf-8"))["semicircle"]["verdict"]["main_fillet"]
+    off = conv["official"]
+    tq = torque_scan()
+    c = evaluate(P.main_fillet_r, off["peak_MPa"], tq)
+    out = dict(note=__doc__.split("\n\n")[0].replace("\n", " "), date=time.strftime("%Y-%m-%d"),
+               source_scf="IACS UR M53 Rev.4 (2019), M53.3.2 / M53.3.3 (p. 19), ranges p. 18; equivalent stress M53.5.2 (p. 22); Q >= 1.15 M53.7",
+               status="does not meet 1.5 combined; open" if not c["factors"]["meets_target_combined"] else "meets 1.5 combined",
+               bending=dict(official_peak_MPa=off["peak_MPa"], basis=off["basis"], alternating_MPa=c["bending"]["alternating_MPa"],
+                            mean_MPa=c["bending"]["mean_MPa"], factor_bending_only=c["bending"]["factor_bending_only"]),
+               torsion_scf=c["torsion_scf"], torque=tq, stresses=c["stresses"], factors=c["factors"],
+               torque_limit_for_target=c["torque_limit_for_target"], minutes=(time.time() - t0) / 60)
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(out, fh, indent=1)
-    print(json.dumps(dict(beta_T=dict(extrapolated=bt_ext, range_limits=bt_clamp), governing=g, stresses=out["stresses"], factors=out["factors"]), indent=1))
+    print(json.dumps(dict(option_c=dict(stresses=c["stresses"], factors=c["factors"])), indent=1))
     print("written", OUT)
+    if not a.compare:
+        return
+    fit = CT.main_fillet_fit()
+    allow = fit["allowance_mm"]
+    land_c = P.main_shell_width - 2 * P.main_shell_chamfer
+    land_b = math.floor((P.main_width - 2 * (R_B + allow)) / 0.1 + 1e-9) * 0.1
+    ratio = (R_B / P.main_fillet_r) ** (-0.5568)
+    b = evaluate(R_B, off["peak_MPa"] * ratio, tq)
+    mp = tq["main_peak_rated_N"]
+    opt = dict(
+        note=__doc__.split("\n\n")[2].replace("\n", " "), date=time.strftime("%Y-%m-%d"),
+        source="IACS UR M53 Rev.4 (2019): bending factor of the journal fillet M53.3.3 (p. 19), f_B(r) = 0.1908 r^(-0.5568), r = R_G / D; "
+               "torsion factor M53.3.3 / 3.2; equivalent stress M53.5.2",
+        bending_scaling=dict(r_c=P.main_fillet_r / P.pin_dia, r_b=R_B / P.pin_dia, ratio_b_over_c=ratio,
+                             note="r_c = 0.029 is just below M53's 0.03; r_b = 0.045 is inside the range"),
+        axial_allowance_mm=allow,
+        options={
+            "c": dict(description=f"R{P.main_fillet_r:.1f} on the journal, {P.main_shell_width:.0f} mm shells with {P.main_shell_chamfer:.1f} x 45 deg "
+                                  f"chamfers (as modelled)", shell_width_mm=P.main_shell_width, chamfer_mm=P.main_shell_chamfer,
+                      axial_gap_nominal_mm=fit["axial_gap_nominal_mm"], **c, bearing=bearing(land_c, mp)),
+            "b": dict(description=f"R{R_B:.1f} on the journal, unchamfered shells narrowed to fit (land in 0.1 mm steps, same axial allowance)",
+                      shell_width_mm=land_b, chamfer_mm=0.0, axial_gap_nominal_mm=(P.main_width - land_b) / 2 - R_B, **b, bearing=bearing(land_b, mp))},
+        reference_16mm=bearing(16.0, mp))
+    with open(OUT_OPT, "w", encoding="utf-8") as fh:
+        json.dump(opt, fh, indent=1)
+    for k in ("c", "b"):
+        o = opt["options"][k]
+        print(f"({k}) R{o['main_fillet_r_mm']:.1f}: bending peak {o['bending']['peak_MPa']:.0f} MPa (factor {o['factors']['bending_only']:.2f}), "
+              f"beta_T {o['torsion_scf']['beta_T_used']:.2f}, sigma_v {o['stresses']['sigma_v_alt_MPa']:.0f} MPa -> combined "
+              f"{o['factors']['combined_alternating']:.2f}, Goodman {o['factors']['combined_goodman_with_mean']:.2f}, M53 Q {o['factors']['m53_Q']:.2f}; "
+              f"land {o['bearing']['land_mm']:.1f} mm, {o['bearing']['specific_load_MPa']:.1f} MPa, film {o['bearing']['ocvirk_hmin_um']:.2f} um", flush=True)
+    r = opt["reference_16mm"]
+    print(f"reference 16 mm land: {r['specific_load_MPa']:.1f} MPa, film {r['ocvirk_hmin_um']:.2f} um")
+    print("written", OUT_OPT)
 
 
 if __name__ == "__main__":

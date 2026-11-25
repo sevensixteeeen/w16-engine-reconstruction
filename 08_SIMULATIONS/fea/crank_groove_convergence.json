@@ -634,7 +634,7 @@
      "basis": "zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050"
     }
    },
-   "main_fillet_decision": "keep option (c): official main-fillet factor 1.78 >= 1.5",
+   "main_fillet_decision": "bending alone: official main-fillet factor 1.78 >= 1.5; the combined bending + torsion factor (tools/crank_main_fillet_torsion.py) decides",
    "web_vm_max_MPa": 107.51298554536096,
    "ligament_vm_max_MPa": 107.51298554536096
   }

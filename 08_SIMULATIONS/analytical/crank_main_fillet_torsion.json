@@ -2,6 +2,7 @@
  "note": "Main-journal fillet: combined bending + torsion, hand calculation (D-050, 2026-11-25).  Light calc, no FE.",
  "date": "2026-11-25",
  "source_scf": "IACS UR M53 Rev.4 (2019), M53.3.2 / M53.3.3 (p. 19), ranges p. 18; equivalent stress M53.5.2 (p. 22); Q >= 1.15 M53.7",
+ "status": "does not meet 1.5 combined; open",
  "bending": {
   "official_peak_MPa": 583.2318187716296,
   "basis": "zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050",
@@ -37,7 +38,7 @@
   "beta_T_used": 3.395924584596587,
   "web_width_B_mm": 70.0,
   "pin_overlap_S_mm": 19.13204051545862,
-  "validity": "M53: 0.03 <= r <= 0.13, 0.2 <= w <= 0.8, 1.1 <= b <= 2.2, s <= 0.5 - r and w are outside"
+  "validity": "M53: 0.03 <= r <= 0.13, 0.2 <= w <= 0.8, 1.1 <= b <= 2.2, s <= 0.5"
  },
  "torque": {
   "first_mode_Hz": 273.56122307490233,
@@ -162,6 +163,7 @@
    "mean_at_section_Nm": 1291.852742946903
   },
   "T_mean_Nm": 1738.4831801674957,
+  "main_peak_rated_N": 36727.61121219981,
   "damper": "EST: 22 g m2, 14 N m s/rad; structural damping ratio 0.02 (dynamics.torsional_forced)"
  },
  "stresses": {
@@ -180,16 +182,16 @@
   "combined_goodman_with_mean": 0.9908302862608757,
   "bending_only": 1.783167458507991,
   "target": 1.5,
+  "meets_target_combined": false,
   "m53_sigma_DW_MPa": 414.3174073891148,
   "m53_Q": 1.1311668917000561,
   "m53_Q_min": 1.15,
-  "m53_sigma_DW_note": "M53.6 (p. 22), drop-forged K = 1.05, sigma_B = UTS, R_G taken as 2 mm, no credit for nitriding"
+  "m53_sigma_DW_note": "M53.6 (p. 22), drop-forged K = 1.05, sigma_B = UTS, R_G taken as not less than 2 mm, no credit for nitriding"
  },
- "damper_requirement": {
+ "torque_limit_for_target": {
   "M_TN_max_Nm": 1967.5514927884299,
   "reduction_pct": 15.419161113976154,
-  "target_factor": 1.5,
-  "decision": "D-050, user 2026-11-25: option (c) kept; the viscous damper must hold the alternating torque at the most loaded crank section (harmonic synthesis, orders 0.5-12, whole speed range) to this value"
+  "note": "alternating torque at the most loaded section that would give the 1.5 target - information for the decision, not a requirement"
  },
- "minutes": 0.2252891222635905
+ "minutes": 0.14969627062479654
 }
