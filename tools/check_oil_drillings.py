@@ -152,7 +152,7 @@ def openings():
     r_out = CT.OIL_R / math.cos(math.radians(d["a_out"])) + CT.OIL_CHAMFER
     r_in = CT.OIL_R / math.cos(math.radians(d["a_in"])) + CT.OIL_CHAMFER
     shell_be = (P.rod_be_width - 1.5) / 2                 # big-end shell half-width (rod_solids: shell_w = w - 1.5)
-    shell_main = P.main_shell_width / 2 - P.main_shell_chamfer   # main shell land half-width (D-050: 16 mm shell, 1 mm chamfers)
+    shell_main = P.main_shell_width / 2 - P.main_shell_chamfer   # main shell land half-width (D-050 option (b): 12.2 mm, unchamfered)
     return dict(outlet_radius_with_chamfer_mm=r_out, inlet_radius_with_chamfer_mm=r_in,
                 outlet_to_big_end_shell_edge_mm=shell_be - r_out, outlet_to_pin_end_mm=P.pin_width / 2 - P.bank_offset / 2 - r_out,
                 inlet_to_main_shell_land_edge_mm=shell_main - r_in, main_shell_groove_width_mm=4.0,

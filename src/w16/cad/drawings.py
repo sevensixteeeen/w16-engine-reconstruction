@@ -167,7 +167,7 @@ def main(which=None):
             ("Crankpin dia", "pin_dia"), ("Crankpin width", "pin_width"), ("Web thickness", "web_thk"), ("Throw pitch", "cyl_pitch"),
             ("Counterweight radius", "cw_radius"), ("Crankpins", "solid, no lightening bore (D-049)"),
             ("Crankpin phases 1-8 [deg]", ", ".join(f"{L.PIN_PHASE[k]:.2f}" for k in range(1, 9))),
-            ("Journal fillets", f"pins: R2.5 semicircular relief groove, 2.5 deep into the web (D-048); mains: R{P.main_fillet_r:.1f}, rolled - "
+            ("Journal fillets", f"pins: R2.5 semicircular relief groove, 2.5 deep into the web (D-048); mains: R{P.main_fillet_r:.1f} - "
                                 + (f"main shells {P.main_shell_width:.1f} mm with {P.main_shell_chamfer:.1f} x 45 deg chamfers (D-050)" if P.main_shell_chamfer > 0
                                    else f"main shells {P.main_shell_width:.1f} mm, unchamfered (D-050 option (b))")),
             ("Journal tolerance", "main h5 / pin h5 (class, provisional); Ra 0.1 um ground + lapped"),
