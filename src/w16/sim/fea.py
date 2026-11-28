@@ -157,7 +157,7 @@ ELASTIC_CHUNK = 20000          # elements per block in the low-memory assembly /
 
 
 def solve_elastic(m, mt, fixed, tractions=(), body=None, thermal=None, order=2, fixed_dirs=None, pressures=(), balance=None, points=(),
-                  factor_cache=None, iterative=False, lowmem=None):
+                  factor_cache=None, iterative=False, lowmem=None, assemble_only=False):
     """fixed: facet index array (all displacement components fixed) ; tractions: list of (facets, fn(x) -> 3 x ... array, MPa);
     body: fn(x) -> force density N/mm3; thermal: nodal temperature rise array on P1 nodes (K).
     pressures: list of (facets, p MPa) acting against the outward facet normal.  balance: (facets, fn, component) - a traction
@@ -166,12 +166,18 @@ def solve_elastic(m, mt, fixed, tractions=(), body=None, thermal=None, order=2, 
     factor_cache: dict shared by load cases on the same mesh, material and constraints - the factorisation is reused.
     lowmem (default: with iterative): the stiffness and the element stresses are built in blocks of ELASTIC_CHUNK elements, so
     the basis values at the quadrature points (~40 kB per P2 element) never exist for the whole mesh at once (D-050: same
-    matrix and stresses as the one-block path; tractions, pressures, supports only)."""
+    matrix and stresses as the one-block path; tractions, pressures, supports only).
+    assemble_only: no stiffness and no solve - returns the load vector f (incl. the balance load) with the position of every
+    dof, for statics checks of the supports (tools/crank_support_reactions.py)."""
     e = ElementVector(ElementTetP2() if order == 2 else ElementTetP1())
     qo = 4 if order == 2 else 2
     lam, mu = lame_parameters(mt["E"], mt["nu"])
     lowmem = iterative if lowmem is None else lowmem
-    if lowmem:
+    if assemble_only:
+        if body is not None or thermal is not None:
+            raise NotImplementedError("assemble_only: body and thermal loads need the full basis")
+        ib, K = Basis(m, e, intorder=1, elements=np.array([0])), None          # dof numbering only
+    elif lowmem:
         if body is not None or thermal is not None:
             raise NotImplementedError("lowmem: body and thermal loads need the one-block path")
         chunks = [np.arange(i, min(i + ELASTIC_CHUNK, m.t.shape[1])) for i in range(0, m.t.shape[1], ELASTIC_CHUNK)]
@@ -230,6 +236,19 @@ def solve_elastic(m, mt, fixed, tractions=(), body=None, thermal=None, order=2, 
         scale = -applied[comp] / resultant(g)[comp]
         f += scale * g
         bal_force = scale * resultant(g)
+    if assemble_only:
+        X = np.zeros((3, ib.N))                           # dof positions: vertices, P2 edge mid-points
+        for i in range(3):
+            X[:, ib.nodal_dofs[i]] = m.p
+            if order == 2:
+                X[:, ib.edge_dofs[i]] = 0.5 * (m.p[:, m.edges[0]] + m.p[:, m.edges[1]])
+        comp_of = np.zeros(ib.N, dtype=np.int64)
+        for i in range(3):
+            comp_of[ib.nodal_dofs[i]] = i
+            if order == 2:
+                comp_of[ib.edge_dofs[i]] = i
+        return dict(f=f, X=X, comp=comp_of, applied=applied, balance_scale=scale, balance_force=bal_force,
+                    nodal_dofs=ib.nodal_dofs, N=int(ib.N))
     D = ib.get_dofs(fixed).all() if fixed is not None and len(fixed) else np.zeros(0, dtype=np.int64)
     for fc, comp in (fixed_dirs or ()):                  # symmetry planes: one displacement component fixed
         D = np.union1d(D, ib.get_dofs(fc).all(f"u^{comp + 1}"))
@@ -273,8 +292,10 @@ def solve_elastic(m, mt, fixed, tractions=(), body=None, thermal=None, order=2, 
     point_reaction = np.zeros(3)
     for d, c in pt:
         point_reaction[c] += react[d]
+    # per node and component: the component sums above cancel for a couple carried by two support nodes
+    point_reactions = [(int(n), int(c), float(react[int(ib.nodal_dofs[c][n])])) for n, comps in points for c in comps]
     return dict(u=u, U=U, vm=vm_el, dofs=int(ib.N), t_solve=t_solve, applied=applied, balance_scale=scale, balance_force=bal_force,
-                point_reaction=point_reaction)
+                point_reaction=point_reaction, point_reactions=point_reactions)
 
 
 def solve_thermal(m, k, robin=(), flux=()):
@@ -449,13 +470,24 @@ def piston_checks(m, pinfo, crown, chamber, p_d, q_p, q_cal):
     return chk
 
 
+def support_node_max(point_reactions):
+    """Largest reaction (N, vector norm over its fixed components) at a single node of a point support, from
+    solve_elastic's point_reactions [(node, component, N)]."""
+    per = {}
+    for n, c, r in point_reactions:
+        per.setdefault(n, np.zeros(3))[c] = r
+    return max(float(np.linalg.norm(v)) for v in per.values()) if per else 0.0
+
+
 def piston_solve_checks(s, F_exp, what):
     """D-043: a solved piston case must carry the gas load and nothing else - the assembled force within
-    PISTON_LIMITS["force"] of F_exp, side force and point-support reaction within PISTON_LIMITS["side"] of it."""
+    PISTON_LIMITS["force"] of F_exp, side force and point-support reaction within PISTON_LIMITS["side"] of it.  The support
+    reaction is also checked per node (2026-11-27): the summed reaction cannot show a couple carried by two nodes."""
     lim = PISTON_LIMITS
     F, Rp = s["applied"], s["point_reaction"]
     chk = dict(gas_force_dev=float(-F[2] / F_exp - 1.0), side_force_frac=float(math.hypot(F[0], F[1]) / F_exp),
-               support_reaction_frac=float(np.linalg.norm(Rp) / F_exp))
+               support_reaction_frac=float(np.linalg.norm(Rp) / F_exp),
+               support_node_max_frac=float(support_node_max(s.get("point_reactions", ())) / F_exp))
     bad = []
     if abs(chk["gas_force_dev"]) > lim["force"]:
         bad.append(f"gas force {-F[2]:.0f} N vs {F_exp:.0f} N")
@@ -463,6 +495,8 @@ def piston_solve_checks(s, F_exp, what):
         bad.append(f"side force ({F[0]:.0f}, {F[1]:.0f}) N")
     if chk["support_reaction_frac"] > lim["side"]:
         bad.append(f"point-support reaction ({Rp[0]:.0f}, {Rp[1]:.0f}, {Rp[2]:.0f}) N")
+    if chk["support_node_max_frac"] > lim["side"]:
+        bad.append(f"a point-support node carries {chk['support_node_max_frac']:.2%} of the gas load")
     if bad:
         raise FECheckError(f"piston {what}: solved load checks failed: " + "; ".join(bad))
     return chk
@@ -604,7 +638,7 @@ def case_piston(thermal_only=False):
 CRANK_FILLET_MESH = 1.0          # mm, element size along the pin-groove and main-fillet circles (D-047 standard; D-050 mains)
 GROOVE_DEPTH = 2.5               # mm, depth of the R2.5 semicircular relief groove into the web (cranktrain.undercut_ring, D-048)
 MAIN_FILLET_BALL = 3.0           # mm, radius (and spacing) of the refinement balls along the main-fillet circles (D-050)
-CRANK_POINT_REACTION_MAX = 0.01  # the 3-2-1 point support may carry at most 1 % of the pin load (loads are self-balanced)
+CRANK_POINT_REACTION_MAX = 0.01  # each node of the 3-2-1 point support may carry at most 1 % of the pin load (loads are self-balanced)
 
 
 def crank_geometry(k=3):
@@ -617,6 +651,15 @@ def crank_geometry(k=3):
                 xfa=L.main_x(k) + hm, xfb=L.main_x(k + 1) - hm,                         # web / main faces (main fillets)
                 mains=(L.main_x(k), L.main_x(k + 1)), Rm=P.main_fillet_r, rf0=P.pin_dia / 2 + 1.25,
                 land=P.main_shell_width - 2 * P.main_shell_chamfer)
+
+
+def crank_support_points(G):
+    """The statically determinate 3-2-1 point support of the crank slice: (point, fixed components) - A on the crank axis at
+    the end face of main k (x, y, z), B on the axis at the end face of main k + 1 (y, z), C on that end face 0.6 main radii
+    above the axis (y).  Used by crank_solve (nearest mesh node) and by the report to classify peaks at the support."""
+    mx0, mx1 = G["mains"]
+    x0, x1 = mx0 - P.main_width / 2, mx1 + P.main_width / 2
+    return [((x0, 0.0, 0.0), (0, 1, 2)), ((x1, 0.0, 0.0), (1, 2)), ((x1, 0.0, 0.6 * P.main_dia / 2), (1,))]
 
 
 def crank_refine(G):
@@ -655,13 +698,15 @@ def crank_zones(m, G):
     return dict(pin_groove=fz, main_fillet=mz, web=web, ligament=lig), cen
 
 
-def crank_solve(m, G, F, mt):
+def crank_solve(m, G, F, mt, assemble_only=False):
     """Crank slice under the pin load F (N) - D-050 supports.  Pin: cosine load towards the crank axis on the central part of
     the pin (D-047 load model).  Mains: the bearing reactions, a compressive pressure on the land of each main
     shell (cosine around the half facing the load, parabolic across the land, zero at the land edges), scaled so that it
     balances the pin load exactly; the slice is held by a statically determinate 3-2-1 point support on its two end faces,
-    which carries only the residual of the mesh (checked <= 1 %).  Until D-049 both journal surfaces were fully fixed -
-    a fixed boundary on the journal would sit on the main fillet."""
+    which carries only the residual of the mesh: checked per node (<= 1 % of the pin load each) - the summed reaction
+    cannot show a couple carried by two nodes (D-050 correction 2026-11-27).  Until D-049 both journal surfaces were fully fixed -
+    a fixed boundary on the journal would sit on the main fillet.
+    assemble_only: returns (load assembly of solve_elastic, support points) without solving - statics checks."""
     pc, e_pin = G["pc"], G["e_pin"]
     pin = facets(m, lambda x: (np.hypot(x[1] - pc[1], x[2] - pc[2]) < P.pin_dia / 2 + 0.05) & (np.abs(x[0] - pc[0]) < P.pin_width / 2 - 2.6))
     hl = G["land"] / 2
@@ -670,34 +715,41 @@ def crank_solve(m, G, F, mt):
     fn_pin, _ = cos_load(pc, (1, 0, 0), -e_pin, F, m, pin)
 
     def fn_land(x):
-        r = x.copy()
-        r[0] = 0.0
+        # radial part built arithmetically: "r = x.copy(); r[0] = 0.0" does not zero the axial coordinate of skfem's
+        # DiscreteField (skfem 12.0.2), so until 2026-11-27 the weight scaled with r / sqrt(x^2 + r^2) and the lands carried
+        # 35 / 65 % of the pin load, the 3-2-1 support the difference (~9.4 kN per node, D-050 correction)
+        x = np.asarray(x)
+        r = x * np.array([0.0, 1.0, 1.0]).reshape(3, 1, 1)
         rn = r / np.maximum(np.sqrt((r * r).sum(0)), 1e-9)
         w = np.clip(-(rn * e_pin.reshape(3, 1, 1)).sum(0), 0, None)                       # half facing -e_pin (the load)
         xm = np.where(np.abs(x[0] - mx0) < np.abs(x[0] - mx1), mx0, mx1)
         w = w * np.clip(1.0 - ((x[0] - xm) / hl) ** 2, 0, None)                            # parabolic across the land
         return w * e_pin.reshape(3, 1, 1)                                                   # pushes the journal towards +e_pin
     comp = int(np.argmax(np.abs(e_pin)))
-    x0 = mx0 - P.main_width / 2
-    x1 = mx1 + P.main_width / 2
     node = lambda q: int(np.argmin(((m.p - np.reshape(q, (3, 1))) ** 2).sum(0)))
-    pts = [(node((x0, 0.0, 0.0)), (0, 1, 2)), (node((x1, 0.0, 0.0)), (1, 2)), (node((x1, 0.0, 0.6 * P.main_dia / 2)), (1,))]
+    pts = [(node(q), comps) for q, comps in crank_support_points(G)]
+    if assemble_only:
+        return solve_elastic(m, mt, None, tractions=[(pin, fn_pin)], balance=(lands, fn_land, comp), assemble_only=True), pts
     s = solve_elastic(m, mt, None, tractions=[(pin, fn_pin)], balance=(lands, fn_land, comp), points=pts, iterative=True)
     pr = float(np.linalg.norm(s["point_reaction"]))
-    if pr > CRANK_POINT_REACTION_MAX * F:
-        raise RuntimeError(f"crank: point-support reaction {pr:.1f} N > {CRANK_POINT_REACTION_MAX:.0%} of the pin load")
+    node_max = support_node_max(s["point_reactions"])
+    if node_max > CRANK_POINT_REACTION_MAX * F:
+        raise RuntimeError(f"crank: a support node carries {node_max:.1f} N > {CRANK_POINT_REACTION_MAX:.0%} of the pin load {F:.0f} N - "
+                           "the bearing-land load does not balance the pin load (D-050 correction 2026-11-27)")
     # pin deflection relative to the main lands, along the load
     nodes = lambda fc: np.unique(m.facets[:, fc])
     U = s["U"]
     defl = float(((U[:, nodes(pin)].mean(1) - U[:, nodes(lands)].mean(1)) @ -e_pin))
+    nodal = [dict(node=n, at=m.p[:, n].round(3).tolist(), component="xyz"[c], reaction_N=r) for n, c, r in s["point_reactions"]]
     info = dict(point_reaction_N=s["point_reaction"].tolist(), point_reaction_pct=100 * pr / F, balance_force_N=np.asarray(s["balance_force"]).tolist(),
+                point_reactions_per_node=nodal, point_reaction_node_max_N=node_max, point_reaction_node_max_pct=100 * node_max / F,
                 applied_force_N=s["applied"].tolist(), pin_deflection_rel_mains_mm=defl, land_mm=G["land"], pin_facets=int(len(pin)), land_facets=int(len(lands)))
     return s, info
 
 
 CRANK_BC = ("bay simply supported on its two main bearings (D-050): bearing reactions as compressive pressures on the {land:.1f} mm "
             "shell lands (cosine around the loaded half, parabolic across the land), balanced to the pin load; 3-2-1 point support on "
-            "the slice end faces (carries only the mesh residual, <= 1 %); pin load on the central part of the pin (D-047); pulsating "
+            "the slice end faces (carries only the mesh residual, <= 1 % of the pin load at every node); pin load on the central part of the pin (D-047); pulsating "
             "load, alternating stress = half the peak; real main fillets R{R:.1f} (D-050); bending only in the FE - combined bending + "
             "torsion at the main fillet by hand calculation (tools/crank_main_fillet_torsion.py); no oil drillings (D-049)")
 

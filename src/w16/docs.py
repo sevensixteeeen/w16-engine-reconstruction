@@ -8,6 +8,7 @@ from __future__ import annotations
 import csv
 import glob
 import json
+import math
 import os
 import subprocess
 import sys
@@ -240,8 +241,8 @@ def evidence():
     fea = {}
     for f in glob.glob(p("08_SIMULATIONS", "fea", "*.json")):
         v = json.load(open(f, encoding="utf-8"))
-        if "case" in v:          # FE case records and their _FAILED records; post-processing records (no "case") are read separately
-            fea[os.path.basename(f)[:-5]] = v
+        if "case" in v and "_before_fix_" not in os.path.basename(f):   # FE case records and their _FAILED records; post-processing
+            fea[os.path.basename(f)[:-5]] = v                              # records (no "case") and pre-fix evidence are read separately
     exp = J("13_EXPORTS_STEP", "component_export_log.json") or []
     aexp = J("13_EXPORTS_STEP", "assembly_export_log.json")
     E = dict(R=R, S=S, V=V, I=I, q=q, rows=rows, fea=fea, exp=exp, aexp=aexp)
@@ -251,6 +252,10 @@ def evidence():
     E["crank_tors"] = J("08_SIMULATIONS", "analytical", "crank_main_fillet_torsion.json")
     E["crank_opts"] = J("08_SIMULATIONS", "analytical", "crank_main_fillet_options.json")
     E["oil"] = J("08_SIMULATIONS", "analytical", "oil_drillings.json")
+    E["crank_sup_prefix"] = J("08_SIMULATIONS", "fea", "crank_support_check_before_fix_2026-11-27.json")
+    E["crank_prefix"] = J("08_SIMULATIONS", "fea", "crank_before_fix_2026-11-27.json")              # pre-fix records (D-050 item 9)
+    E["crank_conv_prefix"] = J("08_SIMULATIONS", "fea", "crank_groove_convergence_before_fix_2026-11-27.json")
+    E["crank_tors_prefix"] = J("08_SIMULATIONS", "analytical", "crank_main_fillet_torsion_before_fix_2026-11-27.json")
     E["ic_crank_static"] = J("06_ASSEMBLIES", "interference", "targeted_d050_static.json")
     E["ic_crank_kin"] = J("06_ASSEMBLIES", "interference", "targeted_d050_kinematic.json")
     return E
@@ -306,6 +311,19 @@ def piston_hot(E, h):
                 T_crown=pis["results"].get("thermal", {}).get("T_crown_mean_C"))
 
 
+def duct_a_note(I):
+    """Limitation 12 (2026-11-22): clean-air duct A vs down-pipe B, a documented open packaging item for v1.0 - only while
+    the interference report still lists those pairs."""
+    cl = [c for c in (I or {}).get("static", {}).get("clashes", []) if {c["a"].split("-L")[0], c["b"].split("-L")[0]} == {"W16-09-air_duct_A", "W16-10-downpipe_B"}]
+    if not cl:
+        return ""
+    return (f"12. **Packaging (open item for v1.0):** clean-air duct A and down-pipe B overlap on both banks (up to {max(c['max_volume_mm3'] for c in cl):.0f} mm3): "
+            "turbine B's outlet and compressor A's inlet face each other 120 mm apart on the same axis, and no pair of elbows fits between them - a "
+            "compressor-A inlet elbow alone, or an inlet elbow plus a turbine-B outlet elbow, overlaps even with 0.5 D / 0.8 D elbows and no straight "
+            "length (study 2026-11-21, DECISIONS). Resolution needs a different turbocharger orientation or spacing; a heat shield between the two is "
+            "required in any resolution.")
+
+
 def crank_md(E):
     """Report section 8.3 (D-050): crank throw supports, mesh convergence of both fillet features with the official
     (zero-size extrapolated) values, combined bending + torsion at the main fillet (option (b), decision of the user
@@ -330,21 +348,22 @@ def crank_md(E):
 **Geometry.** Solid crankpins (D-049); pin relief grooves R2.5, 2.5 mm into the {P.web_thk} mm webs, {P.web_thk - 2.5:.1f} mm of web left behind them
 (D-048); main-journal fillets **R{R:.1f}** on the journal at every web, {shell} - option (b) of D-050, decision of the user 2026-11-25: the
 shells are narrowed to the largest width, in 0.1 mm steps, that keeps the axial allowance to the fillets{fit_txt}. Option (c), R1.6 with
-16 mm shells chamfered 1.0 x 45 deg, did not meet the combined criterion (comparison below).
+16 mm shells chamfered 1.0 x 45 deg, missed the combined criterion in the comparison below; that comparison was made with the biased land load
+(correction below) and was not re-evaluated{option_c_txt(E)}. Option (b) is kept by the decision of the user of 2026-11-27 for its larger margin.
 
 **Boundary conditions (D-050).** Until D-049 the slice was clamped: both main-journal surfaces fully fixed. A clamped journal cannot turn, so the
 throw acts as a frame fixed at both ends and most of its bending moment stays in the journals; the {P.web_thk} mm webs see little of it. The slice is
 now a bay simply supported on its two main bearings: the bearing reactions are compressive pressures on the {land:.1f} mm shell lands (cosine
 around the loaded half, parabolic across the land), balanced to the pin load, and a statically determinate 3-2-1 point support carries only the
-mesh residual. This is the support of the dynamics bay model and of the classification method for crankshafts (IACS UR M53: a throw on two main
+mesh residual{crank_support_txt(E)}. This is the support of the dynamics bay model and of the classification method for crankshafts (IACS UR M53: a throw on two main
 bearings, statically determinate). Real bearings let the journal tilt within their clearance and the oil film cannot clamp it, while the
 neighbouring bays add some restraint: reality lies between the two models, nearer to simple support, so the new model is the more realistic and
 the conservative one. A fixed journal surface would also have sat on the main fillets. With the solid pin, the change moved the pin-groove factor
 from {CC.get('semicircle_hollow_pin', {}).get('verdict', {}).get('factor_on_converged_peak', float('nan')):.2f} (hollow pin, clamped, D-048) to
 {CC.get('semicircle_r16_option_c', {}).get('verdict', {}).get('pin_groove', {}).get('factor_on_converged_peak', float('nan')):.2f} at 0.35 mm /
 {CC.get('semicircle_r16_option_c', {}).get('verdict', {}).get('pin_groove', {}).get('official', {}).get('factor', float('nan')):.2f} official (R1.6 main
-fillets, the run of option (c)).
-"""]
+fillets, the run of option (c), made with the land-load error described next).
+{crank_correction_md(E)}"""]
     if same(C) and "verdict" in C:
         v, runs = C["verdict"], C["runs"]
         names = dict(pin_groove="Pin relief groove", main_fillet=f"Main-journal fillet R{R:.1f}")
@@ -367,7 +386,7 @@ fillets, the run of option (c)).
                    f"{100 * (1 - crr['main_fillet_vm_max_MPa'] / v['main_fillet']['official']['peak_MPa']):.0f} % below the official values.")
         out.append(f"""**Mesh convergence** (`tools/crank_groove_convergence.py`, two refinement balls in every refined mesh; element-mean von Mises peak at the
 design gas force, pulsating load, factor = fatigue strength {fat:.0f} MPa / half the peak; converged = less than 5 % between the two finest meshes;
-point support reaction <= {max(r['supports']['point_reaction_pct'] for r in runs):.0e} % of the load):
+{support_runs_txt(runs)}):
 
 {tab(rows, ["Feature", *sizes, "change, two finest", "0.35 mm value (factor)", "official: zero-size extrapolation (factor)"])}
 
@@ -415,7 +434,9 @@ Bending alone {fa['bending_only']:.2f}.
                          f"**{ff['combined_alternating']:.2f}**", f"{ff['combined_goodman_with_mean']:.2f}", f"{ff['m53_Q']:.2f}",
                          f"{bb['specific_load_MPa']:.1f}", f"{bb['ocvirk_hmin_um']:.2f}", f"{o['torque_limit_for_target']['M_TN_max_Nm']:,.0f}"))
         ref = OPT.get("reference_16mm", {})
-        out.append(f"""**Option comparison on which D-050 was decided** (light calculation, `tools/crank_main_fillet_torsion.py --compare`, 2026-11-25; the bending peak
+        out.append(f"""**Option comparison on which D-050 was decided** (light calculation, `tools/crank_main_fillet_torsion.py --compare`, 2026-11-25, made with
+the land-load error of the crank FE corrected on 2026-11-27: the figures of both options below are biased and were not re-evaluated{option_c_txt(E)};
+option (b) is kept by the decision of the user of 2026-11-27 for its larger margin{', and its corrected numbers are the ones above' if crank_rerun_done(E) else ' - its corrected numbers are pending the re-run'}; the bending peak
 of (b) was the official R1.6 FE peak x {OPT['bending_scaling']['ratio_b_over_c']:.3f}, the ratio of the M53 journal-fillet bending factors f_B(r) = 0.1908
 r^-0.5568 (M53.3.3); same torque, damper and combination; rule of the user: main fillet below 1.5 combined -> option (b)):
 
@@ -431,7 +452,8 @@ Reference, 16 mm shells before D-050: {ref.get('specific_load_MPa', float('nan')
 {E['oil']['geometry']['outlet_phi_deg']:.0f} deg; only the pin and main surfaces are cut; walls >= {min(oil['min_wall_to_relief_groove_mm'], *oil['min_wall_web_faces_mm'].values()):.2f} mm
 to the relief groove and the web faces; {oil.get('min_wall_to_main_fillet_mm', float('nan')):.2f} mm to the main-fillet tangent on the inlet's exit ramp;
 inlet openings {op.get('inlet_to_main_shell_land_edge_mm', float('nan')):.2f} mm inside the main-shell edge and {op.get('inlet_to_main_fillet_tangent_mm', float('nan')):.2f} mm
-from the fillet tangent.
+from the fillet tangent. **Big-end feed - open (D-049):** each drilling's inlet is under the 180-deg groove of the upper main shell for half a
+turn; a continuous feed needs a 360-deg groove or cross-drillings - to be confirmed with a lubrication network / big-end film model.
 """)
     ict = [x for x in (E.get("ic_crank_static"), E.get("ic_crank_kin")) if x]
     if ict:
@@ -578,6 +600,142 @@ Requirements are taken from the project brief (section numbers in brackets). "Wh
 
 
 # ====================================================================== final report
+TABLE_KEYS = ("vm_max_MPa", "vm_p999_MPa", "max_displacement_mm", "pin_deflection_mm", "bore_deflection_mm", "T_max_C", "T_crown_mean_C",
+              "T_top_ring_groove_C", "T_bore_max_C", "T_bore_mean_C", "T_valve_bridge_max_C", "T_valve_bridge_mean_C", "T_roof_mean_C",
+              "energy_balance_error_pct", "bore_radial_growth_mean_um", "bore_out_of_round_um", "yield_factor_on_p999", "factor_on_p999",
+              "factor", "sigma_a_MPa", "max_axial_displacement_mm", "crown_deflection_mm", "peak_bearing_pressure_MPa",
+              "T_at_vm_max_C", "fillet_vm_max_MPa", "main_fillet_vm_max_MPa", "factor_on_fillet_max", "factor_on_main_fillet_max",
+              "web_vm_max_MPa", "ligament_vm_max_MPa")
+
+
+def is_case(x):
+    """A load case of an FE record: a dict with result values (the crank record's 'supports' dict is not one)."""
+    return isinstance(x, dict) and any(isinstance(x.get(k), (int, float)) for k in TABLE_KEYS)
+
+
+CRANK_SUPPORT_NEAR_MM = 6.0          # an element touching a support node has its centroid within ~0.75 of the 5 mm edge length
+
+
+def crank_peak_note(rec):
+    """Label of the crank record's overall peak when it lies at a node of the slice's 3-2-1 point support (end faces,
+    crank axis): a point-load singularity of that node's reaction, not a crank stress.  '' otherwise."""
+    loc = (rec.get("results") or {}).get("vm_max_location")
+    if not loc or len(loc) != 3:
+        return ""
+    from .sim import fea as FE                                     # support points shared with the solver
+    pts = [np.asarray(q, float) for q, _ in FE.crank_support_points(FE.crank_geometry(3))]
+    d = min(float(np.linalg.norm(np.asarray(loc, float) - q)) for q in pts)
+    if d > CRANK_SUPPORT_NEAR_MM:
+        return ""
+    sup = rec["results"].get("supports", {})
+    react = (f"the node carries {sup['point_reaction_node_max_N']:.0f} N, {sup['point_reaction_node_max_pct']:.2f} % of the pin load"
+             if "point_reaction_node_max_N" in sup else "per-node reaction not recorded in this run")
+    return (f"overall peak {rec['results']['vm_max_MPa']:.0f} MPa at ({', '.join(f'{c:.1f}' for c in loc)}), {d:.1f} mm from a node of the 3-2-1 "
+            f"point support on the slice end face, on the crank axis ({react}): a point-load singularity of the support, NOT a crank stress - "
+            "in the crankshaft this is continuous material on the bending neutral axis; the crank is assessed on the zone peaks (section 8.3)")
+
+
+def crank_support_txt(E):
+    """Section 8.3: the per-node support check of the standard crank FE record."""
+    sup = (E.get("fea", {}).get("crank", {}).get("results") or {}).get("supports", {})
+    if "point_reaction_node_max_N" in sup:
+        return (f" - checked per node in every run: largest reaction at a single support node {sup['point_reaction_node_max_N']:.0f} N, "
+                f"{sup['point_reaction_node_max_pct']:.2f} % of the pin load (limit 1 %)")
+    return " (this record predates the per-node check of 2026-11-27)"
+
+
+def support_runs_txt(runs):
+    vals = [r.get("supports", {}).get("point_reaction_node_max_pct") for r in runs]
+    if all(isinstance(x, (int, float)) for x in vals):
+        return f"largest reaction at a single support node <= {max(vals):.2f} % of the load in every run"
+    return "support reactions not checked per node in these runs - they predate the correction of 2026-11-27"
+
+
+def crank_rerun_done(E):
+    """Both crank records come from runs with the corrected land load: they carry the per-node support check (2026-11-27)."""
+    sup = (E.get("fea", {}).get("crank", {}).get("results") or {}).get("supports", {})
+    runs = (E.get("crank_conv", {}).get("semicircle") or {}).get("runs", [])
+    return ("point_reaction_node_max_N" in sup and bool(runs)
+            and all("point_reaction_node_max_pct" in (r.get("supports") or {}) for r in runs))
+
+
+def main_fillet_fix_ratio(E):
+    """Measured effect of the land-load correction on the official R2.5 main-fillet peak: corrected / pre-fix record (None if
+    either record is missing or not for the same radius)."""
+    old = ((E.get("crank_conv_prefix") or {}).get("semicircle") or {})
+    new = ((E.get("crank_conv") or {}).get("semicircle") or {})
+    if not (old and new and crank_rerun_done(E)) or old.get("main_fillet_r_mm") != new.get("main_fillet_r_mm"):
+        return None
+    try:
+        return new["verdict"]["main_fillet"]["official"]["peak_MPa"] / old["verdict"]["main_fillet"]["official"]["peak_MPa"]
+    except (KeyError, TypeError):
+        return None
+
+
+def option_c_txt(E):
+    """Estimate of option (c)'s combined factor with corrected loads: its bending peak times the measured change of the R2.5
+    main-fillet peak (same model, same load error, re-run 2026-11-27; the ratio is the same at every mesh size within 0.3 %),
+    the torsion term unchanged.  '' if the data are missing."""
+    o = ((E.get("crank_opts") or {}).get("options") or {}).get("c")
+    ratio = main_fillet_fix_ratio(E)
+    if not (o and ratio):
+        return ""
+    fat = MATERIALS["42CrMo4 QT + nitrided"]["fatigue"]
+    sa = o["bending"]["peak_MPa"] / 2
+    t3 = (fat / o["factors"]["combined_alternating"]) ** 2 - sa ** 2               # 3 tau_a^2 of the comparison
+    est = fat / math.sqrt((sa * ratio) ** 2 + t3)
+    return (f" - corrected, (c) would reach about {est:.2f} combined{', still below 1.5' if est < 1.5 else ''} (estimate: its bending peak x "
+            f"{ratio:.3f}, the measured change of the R{P.main_fillet_r:.1f} main-fillet peak, torsion unchanged)")
+
+
+def crank_correction_md(E):
+    """Section 8.3: the land-load correction of 2026-11-27 (D-050 item 9), from the pre-fix statics check."""
+    B = E.get("crank_sup_prefix") or {}
+    if not B.get("section_moments"):
+        return ""
+    sm = {r["section"]: r["ratio"] for r in B["section_moments"]}
+    rerun = (f"Corrected and re-run: the standard record and the R{P.main_fillet_r:.1f} convergence below; every run now stops if a single support node "
+             "carries more than 1 % of the pin load." if crank_rerun_done(E) else
+             f"**Re-run pending:** the standard record and the R{P.main_fillet_r:.1f} convergence below are still the biased ones (re-run with the "
+             "corrected load; every run now stops if a single support node carries more than 1 % of the pin load).")
+    ln = B.get("land_share", [float("nan")] * 2)
+    rx = [r for r in B.get("reactions", []) if r["at"][0] < -150]
+    node_a = math.hypot(*[r["reaction_N"] for r in rx if r["component"] in ("y", "z")]) if rx else float("nan")
+    vm_old = ((E.get("crank_prefix") or {}).get("results") or {}).get("vm_max_MPa", float("nan"))
+    effect = ""
+    old, new = (E.get("crank_conv_prefix") or {}).get("semicircle") or {}, (E.get("crank_conv") or {}).get("semicircle") or {}
+    to, tn = (E.get("crank_tors_prefix") or {}).get("factors") or {}, (E.get("crank_tors") or {}).get("factors") or {}
+    if main_fillet_fix_ratio(E) and to and tn:
+        def ser(rec, f):
+            return [s["peak_MPa"] for s in rec["verdict"][f]["series"]]
+        def off(rec, f):
+            return rec["verdict"][f]["official"]
+        def pct(r):
+            lo, hi = f"{100 * (1 - max(r)):.0f}", f"{100 * (1 - min(r)):.0f}"
+            return lo if lo == hi else f"{lo}-{hi}"
+        rg = [a / b for a, b in zip(ser(new, "pin_groove"), ser(old, "pin_groove"))]
+        rm = [a / b for a, b in zip(ser(new, "main_fillet"), ser(old, "main_fillet"))]
+        effect = (f"\nEffect on the R{P.main_fillet_r:.1f} records (pre-fix -> corrected; the pre-fix records are kept as `*_before_fix_2026-11-27.json`): "
+                  f"pin groove official {off(old, 'pin_groove')['peak_MPa']:.0f} -> {off(new, 'pin_groove')['peak_MPa']:.0f} MPa (factor "
+                  f"{off(old, 'pin_groove')['factor']:.2f} -> {off(new, 'pin_groove')['factor']:.2f}), main fillet {off(old, 'main_fillet')['peak_MPa']:.0f} -> "
+                  f"{off(new, 'main_fillet')['peak_MPa']:.0f} MPa ({off(old, 'main_fillet')['factor']:.2f} -> {off(new, 'main_fillet')['factor']:.2f}); "
+                  f"main fillet combined bending + torsion {to['combined_alternating']:.2f} -> {tn['combined_alternating']:.2f}, Goodman "
+                  f"{to['combined_goodman_with_mean']:.2f} -> {tn['combined_goodman_with_mean']:.2f}, M53 Q {to['m53_Q']:.2f} -> {tn['m53_Q']:.2f}. "
+                  f"At every mesh size the corrected peaks are {pct(rg)} % lower at the groove and "
+                  f"{pct(rm)} % lower at the main fillet - the local peaks do not follow the section moments "
+                  "alone; the governing peaks stay at the same places (main k, pin groove a).")
+    return f"""
+**Load-model correction (2026-11-27, D-050 item 9).** The bearing-land load had a coding error (`fea.crank_solve`: the axial coordinate was not
+removed from the radial direction of the land pressure), so the lands carried {100 * ln[0]:.0f} / {100 * ln[1]:.0f} % of the pin load instead of 50 / 50 and
+the end nodes of the 3-2-1 support carried the difference as a couple ({node_a / 1e3:.1f} kN per node; the summed support reaction, the only check
+then, cannot show a couple). Section moments against the intended simply supported bay: main fillet of main k x {sm.get('main fillet, main k (web face)', float('nan')):.3f},
+pin groove a x {sm.get('pin groove a', float('nan')):.3f}, pin groove b x {sm.get('pin groove b', float('nan')):.3f}, main fillet of main k+1 x
+{sm.get('main fillet, main k+1 (web face)', float('nan')):.3f} (`tools/crank_support_reactions.py`, statics of the discrete loads, no solve). The overall peak of that run, {vm_old:.0f} MPa
+at support node A, was the point-load singularity of this reaction, not a crank stress. {rerun}{effect}
+The R1.6 run of option (c) and the option comparison were not re-run (see there).
+"""
+
+
 def fea_table(fea):
     rows = []
     for k, v in sorted(fea.items()):
@@ -585,17 +743,15 @@ def fea_table(fea):
             rows.append((v.get("case", k), "-", "-", "FAILED: " + v.get("error", "")[:90], "-")); continue
         ms = v.get("mesh", {})
         res = v.get("results", {})
-        cases = res.items() if any(isinstance(x, dict) for x in res.values()) else [("single load case", res)]
+        cases = [(n, x) for n, x in res.items() if is_case(x)] or [("single load case", res)]
         for name, r in cases:
             if not isinstance(r, dict):
                 continue
-            keys = [x for x in ("vm_max_MPa", "vm_p999_MPa", "max_displacement_mm", "pin_deflection_mm", "bore_deflection_mm", "T_max_C", "T_crown_mean_C",
-                                "T_top_ring_groove_C", "T_bore_max_C", "T_bore_mean_C", "T_valve_bridge_max_C", "T_valve_bridge_mean_C", "T_roof_mean_C",
-                                "energy_balance_error_pct", "bore_radial_growth_mean_um", "bore_out_of_round_um", "yield_factor_on_p999", "factor_on_p999",
-                                "factor", "sigma_a_MPa", "max_axial_displacement_mm", "crown_deflection_mm", "peak_bearing_pressure_MPa",
-                                "T_at_vm_max_C") if isinstance(r.get(x), (int, float))]
-            bc = v.get("boundary_conditions", "")[:220] + (" NOTE: " + r["note"] if r.get("note") else "")
-            res_txt = "; ".join(f"{x.replace('_', ' ')} = {r[x]:.3g}" for x in keys)
+            keys = [x for x in TABLE_KEYS if isinstance(r.get(x), (int, float))]
+            note = r.get("note") or (crank_peak_note(v) if k == "crank" else "")
+            bc = v.get("boundary_conditions", "")[:220] + (" NOTE: " + note if note else "")
+            res_txt = "; ".join(f"{x.replace('_', ' ')} = {r[x]:.3g}" + (" (3-2-1 support artefact - see note)" if x == "vm_max_MPa" and k == "crank" and note else "")
+                                for x in keys)
             if k == "piston" and name == "fatigue_estimate":
                 res_txt += " - **room-temperature limit: NOT an acceptance measure** (hot fatigue: section 8.1)"
             rows.append((v.get("case", k), name.replace("_", " "), f"{ms.get('tets', '?')} tets, gamma min {ms.get('quality_gamma_min', 0):.2f}",
@@ -616,6 +772,8 @@ def fea_findings(fea, H=None):
             continue
         mat = v.get("material", {})
         ms = v.get("mesh", {})
+        if k == "crank" and crank_peak_note(v):
+            out.append(f"**{v.get('case', k)}:** {crank_peak_note(v)}.")
         if ms.get("quality_below_0p1", 0) > 20:
             out.append(f"**{v.get('case', k)}:** mesh has {ms['quality_below_0p1']} poorly shaped elements (gamma < 0.1); local peaks are unreliable.")
         res = v.get("results", {})
@@ -1093,6 +1251,7 @@ See `11_MANUFACTURING_DOCUMENTATION/MANUFACTURING_SPEC.md` (materials, processes
 {vt_text}
 10. The engine-management description is an architecture, not software.
 {"11. **Piston:** " + (hot_verdict(H) if H else "no temperature-dependent fatigue evaluation for the current piston FE; **piston thermal design is an OPEN item** (section 8.1)") + "." + (" The slot-end corner under the crown " + slot_note(H) + "." if slot_note(H) else " The slot-end corner under the crown is unradiused in the concept CAD: it needs a real radius and a mesh-converged re-check.") + " A cooling / material decision and a new piston FE are needed before the piston is mechanically acceptable." if 'piston' in fea else ""}
+{duct_a_note(I)}
 
 ## 15. Future development recommendations
 

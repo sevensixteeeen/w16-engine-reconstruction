@@ -5,7 +5,7 @@
    "name": "Crankcase and cylinder block",
    "part_numbers": 7,
    "instances": 48,
-   "mass_kg": 97.79
+   "mass_kg": 97.65
   },
   {
    "group": "02",
@@ -33,7 +33,7 @@
    "name": "Crankshaft",
    "part_numbers": 1,
    "instances": 1,
-   "mass_kg": 32.49
+   "mass_kg": 34.26
   },
   {
    "group": "06",
@@ -46,22 +46,22 @@
    "group": "07",
    "name": "Timing system",
    "part_numbers": 10,
-   "instances": 493,
-   "mass_kg": 5.89
+   "instances": 495,
+   "mass_kg": 6.17
   },
   {
    "group": "08",
    "name": "Turbochargers",
    "part_numbers": 14,
    "instances": 32,
-   "mass_kg": 22.43
+   "mass_kg": 22.37
   },
   {
    "group": "09",
    "name": "Intake system",
    "part_numbers": 24,
    "instances": 24,
-   "mass_kg": 24.66
+   "mass_kg": 24.84
   },
   {
    "group": "10",
@@ -75,7 +75,7 @@
    "name": "Fuel injection and ignition",
    "part_numbers": 7,
    "instances": 68,
-   "mass_kg": 8.86
+   "mass_kg": 8.73
   },
   {
    "group": "12",
@@ -89,14 +89,14 @@
    "name": "Cooling system",
    "part_numbers": 14,
    "instances": 14,
-   "mass_kg": 3.79
+   "mass_kg": 3.8
   },
   {
    "group": "14",
    "name": "Accessory system",
    "part_numbers": 15,
    "instances": 39,
-   "mass_kg": 32.7
+   "mass_kg": 32.61
   },
   {
    "group": "15",
@@ -106,8 +106,8 @@
    "mass_kg": 11.11
   }
  ],
- "total_mass_kg": 344.3,
+ "total_mass_kg": 346.1,
  "part_numbers": 151,
- "instances": 1597,
+ "instances": 1599,
  "invalid_or_multi_solid": []
 }

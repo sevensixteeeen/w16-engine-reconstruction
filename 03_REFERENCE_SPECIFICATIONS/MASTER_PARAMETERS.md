@@ -41,7 +41,7 @@ Generated from `src/w16/params.py` - the single source of truth for CAD, calcula
 | `rod_be_width` | 17.75 | mm | EST | big-end width |
 | `rod_side_clear` | 0.25 | mm | EST | total axial float of the rod pair on the pin |
 | `cw_radius` | 90 | mm | EST | counterweight outer radius (limited by the piston skirt at BDC) |
-| `pin_bore` | 28 | mm | EST | lightening bore through each crankpin |
+| `pin_bore` | 0 | mm | EST | crankpin lightening bore; 0 = solid pin (D-049: the 28 mm bore of earlier versions reached under the main journals, so it could not be machined or plugged) |
 | `deck_clearance` | 0.8 | mm | EST | piston crown to block deck at TDC |
 | `gasket_thk` | 1 | mm | EST | compressed MLS head-gasket thickness |
 | `gasket_bore` | 87.5 | mm | EST | head-gasket fire-ring bore |
@@ -79,6 +79,10 @@ Generated from `src/w16/params.py` - the single source of truth for CAD, calcula
 | `rod_bolt_dia` | 8 | mm | EST | M8x1 rod bolts |
 | `bearing_shell_thk` | 1.8 | mm | EST | rod bearing shell wall |
 | `main_shell_thk` | 2.5 | mm | EST | main bearing shell wall |
+| `main_shell_width` | 12.2 | mm | CALC | main bearing shell width (axial), centred on the 18 mm journal: the largest width, in 0.1 mm steps, that keeps the axial allowance to the R2.5 main fillets (D-050 option (b); cranktrain.main_fillet_fit); 16 mm before D-050 |
+| `main_shell_chamfer` | 0 | mm | EST | 45-deg chamfer at the bore edges of the main shells: none (D-050 option (b)); load-carrying land = shell width - 2 x chamfer |
+| `main_fillet_r` | 2.5 | mm | EST | main-journal fillet radius, on the journal at every web (D-050 option (b), decision of the user 2026-11-25; option (c) was R1.6 with 16 mm shells chamfered 1.0 x 45 deg) |
+| `crank_end_float` | 0.2 | mm | EST | total axial float of the crankshaft; thrust bearing assumed at main 5 (none is modelled) |
 | `liner_wall` | 5 | mm | EST | minimum cylinder wall to water jacket |
 | `jacket_width` | 7 | mm | EST | water-jacket radial width |
 | `jacket_depth` | 78 | mm | EST | water-jacket depth below deck |
@@ -129,7 +133,7 @@ Generated from `src/w16/params.py` - the single source of truth for CAD, calcula
 | `rod_cg_frac` | 0.3 | - | EST | rod centre of gravity from big-end centre / rod length |
 | `J_damper` | 0.022 | kg m2 | EST | viscous damper ring + hub + pulley |
 | `J_flywheel` | 0.11 | kg m2 | EST | flex plate + dual-clutch input mass |
-| `J_throw_fixed` | 0.0042 | kg m2 | EST | webs + pin + counterweights of one throw; replaced by CAD value |
+| `J_throw_fixed` | 0.0042 | kg m2 | EST | webs + pin + counterweights of one throw - fallback only: the torsional model uses the CAD throw inertia (D-050; about 9.5 g m2) |
 | `p_crankcase_bar` | 0.85 | bar | EST | dry-sump crankcase depression (abs) |
 | `throw` | 42.87 | mm | CALC | crank radius giving 86.000 mm stroke with offset bores (< stroke/2) |
 | `s_tdc` | 204.9 | mm | CALC | piston-pin distance along the cylinder axis from the axis foot point at TDC |

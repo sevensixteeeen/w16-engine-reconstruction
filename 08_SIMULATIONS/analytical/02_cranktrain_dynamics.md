@@ -50,20 +50,20 @@ residuals remain. No balance shafts are needed (the VW W8 needs two, the W12 and
 
 | rpm | rod compression [kN] | rod tension [kN] | piston side force [kN] | big-end bearing [kN] | big-end spec. load [MPa] | main bearing peak [kN] | main spec. load [MPa] | small-end spec. load [MPa] | mean torque [N m] | max torque | min torque |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 2000 | 48.22 | -1.123 | 10.22 | 47.79 | 52.52 | 34.71 | 31.9 | 100.5 | 1661 | 1843 | 1464 |
-| 3000 | 49.87 | -3.103 | 10.05 | 48.85 | 53.68 | 35.08 | 32.24 | 103.9 | 1679 | 1849 | 1505 |
-| 3750 | 50.94 | -5.161 | 9.853 | 49.29 | 54.17 | 35.38 | 32.52 | 106.1 | 1694 | 1865 | 1515 |
-| 5000 | 48.12 | -10.21 | 9.01 | 45.14 | 49.6 | 35.54 | 32.66 | 100.3 | 1722 | 1897 | 1529 |
-| 6000 | 46.07 | -14.85 | 8.451 | 41.75 | 45.88 | 36.6 | 33.64 | 95.97 | 1743 | 1924 | 1530 |
-| 6700 | 43.39 | -18.71 | 7.823 | 37.91 | 41.66 | 36.73 | 33.76 | 90.4 | 1730 | 1914 | 1501 |
+| 2000 | 48.22 | -1.123 | 10.22 | 47.79 | 52.52 | 34.71 | 41.84 | 100.5 | 1661 | 1843 | 1464 |
+| 3000 | 49.87 | -3.103 | 10.05 | 48.85 | 53.68 | 35.08 | 42.28 | 103.9 | 1679 | 1849 | 1505 |
+| 3750 | 50.94 | -5.161 | 9.853 | 49.29 | 54.17 | 35.38 | 42.65 | 106.1 | 1694 | 1865 | 1515 |
+| 5000 | 48.12 | -10.21 | 9.01 | 45.14 | 49.6 | 35.54 | 42.84 | 100.3 | 1722 | 1897 | 1529 |
+| 6000 | 46.07 | -14.85 | 8.451 | 41.75 | 45.88 | 36.6 | 44.12 | 95.97 | 1743 | 1924 | 1530 |
+| 6700 | 43.39 | -18.71 | 7.823 | 37.91 | 41.66 | 36.73 | 44.27 | 90.4 | 1730 | 1914 | 1501 |
 
 - Mean indicated torque from the force model vs. cycle model at 6,700 rpm: 1730 vs 1762 N m
   (-1.8 %, consistency check between two independent calculations).
 - Rod tension at gas-exchange TDC, overspeed 7300 rpm, no gas load: **23.5 kN**.
 - Design gas force at the design peak pressure 135 bar: **78.4 kN** (used for the FE load cases).
-- Bearing projected widths used: big end 16.25 mm x dia 56.0 mm; main 16.0 mm x dia 68.0 mm.
+- Bearing projected widths used: big end 16.25 mm x dia 56.0 mm; main 12.2 mm x dia 68.0 mm.
   Typical capability of sputter (AlSn20 on bronze) bearings: 100+ MPa; bimetal: ~60 MPa. Both journals are inside this.
-- Quasi-static short-bearing (Ocvirk) minimum film at peak load: big end 0.76 um (2,000 rpm), main 1.71 um
+- Quasi-static short-bearing (Ocvirk) minimum film at peak load: big end 0.76 um (2,000 rpm), main 1.14 um
   (6,700 rpm). This estimate ignores squeeze-film support and is conservative; an elasto-hydrodynamic orbit
   calculation is required before release (listed under limitations).
 
@@ -71,22 +71,26 @@ residuals remain. No balance shafts are needed (the VW W8 needs two, the W12 and
 
 ## Torsional vibration (lumped model: damper - 8 throws - flywheel)
 
-Throw stiffness from Carter's formula: 789 kN m/rad; throw inertia 6.67 g m2 (EST until CAD);
+Throw stiffness from Carter's formula: 789 kN m/rad; throw inertia 12.30 g m2 (crank part
+9.83 g m2 from the CAD - pin, webs, counterweights and one main journal (D-050; the earlier EST was
+4.2 g m2) - plus 2.47 g m2 of rods and pistons);
 damper 22 g m2; flywheel side 110 g m2.
 
-Natural frequencies: 302 Hz, 800 Hz, 1353 Hz, 1902 Hz.
-First mode (302 Hz) is excited by order 8 at 2265 rpm, order 4 at 4530 rpm and
-order 2.5 at 7248 rpm.
+Natural frequencies: 274 Hz, 651 Hz, 1043 Hz, 1438 Hz.
+First mode (274 Hz) is excited by order 8 at 2,052 rpm, order 4 at 4,103 rpm and
+order 2.5 at 6,565 rpm. **The order-2.5 resonance at about 6,565 rpm lies inside the operating range** (up to 6,800 rpm, rated 6,700 rpm): the viscous damper at the free end must address it.
 
 | rpm | vibratory torque, worst section [N m, RSS of orders] | largest single order | its amplitude [N m] |
 |---|---|---|---|
-| 2000 | 922.3 | 0.5 | 704.8 |
-| 3000 | 982.5 | 0.5 | 725.1 |
-| 3750 | 1086 | 0.5 | 740.4 |
-| 5000 | 1125 | 0.5 | 741.5 |
-| 6000 | 1247 | 0.5 | 760.8 |
-| 6700 | 1252 | 2.5 | 883.2 |
+| 2000 | 962.1 | 0.5 | 704.9 |
+| 3000 | 1076 | 0.5 | 725.6 |
+| 3750 | 1116 | 0.5 | 741.3 |
+| 5000 | 1265 | 3 | 753.1 |
+| 6000 | 1330 | 2.5 | 971 |
+| 6700 | 1478 | 2.5 | 1212 |
 
 Nominal torsional shear stress in the crankpin (dia 56.0 mm) for mean + vibratory torque at 6,700 rpm:
-86 MPa (before stress concentration).
+93 MPa (before stress concentration).
 A viscous damper is required at the free end; its tuning needs measured crank stiffness - listed under limitations.
+The table is the root-sum-square of the orders. The crank fillet check (final report section 8.3, D-050) uses the harmonic synthesis of
+IACS UR M53 (larger); see the final report, section 8.3, for the combined bending + torsion factor of the main fillets.

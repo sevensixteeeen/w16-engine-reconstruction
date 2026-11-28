@@ -14,6 +14,8 @@ regen_logs/
 regen_logs_console.log
 regen_logs_d050/
 regen_logs_d050_console.log
+regen_logs_d050_fix/
+regen_logs_d050_fix_console.log
 
 # low-resolution video previews of tools/render_videos.py - watched locally, not tracked
 09_ANIMATIONS/video_preview/

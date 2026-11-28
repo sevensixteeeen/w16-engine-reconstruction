@@ -85,6 +85,7 @@ The 23.13 deg stagger between odd and even pins is the VR correction (the VW W12
 
 | parameter | value | unit | tag | note |
 |---|---|---|---|---|
+| main_shell_width | 12.2 | mm | CALC | main bearing shell width (axial), centred on the 18 mm journal: the largest width, in 0.1 mm steps, that keeps the axial allowance to the R2.5 main fillets (D-050 option (b); cranktrain.main_fillet_fit); 16 mm before D-050 |
 | m_piston | 0.444 | kg | CALC | bare piston, CAD mass of the gallery-cooled design (D-042: 0.4436 - deeper valve pockets; 0.4457 in D-040, 0.4348 in D-038, 0.4341 in D-037, 0.430 in D-036, 0.427 in D-035, 0.365 EST before) |
 | m_pin | 0.141 | kg | CALC | gudgeon pin, CAD mass (dia 24 / 14 x 60) |
 | m_rings | 0.027 | kg | CALC | ring pack + circlips, CAD mass |

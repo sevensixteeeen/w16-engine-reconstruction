@@ -2,7 +2,7 @@ ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');
 FILE_NAME('W16_10_precat_B_L2__Pre_catalyst_housing_B_bank_2',
-  '2026-11-20T21:38:19',('Author'),('Open CASCADE'),
+  '2026-11-27T19:09:11',('Author'),('Open CASCADE'),
   'Open CASCADE STEP processor 8.0','build123d','Unknown');
 FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
 ENDSEC;

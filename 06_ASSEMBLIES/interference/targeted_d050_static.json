@@ -1,0 +1,703 @@
+{
+ "patterns": [
+  "W16-05-001",
+  "W16-01-005",
+  "W16-04-003"
+ ],
+ "counts": {
+  "clear": 341,
+  "expected": 115
+ },
+ "results": [
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-15-002",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-05-001",
+   "b": "W16-14-sensor",
+   "status": "expected",
+   "reason": "screw-in sensor in its boss"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  },
+  {
+   "a": "W16-04-003",
+   "b": "W16-04-005",
+   "status": "expected",
+   "reason": "threaded fastener in its thread / clearance hole"
+  }
+ ]
+}

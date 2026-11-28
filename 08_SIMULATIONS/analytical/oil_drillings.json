@@ -1,6 +1,6 @@
 {
  "note": "Check of the crankshaft oil drillings (D-049, 2026-11-24).",
- "date": "2026-11-25",
+ "date": "2026-11-27",
  "geometry": {
   "diameter_mm": 5.0,
   "outlet_phi_deg": 276.0,
@@ -933,6 +933,6 @@
   "drill_access_min_to_cw_radius_mm": 28.671089393782125,
   "shared_mains_min_drilling_to_drilling_mm": 3.5771075470056624,
   "shared_mains_min_inlet_separation_deg": 23.130927534972244,
-  "minutes": 0.37616202036539714
+  "minutes": 0.2832347512245178
  }
 }

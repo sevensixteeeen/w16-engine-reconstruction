@@ -1,0 +1,12 @@
+{
+ "what": "kinematic W16-0[34]- vs W16-05-001, 12 crank angles",
+ "patterns": [
+  "W16-0[34]-",
+  "W16-05-001"
+ ],
+ "counts": {
+  "clear": 224,
+  "expected": 96
+ },
+ "worst": []
+}

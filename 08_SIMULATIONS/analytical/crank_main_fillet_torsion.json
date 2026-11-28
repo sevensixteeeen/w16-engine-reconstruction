@@ -1,164 +1,168 @@
 {
  "note": "Main-journal fillet: combined bending + torsion, hand calculation (D-050, 2026-11-25).  Light calc, no FE.",
- "date": "2026-11-25",
+ "date": "2026-11-28",
+ "main_fillet_r_mm": 2.5,
+ "shell_width_mm": 12.2,
+ "chamfer_mm": 0.0,
  "source_scf": "IACS UR M53 Rev.4 (2019), M53.3.2 / M53.3.3 (p. 19), ranges p. 18; equivalent stress M53.5.2 (p. 22); Q >= 1.15 M53.7",
- "status": "does not meet 1.5 combined; open",
+ "converged": true,
+ "status": "meets the 1.5 combined criterion",
  "bending": {
-  "official_peak_MPa": 583.2318187716296,
+  "official_peak_MPa": 449.42230934071864,
   "basis": "zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050",
-  "alternating_MPa": 291.6159093858148,
-  "mean_MPa": 291.6159093858148,
-  "factor_bending_only": 1.783167458507991
+  "alternating_MPa": 224.71115467035932,
+  "mean_MPa": 224.71115467035932,
+  "factor_bending_only": 2.314081829906555
  },
  "torsion_scf": {
   "geometry": {
-   "r": 0.023529411764705882,
+   "r": 0.03676470588235294,
    "s": 0.3416435806331896,
    "w": 0.16964285714285715,
    "b": 1.25
   },
-  "beta_T_extrapolated": 3.395924584596587,
+  "beta_T_extrapolated": 3.030397914714166,
   "sub_extrapolated": {
-   "f_rs": 2.603317360282526,
+   "f_rs": 2.323104445759217,
    "f_b": 1.260734375000002,
    "f_w": 1.2933537932416113
   },
   "at_range_limits": {
-   "r": 0.03,
+   "r": 0.03676470588235294,
    "s": 0.3416435806331896,
    "w": 0.2,
    "b": 1.25
   },
-  "beta_T_range_limits": 3.1165033116872545,
+  "beta_T_range_limits": 2.958918259976968,
   "sub_range_limits": {
-   "f_rs": 2.446827543880965,
+   "f_rs": 2.323104445759217,
    "f_b": 1.260734375000002,
    "f_w": 1.2628467492177655
   },
-  "beta_T_used": 3.395924584596587,
+  "beta_T_used": 3.030397914714166,
   "web_width_B_mm": 70.0,
   "pin_overlap_S_mm": 19.13204051545862,
   "validity": "M53: 0.03 <= r <= 0.13, 0.2 <= w <= 0.8, 1.1 <= b <= 2.2, s <= 0.5"
  },
  "torque": {
-  "first_mode_Hz": 273.56122307490233,
-  "order25_resonance_rpm": 6565.469353797656,
+  "first_mode_Hz": 273.542083056384,
+  "order25_resonance_rpm": 6565.009993353216,
   "scan": [
    {
     "rpm": 6265,
-    "M_TN_max_Nm": 2300.3033905740676,
+    "M_TN_max_Nm": 2300.4883846627627,
     "section": 4,
-    "order25_amp_at_section_Nm": 1123.9452222203413,
-    "order25_amp_max_Nm": 1123.9452222203413,
+    "order25_amp_at_section_Nm": 1124.295471623744,
+    "order25_amp_max_Nm": 1124.295471623744,
     "T_mean_engine_Nm": 1738.4831801674957,
     "mean_at_section_Nm": 869.2415900837458
    },
    {
     "rpm": 6315,
-    "M_TN_max_Nm": 2305.6444100057006,
+    "M_TN_max_Nm": 2305.808462570871,
     "section": 4,
-    "order25_amp_at_section_Nm": 1145.684996165918,
-    "order25_amp_max_Nm": 1145.684996165918,
+    "order25_amp_at_section_Nm": 1146.0061251734376,
+    "order25_amp_max_Nm": 1146.0061251734376,
     "T_mean_engine_Nm": 1737.5512214537569,
     "mean_at_section_Nm": 868.7756107268763
    },
    {
     "rpm": 6365,
-    "M_TN_max_Nm": 2304.6361782028794,
+    "M_TN_max_Nm": 2304.7446720719736,
     "section": 4,
-    "order25_amp_at_section_Nm": 1161.3227503882852,
-    "order25_amp_max_Nm": 1161.3227503882852,
+    "order25_amp_at_section_Nm": 1161.595842863845,
+    "order25_amp_max_Nm": 1161.595842863845,
     "T_mean_engine_Nm": 1736.6203975258913,
     "mean_at_section_Nm": 868.3101987629434
    },
    {
     "rpm": 6415,
-    "M_TN_max_Nm": 2294.170417322005,
+    "M_TN_max_Nm": 2294.1941778209157,
     "section": 4,
-    "order25_amp_at_section_Nm": 1168.899210499036,
-    "order25_amp_max_Nm": 1168.899210499036,
+    "order25_amp_at_section_Nm": 1169.1039678027191,
+    "order25_amp_max_Nm": 1169.1039678027191,
     "T_mean_engine_Nm": 1735.6926207995978,
     "mean_at_section_Nm": 867.8463103997967
    },
    {
     "rpm": 6465,
-    "M_TN_max_Nm": 2271.863689816519,
+    "M_TN_max_Nm": 2271.78336540892,
     "section": 4,
-    "order25_amp_at_section_Nm": 1166.6232964191408,
-    "order25_amp_max_Nm": 1166.6232964191408,
+    "order25_amp_at_section_Nm": 1166.7407700828962,
+    "order25_amp_max_Nm": 1166.7407700828962,
     "T_mean_engine_Nm": 1734.765562286781,
     "mean_at_section_Nm": 867.382781143388
    },
    {
     "rpm": 6515,
-    "M_TN_max_Nm": 2236.5984036963173,
+    "M_TN_max_Nm": 2236.412161540933,
     "section": 4,
-    "order25_amp_at_section_Nm": 1153.216740713245,
-    "order25_amp_max_Nm": 1193.9700381288462,
+    "order25_amp_at_section_Nm": 1153.2327299724086,
+    "order25_amp_max_Nm": 1194.361118393292,
     "T_mean_engine_Nm": 1733.8392568245783,
     "mean_at_section_Nm": 866.9196284122869
    },
    {
     "rpm": 6565,
-    "M_TN_max_Nm": 2214.139671713029,
+    "M_TN_max_Nm": 2214.258245974711,
     "section": 7,
-    "order25_amp_at_section_Nm": 1214.1349487430737,
-    "order25_amp_max_Nm": 1214.1349487430737,
+    "order25_amp_at_section_Nm": 1214.4276411214894,
+    "order25_amp_max_Nm": 1214.4276411214894,
     "T_mean_engine_Nm": 1732.9137027943125,
     "mean_at_section_Nm": 1520.139525160882
    },
    {
     "rpm": 6615,
-    "M_TN_max_Nm": 2245.71967183731,
+    "M_TN_max_Nm": 2246.429743006697,
     "section": 6,
-    "order25_amp_at_section_Nm": 1165.2298845095877,
-    "order25_amp_max_Nm": 1224.155035866881,
+    "order25_amp_at_section_Nm": 1165.475165377685,
+    "order25_amp_max_Nm": 1224.3404929210901,
     "T_mean_engine_Nm": 1731.5289963508915,
     "mean_at_section_Nm": 1298.646747263171
    },
    {
     "rpm": 6665,
-    "M_TN_max_Nm": 2297.8995389667107,
+    "M_TN_max_Nm": 2298.4954960837003,
     "section": 6,
-    "order25_amp_at_section_Nm": 1165.1075849785823,
-    "order25_amp_max_Nm": 1220.5895808582557,
+    "order25_amp_at_section_Nm": 1165.2487098017502,
+    "order25_amp_max_Nm": 1220.6679441161143,
     "T_mean_engine_Nm": 1730.63003378553,
     "mean_at_section_Nm": 1297.9725253391498
    },
    {
     "rpm": 6700,
-    "M_TN_max_Nm": 2325.968962199412,
+    "M_TN_max_Nm": 2326.4815580566815,
     "section": 6,
-    "order25_amp_at_section_Nm": 1158.8750555498102,
-    "order25_amp_max_Nm": 1211.8108112258926,
+    "order25_amp_at_section_Nm": 1158.9474847267309,
+    "order25_amp_max_Nm": 1211.8192758044256,
     "T_mean_engine_Nm": 1730.0017182558588,
     "mean_at_section_Nm": 1297.5012886918962
    },
    {
     "rpm": 6715,
-    "M_TN_max_Nm": 2326.23785564457,
+    "M_TN_max_Nm": 2326.718020785176,
     "section": 6,
-    "order25_amp_at_section_Nm": 1149.7591959540166,
-    "order25_amp_max_Nm": 1201.3572482198201,
+    "order25_amp_at_section_Nm": 1149.803739703188,
+    "order25_amp_max_Nm": 1201.3378112199996,
     "T_mean_engine_Nm": 1722.4703239292007,
     "mean_at_section_Nm": 1291.852742946903
    },
    {
     "rpm": 6765,
-    "M_TN_max_Nm": 2318.258940713093,
+    "M_TN_max_Nm": 2318.62821983261,
     "section": 6,
-    "order25_amp_at_section_Nm": 1114.504771897644,
-    "order25_amp_max_Nm": 1161.683059426185,
+    "order25_amp_at_section_Nm": 1114.467519735744,
+    "order25_amp_max_Nm": 1161.5826747744172,
     "T_mean_engine_Nm": 1697.3683022673144,
     "mean_at_section_Nm": 1273.0262267004882
    }
   ],
   "governing": {
    "rpm": 6715,
-   "M_TN_max_Nm": 2326.23785564457,
+   "M_TN_max_Nm": 2326.718020785176,
    "section": 6,
-   "order25_amp_at_section_Nm": 1149.7591959540166,
-   "order25_amp_max_Nm": 1201.3572482198201,
+   "order25_amp_at_section_Nm": 1149.803739703188,
+   "order25_amp_max_Nm": 1201.3378112199996,
    "T_mean_engine_Nm": 1722.4703239292007,
    "mean_at_section_Nm": 1291.852742946903
   },
@@ -168,30 +172,30 @@
  },
  "stresses": {
   "W_P_mm3": 61738.57882834662,
-  "tau_N_alt_MPa": 37.67883711920661,
+  "tau_N_alt_MPa": 37.68661451139345,
   "tau_N_mean_MPa": 28.15878196679982,
-  "tau_alt_MPa": 127.95448929212418,
-  "tau_mean_MPa": 95.62509995335054,
-  "sigma_v_alt_MPa": 366.2743406204436,
-  "sigma_v_mean_MPa": 335.36892794381026
+  "tau_alt_MPa": 114.20543802796334,
+  "tau_mean_MPa": 85.33231415308103,
+  "sigma_v_alt_MPa": 299.3722586659677,
+  "sigma_v_mean_MPa": 268.9608048572254
  },
  "factors": {
   "fatigue_strength_MPa": 520,
   "uts_MPa": 1100,
-  "combined_alternating": 1.4197008698975628,
-  "combined_goodman_with_mean": 0.9908302862608757,
-  "bending_only": 1.783167458507991,
+  "combined_alternating": 1.7369678884649207,
+  "combined_goodman_with_mean": 1.2191766172822671,
+  "bending_only": 2.314081829906555,
   "target": 1.5,
-  "meets_target_combined": false,
-  "m53_sigma_DW_MPa": 414.3174073891148,
-  "m53_Q": 1.1311668917000561,
+  "meets_target_combined": true,
+  "m53_sigma_DW_MPa": 407.315965813634,
+  "m53_Q": 1.3605668328410725,
   "m53_Q_min": 1.15,
   "m53_sigma_DW_note": "M53.6 (p. 22), drop-forged K = 1.05, sigma_B = UTS, R_G taken as not less than 2 mm, no credit for nitriding"
  },
  "torque_limit_for_target": {
-  "M_TN_max_Nm": 1967.5514927884299,
-  "reduction_pct": 15.419161113976154,
+  "M_TN_max_Nm": 3104.979581647388,
+  "reduction_pct": -33.44889900322254,
   "note": "alternating torque at the most loaded section that would give the 1.5 target - information for the decision, not a requirement"
  },
- "minutes": 0.14969627062479654
+ "minutes": 0.17460797627766927
 }

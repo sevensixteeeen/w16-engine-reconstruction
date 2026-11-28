@@ -31,7 +31,7 @@ Requirements are taken from the project brief (section numbers in brackets). "Wh
 |---|---|---|
 | All sixteen cylinders are represented | PASS | 16 bores in the block CAD; pistons x16 |
 | Four cylinder banks (rows) correctly organised | PASS | two VR8 banks at 90 deg, each with two rows at 15 deg; firing intervals 45.000 deg (layout check) |
-| Engine architecture mechanically coherent | PARTIAL - packaging overlaps listed | interference check: 35 static and 1 kinematic clash pairs remain (listed in the report) |
+| Engine architecture mechanically coherent | PARTIAL - packaging overlaps listed | interference check: 2 static and 0 kinematic clash pairs remain (listed in the report) |
 | Displacement consistent with bore and stroke | PASS | 7992.92 cm3 vs 7,993 cm3 published |
 | All sixteen piston assemblies modelled | PASS | pistons 16, pins 16, rings 48 |
 | Shared crankshaft modelled | PASS | one-piece crank, 8 pins, 9 mains, distributed counterweights |
@@ -44,7 +44,7 @@ Requirements are taken from the project brief (section numbers in brackets). "Wh
 | Lubrication and cooling circuits modelled | PASS | galleries and jackets are real passages in block/heads; external circuit parts and 1-D flow calculations |
 | Major mechanical interfaces validated | PARTIAL | CAD interference check (static all-pairs + 12 crank angles); CAD compression ratio 9.00, 9.00 |
 | Parametric CAD files editable | PASS | geometry is generated from `src/w16/params.py`; BREP per part in `05_COMPONENT_CAD/` |
-| STEP exports generated | PASS | 166 component STEP files; master assembly 186.33 MB; 15 sub-assemblies |
+| STEP exports generated | PASS | 166 component STEP files; master assembly 187.45 MB; 15 sub-assemblies |
 | STL and 3MF exports generated where supported | PASS | 166 STL, 159 3MF component files |
 | Exploded assembly documentation complete | PASS | exploded views + hierarchy |
 | Engineering drawings available | PASS | 9 sheets (PDF/SVG/PNG) |

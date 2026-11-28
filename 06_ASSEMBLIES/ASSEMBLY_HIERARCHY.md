@@ -6,7 +6,7 @@ Masses are CAD volume x material density; items marked * use a catalogue/estimat
 
 ```
 W16_ENGINE_MASTER_ASSEMBLY
-|- 01 Crankcase and cylinder block   (48 parts, 97.8 kg)
+|- 01 Crankcase and cylinder block   (48 parts, 97.6 kg)
 |   |- W16-01-001                   x1   Crankcase upper section (cylinder block)
 |   |- W16-01-002                   x1   Crankcase lower section (bearing support)
 |   |- W16-01-003                   x9   Main bearing cover (cast-in insert)
@@ -35,7 +35,7 @@ W16_ENGINE_MASTER_ASSEMBLY
 |   |- W16-04-003                   x32  Big-end bearing shell
 |   |- W16-04-004                   x16  Small-end bush
 |   |- W16-04-005                   x32  Rod bolt M8x1
-|- 05 Crankshaft   (1 parts, 32.5 kg)
+|- 05 Crankshaft   (1 parts, 34.3 kg)
 |   |- W16-05-001                   x1   Crankshaft
 |- 06 Valvetrain   (324 parts, 17.4 kg)
 |   |- W16-06-001                   x16  Intake valve, short
@@ -51,7 +51,7 @@ W16_ENGINE_MASTER_ASSEMBLY
 |   |- W16-06-011                   x1   Intake camshaft, bank 2
 |   |- W16-06-012                   x1   Exhaust camshaft, bank 2
 |   |- W16-06-013                   x32  Roller finger follower, long valves (ratio 1.65)
-|- 07 Timing system   (32 parts, 5.9 kg)
+|- 07 Timing system   (32 parts, 6.2 kg)
 |   |- W16-07-001                   x1   Crank sprocket, duplex Z24
 |   |- W16-07-002                   x1   Intermediate shaft
 |   |- W16-07-003                   x1   Intermediate sprocket, duplex Z36
@@ -77,7 +77,7 @@ W16_ENGINE_MASTER_ASSEMBLY
 |   |- W16-08-012                   x4   Floating journal bearing, LH
 |   |- W16-08-013                   x2   Waste-gate actuator with rod, RH
 |   |- W16-08-014                   x2   Waste-gate actuator with rod, LH
-|- 09 Intake system   (24 parts, 24.7 kg)
+|- 09 Intake system   (24 parts, 24.8 kg)
 |   |- W16-09-air_box-L1            x1   Air box, bank 1
 |   |- W16-09-air_box-L2            x1   Air box, bank 2
 |   |- W16-09-air_duct_A-L1         x1   Clean-air duct A, bank 1
@@ -121,7 +121,7 @@ W16_ENGINE_MASTER_ASSEMBLY
 |   |- W16-10-substrate_A-L2        x1   Pre-catalyst substrate A, bank 2
 |   |- W16-10-substrate_B-L1        x1   Pre-catalyst substrate B, bank 1
 |   |- W16-10-substrate_B-L2        x1   Pre-catalyst substrate B, bank 2
-|- 11 Fuel injection and ignition   (68 parts, 8.9 kg)
+|- 11 Fuel injection and ignition   (68 parts, 8.7 kg)
 |   |- W16-11-001                   x16  Spark plug M10
 |   |- W16-11-002                   x16  Pencil coil with ion-current sensing
 |   |- W16-11-003                   x32  Port fuel injector
@@ -151,7 +151,7 @@ W16_ENGINE_MASTER_ASSEMBLY
 |   |- W16-13-water_pump_housing    x1   Water pump housing
 |   |- W16-13-water_pump_impeller   x1   Water pump impeller
 |   |- W16-13-water_pump_pulley     x1   Water pump pulley
-|- 14 Accessory system   (39 parts, 32.7 kg)
+|- 14 Accessory system   (39 parts, 32.6 kg)
 |   |- W16-14-ac_compressor         x1   Ac compressor
 |   |- W16-14-accessory_belt        x1   Accessory belt
 |   |- W16-14-alternator            x1   Alternator
@@ -178,21 +178,21 @@ W16_ENGINE_MASTER_ASSEMBLY
 
 | Group | Sub-assembly | Part numbers | Parts | Mass [kg] |
 |---|---|---|---|---|
-| 01 | Crankcase and cylinder block | 7 | 48 | 97.8 |
+| 01 | Crankcase and cylinder block | 7 | 48 | 97.6 |
 | 02 | Cylinder heads | 8 | 152 | 43.5 |
 | 03 | Piston assemblies | 5 | 112 | 9.8 |
 | 04 | Connecting rods | 5 | 112 | 6.8 |
-| 05 | Crankshaft | 1 | 1 | 32.5 |
+| 05 | Crankshaft | 1 | 1 | 34.3 |
 | 06 | Valvetrain | 13 | 324 | 17.4 |
-| 07 | Timing system | 10 | 32 | 5.9 |
+| 07 | Timing system | 10 | 32 | 6.2 |
 | 08 | Turbochargers | 14 | 32 | 22.4 |
-| 09 | Intake system | 24 | 24 | 24.7 |
+| 09 | Intake system | 24 | 24 | 24.8 |
 | 10 | Exhaust system | 18 | 18 | 17.9 |
-| 11 | Fuel injection and ignition | 7 | 68 | 8.9 |
+| 11 | Fuel injection and ignition | 7 | 68 | 8.7 |
 | 12 | Lubrication system | 6 | 6 | 9.1 |
 | 13 | Cooling system | 14 | 14 | 3.8 |
-| 14 | Accessory system | 15 | 39 | 32.7 |
+| 14 | Accessory system | 15 | 39 | 32.6 |
 | 15 | Fasteners and interfaces | 4 | 154 | 11.1 |
-| | **Total** | **151** | **1136** | **344.3** |
+| | **Total** | **151** | **1136** | **346.1** |
 
 Published reference: about 400 kg (not a design target). The CAD total includes dressing items that published engine weights usually exclude (pre-catalysts, air boxes, oil tank, charge-air coolers and ducts, accessories); fluids are not included. Brackets, hoses, small fasteners, seals and wiring not modelled are also not included.

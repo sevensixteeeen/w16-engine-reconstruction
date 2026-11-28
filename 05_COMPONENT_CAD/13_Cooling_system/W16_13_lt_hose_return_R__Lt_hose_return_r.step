@@ -2,7 +2,7 @@ ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');
 FILE_NAME('W16_13_lt_hose_return_R__Lt_hose_return_r',
-  '2026-11-20T21:38:24',('Author'),('Open CASCADE'),
+  '2026-11-27T19:09:15',('Author'),('Open CASCADE'),
   'Open CASCADE STEP processor 8.0','build123d','Unknown');
 FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
 ENDSEC;

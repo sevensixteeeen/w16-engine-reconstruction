@@ -1,0 +1,1038 @@
+{
+ "note": "Crank throw 3 is solved exactly as `fea.case_crank` (same solid, load, bearing-reaction supports, standard 1.0 mm mesh along both pin-groove circles and both main-fillet circles, CG solver), then again with extra local refinement in two balls (default radius 3 mm), one on the pin-groove peak and one on the main-fillet peak of the standard mesh, at 0.7 / 0.5 / 0.35 mm - both balls in the same mesh.  For each feature: converged (criterion of the user, 2026-11-23) when its peak in its refined ball changes by less than 5 % between the two finest meshes; otherwise NOT CONVERGED and only the series is reported (no value is picked).  The feature peak is the maximum over ball and feature zone (the zones of `fea.crank_zones`), so a stress outside the feature cannot be taken for it; the zone peak outside the ball must stay below the refined peak.  Rule of the user (D-050): a main fillet below 1.5 - judged on the combined bending + torsion factor of tools/crank_main_fillet_torsion.py - switches to option (b); decided 2026-11-25: option (b), R2.5 main fillets with 12.2 mm unchamfered shells (the R1.6 run of option (c) is kept as `semicircle_r16_option_c`).  Official values (D-050, decision of the user 2026-11-25): the zero-size linear extrapolation of the two finest meshes, because the element-mean peak keeps rising by about the same amount per refinement step; `--reverdict` recomputes the verdicts from the saved runs without any FE. Each run also gives the web and the ligament stresses (web 9.5 mm, 7.0 mm remaining behind the 2.5 mm groove).  Each record carries the pin bore and the main fillet radius it was solved with; earlier records (hollow pin, fixed journals, no main fillets) are kept under their own keys.",
+ "semicircle_repeatability_1mm": {
+  "note": "First run 2026-11-22. NOT a convergence check: Mesh.MeshSizeMin was left at the mesh_shape default (h / 5 = 1.0 mm), so gmsh clamped the requested 0.7 / 0.5 / 0.35 mm ball sizes to 1.0 mm (+0.5 % tets). These are four 1.0 mm meshes of the semicircular groove (the extra ball only moved the 1.0 mm zone): peak 167.8-171.3 MPa, mesh-to-mesh scatter about 2 %. The cusp case was stopped by the host (low system memory) before its first solve finished.",
+  "volume_mm3": 500756.57965615904,
+  "runs": [
+   {
+    "tets": 220984,
+    "gamma_min": 0.22907444297596216,
+    "fillet_vm_max_MPa": 171.34052078793619,
+    "at": [
+     -89.622,
+     6.391,
+     -13.05
+    ],
+    "fillet_vm_p999_MPa": 156.41131453056227,
+    "r_from_pin_axis_mm": 28.54864287739524,
+    "x_from_web_face_mm": 1.8781206042905154,
+    "minutes": 14.800361478328705,
+    "factor_on_max": 6.069784282301684,
+    "requested_local_size_mm": 1.0,
+    "effective_local_size_mm": 1.0
+   },
+   {
+    "tets": 221790,
+    "gamma_min": 0.22907444297596216,
+    "fillet_vm_max_MPa": 167.79390927073408,
+    "at": [
+     -89.431,
+     12.668,
+     -9.021
+    ],
+    "fillet_vm_p999_MPa": 158.0247642899192,
+    "r_from_pin_axis_mm": 28.81763527771131,
+    "x_from_web_face_mm": 2.068583537888756,
+    "minutes": 14.060785945256551,
+    "ball_vm_max_MPa": 167.3231338447823,
+    "factor_on_max": 6.1980795639129465,
+    "requested_local_size_mm": 0.7,
+    "effective_local_size_mm": 1.0
+   },
+   {
+    "tets": 221802,
+    "gamma_min": 0.22907444297596216,
+    "fillet_vm_max_MPa": 168.33922136280333,
+    "at": [
+     -89.469,
+     11.559,
+     -9.654
+    ],
+    "fillet_vm_p999_MPa": 156.7680048330101,
+    "r_from_pin_axis_mm": 28.700067513665598,
+    "x_from_web_face_mm": 2.030796934768503,
+    "minutes": 13.491017627716065,
+    "ball_vm_max_MPa": 167.3329397183027,
+    "factor_on_max": 6.178001725210552,
+    "requested_local_size_mm": 0.5,
+    "effective_local_size_mm": 1.0
+   },
+   {
+    "tets": 222066,
+    "gamma_min": 0.22907444297596216,
+    "fillet_vm_max_MPa": 167.9275173415638,
+    "at": [
+     -89.708,
+     5.893,
+     -13.568
+    ],
+    "fillet_vm_p999_MPa": 156.49406977464994,
+    "r_from_pin_axis_mm": 28.457365434613134,
+    "x_from_web_face_mm": 1.7920480441177062,
+    "minutes": 13.764602144559225,
+    "ball_vm_max_MPa": 167.9275173415638,
+    "factor_on_max": 6.193148189552787,
+    "requested_local_size_mm": 0.35,
+    "effective_local_size_mm": 1.0
+   }
+  ],
+  "pin_bore_mm": 28.0,
+  "supports": "both main-journal surfaces fully fixed (model before D-050)",
+  "main_fillet_r_mm": null,
+  "note_model": "no main fillets in the slice (the CAD rings were misplaced until D-050)"
+ },
+ "semicircle_hollow_pin": {
+  "volume_mm3": 505172.4966073655,
+  "web_thk_mm": 9.5,
+  "groove_depth_mm": 2.5,
+  "web_remaining_at_groove_mm": 7.0,
+  "ball_radius_mm": 3.0,
+  "date": "2026-11-23",
+  "runs": [
+   {
+    "tets": 220297,
+    "gamma_min": 0.2807029711304615,
+    "mesh_size_min_mm": 1.0,
+    "fillet_vm_max_MPa": 171.22436849651993,
+    "at": [
+     -89.421,
+     8.494,
+     -11.296
+    ],
+    "fillet_vm_p999_MPa": 157.84647028184642,
+    "r_from_pin_axis_mm": 28.761464408714073,
+    "x_from_web_face_mm": 2.078962608203966,
+    "web_vm_max_MPa": 79.23112903080437,
+    "web_vm_p999_MPa": 68.17124034703282,
+    "ligament_vm_max_MPa": 149.74861117832484,
+    "ligament_vm_p999_MPa": 94.76794763272696,
+    "ligament_vm_max_location": [
+     -82.56,
+     33.56,
+     -8.44
+    ],
+    "minutes": 21.181227640310922,
+    "local_size_mm": 1.0
+   },
+   {
+    "tets": 223856,
+    "gamma_min": 0.1463058675574237,
+    "mesh_size_min_mm": 0.7,
+    "fillet_vm_max_MPa": 181.14874566630505,
+    "at": [
+     -89.452,
+     8.609,
+     -11.146
+    ],
+    "fillet_vm_p999_MPa": 163.07069508723373,
+    "r_from_pin_axis_mm": 28.826007348467346,
+    "x_from_web_face_mm": 2.047763588376341,
+    "web_vm_max_MPa": 78.87523684679452,
+    "web_vm_p999_MPa": 67.92538249252794,
+    "ligament_vm_max_MPa": 146.96675700053018,
+    "ligament_vm_p999_MPa": 94.63037140303858,
+    "ligament_vm_max_location": [
+     -82.55,
+     -5.93,
+     -34.06
+    ],
+    "minutes": 21.597200544675193,
+    "ball_vm_max_MPa": 181.14874566630505,
+    "ball_tets": 900,
+    "ball_edge_mean_mm": 0.8695460577472,
+    "fillet_vm_max_outside_ball_MPa": 173.05160779375998,
+    "local_size_mm": 0.7
+   },
+   {
+    "tets": 231253,
+    "gamma_min": 0.27867544460462446,
+    "mesh_size_min_mm": 0.5,
+    "fillet_vm_max_MPa": 193.9236420322771,
+    "at": [
+     -89.659,
+     6.144,
+     -13.126
+    ],
+    "fillet_vm_p999_MPa": 174.60507090334303,
+    "r_from_pin_axis_mm": 28.642353268845643,
+    "x_from_web_face_mm": 1.8410724969292573,
+    "web_vm_max_MPa": 79.32325601501519,
+    "web_vm_p999_MPa": 68.0219452817929,
+    "ligament_vm_max_MPa": 148.37664893451938,
+    "ligament_vm_p999_MPa": 93.47323352948833,
+    "ligament_vm_max_location": [
+     -136.48,
+     33.55,
+     -8.66
+    ],
+    "minutes": 24.2023007551829,
+    "ball_vm_max_MPa": 193.9236420322771,
+    "ball_tets": 2502,
+    "ball_edge_mean_mm": 0.6225384119411103,
+    "fillet_vm_max_outside_ball_MPa": 184.5654124604779,
+    "local_size_mm": 0.5
+   },
+   {
+    "tets": 234558,
+    "gamma_min": 0.2618667345555892,
+    "mesh_size_min_mm": 0.35,
+    "fillet_vm_max_MPa": 194.8260985701505,
+    "at": [
+     -89.659,
+     8.989,
+     -11.07
+    ],
+    "fillet_vm_p999_MPa": 186.07812638024777,
+    "r_from_pin_axis_mm": 28.68979214596527,
+    "x_from_web_face_mm": 1.841307414580939,
+    "web_vm_max_MPa": 79.56441632938719,
+    "web_vm_p999_MPa": 67.58509657235471,
+    "ligament_vm_max_MPa": 161.60075394861084,
+    "ligament_vm_p999_MPa": 95.63564958735363,
+    "ligament_vm_max_location": [
+     -136.54,
+     33.35,
+     -8.16
+    ],
+    "minutes": 56.2661007086436,
+    "ball_vm_max_MPa": 194.8260985701505,
+    "ball_tets": 7415,
+    "ball_edge_mean_mm": 0.43391096166908766,
+    "fillet_vm_max_outside_ball_MPa": 190.51053430455352,
+    "local_size_mm": 0.35
+   }
+  ],
+  "verdict": {
+   "criterion": "refined-ball peak changes < 5% between the two finest meshes",
+   "two_finest_mm": [
+    0.5,
+    0.35
+   ],
+   "peaks_MPa": [
+    193.9236420322771,
+    194.8260985701505
+   ],
+   "change_pct": 0.4632113174244262,
+   "converged": true,
+   "series": [
+    {
+     "local_size_mm": 1.0,
+     "peak_MPa": 171.22436849651993
+    },
+    {
+     "local_size_mm": 0.7,
+     "peak_MPa": 181.14874566630505
+    },
+    {
+     "local_size_mm": 0.5,
+     "peak_MPa": 193.9236420322771
+    },
+    {
+     "local_size_mm": 0.35,
+     "peak_MPa": 194.8260985701505
+    }
+   ],
+   "converged_peak_MPa": 194.8260985701505,
+   "factor_on_converged_peak": 5.338093857202248,
+   "web_vm_max_MPa": 79.56441632938719,
+   "ligament_vm_max_MPa": 161.60075394861084
+  },
+  "note_ligament": "2026-11-23: the ligament_vm_* values of these runs are NOT ligament results - their maximum sits 0.5 mm inside the far web face, 34.6 mm from the crank axis, i.e. at the unfilleted main-journal / web corner of the FE slice (a modelling artefact, see fea.case_crank boundary_conditions). The ligament zone now excludes 6 mm round the main journal (as the web zone); the ligament stress is taken from the regenerated crank FE (1.0 mm is adequate there: the web stress is mesh-independent, 78.9-79.6 MPa).",
+  "pin_bore_mm": 28.0,
+  "note_superseded": "Solved on the hollow pin (28 mm lightening bore) of D-048. Superseded by D-049 (solid pin, 2026-11-24): the bore reached under the main journals, so it could not be machined or plugged; the throw model changed and the convergence is re-run on the solid pin (key `semicircle`). Kept for the record.",
+  "supports": "both main-journal surfaces fully fixed (model before D-050)",
+  "main_fillet_r_mm": null,
+  "note_model": "no main fillets in the slice (the CAD rings were misplaced until D-050)"
+ },
+ "semicircle_r16_option_c": {
+  "volume_mm3": 537617.7003712741,
+  "pin_bore_mm": 0.0,
+  "main_fillet_r_mm": 1.6,
+  "main_land_mm": 14.0,
+  "supports": "bearing reactions on the main lands (D-050)",
+  "web_thk_mm": 9.5,
+  "groove_depth_mm": 2.5,
+  "web_remaining_at_groove_mm": 7.0,
+  "ball_radius_mm": 3.0,
+  "date": "2026-11-24",
+  "runs": [
+   {
+    "tets": 488253,
+    "gamma_min": 0.2110566112542236,
+    "mesh_size_min_mm": 1.0,
+    "supports": {
+     "point_reaction_N": [
+      1.5220132354443194e-07,
+      -2.2563335733138956e-07,
+      3.65024789061863e-07
+     ],
+     "point_reaction_pct": 5.80629022420945e-10,
+     "balance_force_N": [
+      0.0,
+      43925.787568202155,
+      -64962.42965801161
+     ],
+     "applied_force_N": [
+      0.0,
+      -43925.78756820215,
+      64962.42965801161
+     ],
+     "pin_deflection_rel_mains_mm": 0.03207025548181698,
+     "land_mm": 14.0,
+     "pin_facets": 10815,
+     "land_facets": 4606
+    },
+    "web_vm_max_MPa": 104.08015814543666,
+    "web_vm_p999_MPa": 95.14237153182914,
+    "ligament_vm_max_MPa": 104.08015814543666,
+    "ligament_vm_p999_MPa": 98.13370449794473,
+    "ligament_vm_max_location": [
+     -136.6,
+     -4.56,
+     -40.01
+    ],
+    "features": {
+     "pin_groove": {
+      "zone_vm_max_MPa": 320.6278406627922,
+      "at": [
+       -128.636,
+       13.339,
+       -9.572
+      ],
+      "zone_vm_p999_MPa": 281.08540045812657
+     },
+     "main_fillet": {
+      "zone_vm_max_MPa": 457.29506215091226,
+      "at": [
+       -137.39,
+       19.775,
+       -28.01
+      ],
+      "zone_vm_p999_MPa": 415.7681713904419
+     }
+    },
+    "minutes": 121.75231394370397,
+    "local_size_mm": 1.0
+   },
+   {
+    "tets": 494007,
+    "gamma_min": 0.2491237553160676,
+    "mesh_size_min_mm": 0.7,
+    "supports": {
+     "point_reaction_N": [
+      1.1950498901569517e-07,
+      -1.9774148540818715e-07,
+      2.452998160151765e-07
+     ],
+     "point_reaction_pct": 4.297173024694675e-10,
+     "balance_force_N": [
+      0.0,
+      43925.588570629305,
+      -64962.13535786257
+     ],
+     "applied_force_N": [
+      0.0,
+      -43925.58857062931,
+      64962.13535786257
+     ],
+     "pin_deflection_rel_mains_mm": 0.03316013402838949,
+     "land_mm": 14.0,
+     "pin_facets": 10965,
+     "land_facets": 4623
+    },
+    "web_vm_max_MPa": 107.20268659359263,
+    "web_vm_p999_MPa": 96.25478694029843,
+    "ligament_vm_max_MPa": 107.20268659359263,
+    "ligament_vm_p999_MPa": 98.63784654642572,
+    "ligament_vm_max_location": [
+     -136.63,
+     39.1,
+     -9.51
+    ],
+    "features": {
+     "pin_groove": {
+      "zone_vm_max_MPa": 337.97148996273154,
+      "at": [
+       -128.392,
+       10.653,
+       -10.932
+      ],
+      "zone_vm_p999_MPa": 297.6184245537354,
+      "ball_vm_max_MPa": 336.38051655045615,
+      "ball_at": [
+       -128.466,
+       10.935,
+       -10.745
+      ],
+      "ball_tets": 911,
+      "ball_edge_mean_mm": 0.8692773135403681,
+      "zone_vm_max_outside_ball_MPa": 337.97148996273154
+     },
+     "main_fillet": {
+      "zone_vm_max_MPa": 504.4286565611139,
+      "at": [
+       -137.172,
+       21.225,
+       -27.371
+      ],
+      "zone_vm_p999_MPa": 447.8359503011329,
+      "ball_vm_max_MPa": 504.4286565611139,
+      "ball_at": [
+       -137.172,
+       21.225,
+       -27.371
+      ],
+      "ball_tets": 905,
+      "ball_edge_mean_mm": 0.8843101216729352,
+      "zone_vm_max_outside_ball_MPa": 439.29531775934265
+     }
+    },
+    "minutes": 59.13764189084371,
+    "local_size_mm": 0.7
+   },
+   {
+    "tets": 523276,
+    "gamma_min": 0.23815394526926492,
+    "mesh_size_min_mm": 0.5,
+    "supports": {
+     "point_reaction_N": [
+      -1.2596045451118698e-07,
+      9.892231389585504e-08,
+      -1.4838133211014792e-07
+     ],
+     "point_reaction_pct": 2.784171674009222e-10,
+     "balance_force_N": [
+      0.0,
+      43925.510619046916,
+      -64962.02007423379
+     ],
+     "applied_force_N": [
+      0.0,
+      -43925.51061904692,
+      64962.0200742338
+     ],
+     "pin_deflection_rel_mains_mm": 0.032424499594044386,
+     "land_mm": 14.0,
+     "pin_facets": 11609,
+     "land_facets": 4700
+    },
+    "web_vm_max_MPa": 106.32540197041425,
+    "web_vm_p999_MPa": 95.89983693864153,
+    "ligament_vm_max_MPa": 106.32540197041425,
+    "ligament_vm_p999_MPa": 99.77569363515552,
+    "ligament_vm_max_location": [
+     -136.58,
+     -6.57,
+     -39.52
+    ],
+    "features": {
+     "pin_groove": {
+      "zone_vm_max_MPa": 351.6127667763007,
+      "at": [
+       -128.463,
+       10.822,
+       -10.73
+      ],
+      "zone_vm_p999_MPa": 317.89091957194665,
+      "ball_vm_max_MPa": 351.6127667763007,
+      "ball_at": [
+       -128.463,
+       10.822,
+       -10.73
+      ],
+      "ball_tets": 2487,
+      "ball_edge_mean_mm": 0.6170855829423025,
+      "zone_vm_max_outside_ball_MPa": 351.410790205224
+     },
+     "main_fillet": {
+      "zone_vm_max_MPa": 522.4358164465108,
+      "at": [
+       -137.25,
+       19.421,
+       -28.586
+      ],
+      "zone_vm_p999_MPa": 496.44755818097235,
+      "ball_vm_max_MPa": 522.4358164465108,
+      "ball_at": [
+       -137.25,
+       19.421,
+       -28.586
+      ],
+      "ball_tets": 2711,
+      "ball_edge_mean_mm": 0.6165911271129324,
+      "zone_vm_max_outside_ball_MPa": 488.20067837260086
+     }
+    },
+    "minutes": 51.68694953521093,
+    "local_size_mm": 0.5
+   },
+   {
+    "tets": 564736,
+    "gamma_min": 0.16664572943492237,
+    "mesh_size_min_mm": 0.35,
+    "supports": {
+     "point_reaction_N": [
+      1.0116846382857148e-07,
+      -1.5463438529650375e-07,
+      1.796834112610668e-07
+     ],
+     "point_reaction_pct": 3.286785126288117e-10,
+     "balance_force_N": [
+      0.0,
+      43925.53034012534,
+      -64962.04923999816
+     ],
+     "applied_force_N": [
+      0.0,
+      -43925.53034012533,
+      64962.04923999816
+     ],
+     "pin_deflection_rel_mains_mm": 0.03191255952036715,
+     "land_mm": 14.0,
+     "pin_facets": 11685,
+     "land_facets": 4801
+    },
+    "web_vm_max_MPa": 107.51298554536096,
+    "web_vm_p999_MPa": 95.58997128574028,
+    "ligament_vm_max_MPa": 107.51298554536096,
+    "ligament_vm_p999_MPa": 98.42447394909969,
+    "ligament_vm_max_location": [
+     -136.66,
+     -4.14,
+     -39.83
+    ],
+    "features": {
+     "pin_groove": {
+      "zone_vm_max_MPa": 367.83304630189565,
+      "at": [
+       -128.713,
+       10.562,
+       -10.703
+      ],
+      "zone_vm_p999_MPa": 342.3853174076823,
+      "ball_vm_max_MPa": 367.83304630189565,
+      "ball_at": [
+       -128.713,
+       10.562,
+       -10.703
+      ],
+      "ball_tets": 7142,
+      "ball_edge_mean_mm": 0.43517250871014396,
+      "zone_vm_max_outside_ball_MPa": 366.26742931847315
+     },
+     "main_fillet": {
+      "zone_vm_max_MPa": 540.52302519078,
+      "at": [
+       -137.316,
+       17.739,
+       -29.612
+      ],
+      "zone_vm_p999_MPa": 524.2593072731701,
+      "ball_vm_max_MPa": 540.52302519078,
+      "ball_at": [
+       -137.316,
+       17.739,
+       -29.612
+      ],
+      "ball_tets": 7752,
+      "ball_edge_mean_mm": 0.43315122976053605,
+      "zone_vm_max_outside_ball_MPa": 538.921163708796
+     }
+    },
+    "minutes": 58.433545450369515,
+    "local_size_mm": 0.35
+   }
+  ],
+  "verdict": {
+   "pin_groove": {
+    "criterion": "refined-ball peak changes < 5% between the two finest meshes",
+    "two_finest_mm": [
+     0.5,
+     0.35
+    ],
+    "peaks_MPa": [
+     351.6127667763007,
+     367.83304630189565
+    ],
+    "change_pct": 4.409685233197427,
+    "converged": true,
+    "series": [
+     {
+      "local_size_mm": 1.0,
+      "peak_MPa": 320.6278406627922
+     },
+     {
+      "local_size_mm": 0.7,
+      "peak_MPa": 336.38051655045615
+     },
+     {
+      "local_size_mm": 0.5,
+      "peak_MPa": 351.6127667763007
+     },
+     {
+      "local_size_mm": 0.35,
+      "peak_MPa": 367.83304630189565
+     }
+    ],
+    "converged_peak_MPa": 367.83304630189565,
+    "factor_on_converged_peak": 2.8273696734317597,
+    "increments_MPa": [
+     15.75267588766394,
+     15.232250225844552,
+     16.220279525594947
+    ],
+    "extrapolated_peak_MPa": 406.63520366703744,
+    "factor_on_extrapolated_peak": 2.557574923718549,
+    "official": {
+     "peak_MPa": 406.63520366703744,
+     "factor": 2.557574923718549,
+     "basis": "zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050"
+    }
+   },
+   "main_fillet": {
+    "criterion": "refined-ball peak changes < 5% between the two finest meshes",
+    "two_finest_mm": [
+     0.5,
+     0.35
+    ],
+    "peaks_MPa": [
+     522.4358164465108,
+     540.52302519078
+    ],
+    "change_pct": 3.346242047299513,
+    "converged": true,
+    "series": [
+     {
+      "local_size_mm": 1.0,
+      "peak_MPa": 457.29506215091226
+     },
+     {
+      "local_size_mm": 0.7,
+      "peak_MPa": 504.4286565611139
+     },
+     {
+      "local_size_mm": 0.5,
+      "peak_MPa": 522.4358164465108
+     },
+     {
+      "local_size_mm": 0.35,
+      "peak_MPa": 540.52302519078
+     }
+    ],
+    "converged_peak_MPa": 540.52302519078,
+    "factor_on_converged_peak": 1.924062346156165,
+    "increments_MPa": [
+     47.133594410201624,
+     18.007159885396902,
+     18.08720874426922
+    ],
+    "extrapolated_peak_MPa": 583.2318187716296,
+    "factor_on_extrapolated_peak": 1.783167458507991,
+    "official": {
+     "peak_MPa": 583.2318187716296,
+     "factor": 1.783167458507991,
+     "basis": "zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050"
+    }
+   },
+   "main_fillet_decision": "bending alone: official main-fillet factor 1.78 >= 1.5; the combined bending + torsion factor (tools/crank_main_fillet_torsion.py) decides",
+   "web_vm_max_MPa": 107.51298554536096,
+   "ligament_vm_max_MPa": 107.51298554536096
+  },
+  "note_option": "D-050 option (c): R1.6 main fillets, 16 mm main shells chamfered 1.0 x 45 deg (14 mm land). The basis of the option comparison (crank_main_fillet_options.json); superseded by option (b), decision of the user 2026-11-25 - the R2.5 convergence is the key 'semicircle'."
+ },
+ "semicircle": {
+  "volume_mm3": 537962.981396928,
+  "pin_bore_mm": 0.0,
+  "main_fillet_r_mm": 2.5,
+  "main_land_mm": 12.2,
+  "supports": "bearing reactions on the main lands (D-050)",
+  "web_thk_mm": 9.5,
+  "groove_depth_mm": 2.5,
+  "web_remaining_at_groove_mm": 7.0,
+  "ball_radius_mm": 3.0,
+  "date": "2026-11-25",
+  "runs": [
+   {
+    "tets": 503326,
+    "gamma_min": 0.14813850398518175,
+    "mesh_size_min_mm": 1.0,
+    "supports": {
+     "point_reaction_N": [
+      -9.735867934068665e-08,
+      -1.3640496376865485e-07,
+      -1.6541252989554778e-07
+     ],
+     "point_reaction_pct": 3.0027270529715785e-10,
+     "balance_force_N": [
+      0.0,
+      43925.78595477778,
+      -64962.42727189691
+     ],
+     "applied_force_N": [
+      0.0,
+      -43925.78595477777,
+      64962.42727189691
+     ],
+     "pin_deflection_rel_mains_mm": 0.03270889054338516,
+     "land_mm": 12.2,
+     "pin_facets": 10806,
+     "land_facets": 4085
+    },
+    "web_vm_max_MPa": 107.22196375980985,
+    "web_vm_p999_MPa": 96.71549089456944,
+    "ligament_vm_max_MPa": 107.22196375980985,
+    "ligament_vm_p999_MPa": 98.56336153182613,
+    "ligament_vm_max_location": [
+     -136.69,
+     39.32,
+     -8.58
+    ],
+    "features": {
+     "pin_groove": {
+      "zone_vm_max_MPa": 317.1063634070458,
+      "at": [
+       -128.731,
+       8.05,
+       -12.392
+      ],
+      "zone_vm_p999_MPa": 271.2354960703542
+     },
+     "main_fillet": {
+      "zone_vm_max_MPa": 409.3583603374455,
+      "at": [
+       -137.478,
+       21.415,
+       -27.302
+      ],
+      "zone_vm_p999_MPa": 377.88400842847324
+     }
+    },
+    "minutes": 58.38935346206029,
+    "local_size_mm": 1.0
+   },
+   {
+    "tets": 498269,
+    "gamma_min": 0.14813850398518175,
+    "mesh_size_min_mm": 0.7,
+    "supports": {
+     "point_reaction_N": [
+      -1.1137535693706013e-07,
+      -3.528761283178028e-09,
+      -9.555787983117625e-08
+     ],
+     "point_reaction_pct": 1.8719112561583625e-10,
+     "balance_force_N": [
+      0.0,
+      43925.6253154871,
+      -64962.189700319956
+     ],
+     "applied_force_N": [
+      0.0,
+      -43925.625315487094,
+      64962.189700319956
+     ],
+     "pin_deflection_rel_mains_mm": 0.03253175190331987,
+     "land_mm": 12.2,
+     "pin_facets": 11015,
+     "land_facets": 4133
+    },
+    "web_vm_max_MPa": 105.38274537466751,
+    "web_vm_p999_MPa": 97.26764905966463,
+    "ligament_vm_max_MPa": 105.38274537466751,
+    "ligament_vm_p999_MPa": 98.3534027128406,
+    "ligament_vm_max_location": [
+     -136.64,
+     -5.89,
+     -39.78
+    ],
+    "features": {
+     "pin_groove": {
+      "zone_vm_max_MPa": 332.9901833539432,
+      "at": [
+       -128.633,
+       6.873,
+       -13.229
+      ],
+      "zone_vm_p999_MPa": 291.44441711110636,
+      "ball_vm_max_MPa": 332.9901833539432,
+      "ball_at": [
+       -128.633,
+       6.873,
+       -13.229
+      ],
+      "ball_tets": 906,
+      "ball_edge_mean_mm": 0.866919740171386,
+      "zone_vm_max_outside_ball_MPa": 321.26235657502735
+     },
+     "main_fillet": {
+      "zone_vm_max_MPa": 417.5365492578545,
+      "at": [
+       -137.643,
+       18.776,
+       -29.042
+      ],
+      "zone_vm_p999_MPa": 396.3913295930144,
+      "ball_vm_max_MPa": 416.64141839791847,
+      "ball_at": [
+       -137.731,
+       22.993,
+       -25.753
+      ],
+      "ball_tets": 890,
+      "ball_edge_mean_mm": 0.8722636627592045,
+      "zone_vm_max_outside_ball_MPa": 417.5365492578545
+     }
+    },
+    "minutes": 57.09653497934342,
+    "local_size_mm": 0.7
+   },
+   {
+    "tets": 550398,
+    "gamma_min": 0.14813850398518175,
+    "mesh_size_min_mm": 0.5,
+    "supports": {
+     "point_reaction_N": [
+      -5.7098077377304435e-08,
+      -3.7213112591416575e-09,
+      2.7253918233327568e-08
+     ],
+     "point_reaction_pct": 8.082027878308412e-11,
+     "balance_force_N": [
+      0.0,
+      43925.53846884712,
+      -64962.06126167258
+     ],
+     "applied_force_N": [
+      0.0,
+      -43925.53846884712,
+      64962.06126167258
+     ],
+     "pin_deflection_rel_mains_mm": 0.03338859298193057,
+     "land_mm": 12.2,
+     "pin_facets": 11779,
+     "land_facets": 4132
+    },
+    "web_vm_max_MPa": 107.8297008417655,
+    "web_vm_p999_MPa": 97.05003183769077,
+    "ligament_vm_max_MPa": 107.8297008417655,
+    "ligament_vm_p999_MPa": 98.89557968422189,
+    "ligament_vm_max_location": [
+     -136.68,
+     -5.07,
+     -39.74
+    ],
+    "features": {
+     "pin_groove": {
+      "zone_vm_max_MPa": 348.6336670323242,
+      "at": [
+       -128.562,
+       9.534,
+       -11.408
+      ],
+      "zone_vm_p999_MPa": 320.1809054720196,
+      "ball_vm_max_MPa": 348.6336670323242,
+      "ball_at": [
+       -128.562,
+       9.534,
+       -11.408
+      ],
+      "ball_tets": 2423,
+      "ball_edge_mean_mm": 0.6244908324425286,
+      "zone_vm_max_outside_ball_MPa": 336.3131383265922
+     },
+     "main_fillet": {
+      "zone_vm_max_MPa": 441.2951846146139,
+      "at": [
+       -137.793,
+       20.551,
+       -27.761
+      ],
+      "zone_vm_p999_MPa": 422.9211800977028,
+      "ball_vm_max_MPa": 441.2951846146139,
+      "ball_at": [
+       -137.793,
+       20.551,
+       -27.761
+      ],
+      "ball_tets": 2557,
+      "ball_edge_mean_mm": 0.6162181005513421,
+      "zone_vm_max_outside_ball_MPa": 418.0469482150165
+     }
+    },
+    "minutes": 64.78286609252294,
+    "local_size_mm": 0.5
+   },
+   {
+    "tets": 560619,
+    "gamma_min": 0.1481385039851823,
+    "mesh_size_min_mm": 0.35,
+    "supports": {
+     "point_reaction_N": [
+      -2.805109033943154e-08,
+      -1.1233913710384513e-07,
+      5.620495358016342e-08
+     ],
+     "point_reaction_pct": 1.6412982957197146e-10,
+     "balance_force_N": [
+      0.0,
+      43925.48650862667,
+      -64961.9844170136
+     ],
+     "applied_force_N": [
+      0.0,
+      -43925.48650862668,
+      64961.984417013606
+     ],
+     "pin_deflection_rel_mains_mm": 0.03247135175336443,
+     "land_mm": 12.2,
+     "pin_facets": 11661,
+     "land_facets": 4182
+    },
+    "web_vm_max_MPa": 105.8759895860574,
+    "web_vm_p999_MPa": 98.07918147686611,
+    "ligament_vm_max_MPa": 105.8759895860574,
+    "ligament_vm_p999_MPa": 98.0379949537307,
+    "ligament_vm_max_location": [
+     -136.61,
+     38.93,
+     -10.07
+    ],
+    "features": {
+     "pin_groove": {
+      "zone_vm_max_MPa": 360.3414414925777,
+      "at": [
+       -128.601,
+       8.892,
+       -11.738
+      ],
+      "zone_vm_p999_MPa": 344.524502166493,
+      "ball_vm_max_MPa": 360.3414414925777,
+      "ball_at": [
+       -128.601,
+       8.892,
+       -11.738
+      ],
+      "ball_tets": 7221,
+      "ball_edge_mean_mm": 0.434594205925583,
+      "zone_vm_max_outside_ball_MPa": 346.4513346251469
+     },
+     "main_fillet": {
+      "zone_vm_max_MPa": 453.9325388407882,
+      "at": [
+       -137.603,
+       22.043,
+       -26.874
+      ],
+      "zone_vm_p999_MPa": 448.70131117426865,
+      "ball_vm_max_MPa": 453.9325388407882,
+      "ball_at": [
+       -137.603,
+       22.043,
+       -26.874
+      ],
+      "ball_tets": 7441,
+      "ball_edge_mean_mm": 0.4327932307287579,
+      "zone_vm_max_outside_ball_MPa": 453.0731840375394
+     }
+    },
+    "minutes": 65.80936505794526,
+    "local_size_mm": 0.35
+   }
+  ],
+  "verdict": {
+   "pin_groove": {
+    "criterion": "refined-ball peak changes < 5% between the two finest meshes",
+    "two_finest_mm": [
+     0.5,
+     0.35
+    ],
+    "peaks_MPa": [
+     348.6336670323242,
+     360.3414414925777
+    ],
+    "change_pct": 3.2490779888537116,
+    "converged": true,
+    "series": [
+     {
+      "local_size_mm": 1.0,
+      "peak_MPa": 317.1063634070458
+     },
+     {
+      "local_size_mm": 0.7,
+      "peak_MPa": 332.9901833539432
+     },
+     {
+      "local_size_mm": 0.5,
+      "peak_MPa": 348.6336670323242
+     },
+     {
+      "local_size_mm": 0.35,
+      "peak_MPa": 360.3414414925777
+     }
+    ],
+    "converged_peak_MPa": 360.3414414925777,
+    "factor_on_converged_peak": 2.8861515225453798,
+    "increments_MPa": [
+     15.883819946897404,
+     15.64348367838096,
+     11.707774460253518
+    ],
+    "extrapolated_peak_MPa": 387.13565599778195,
+    "factor_on_extrapolated_peak": 2.68639683244769,
+    "official": {
+     "peak_MPa": 387.13565599778195,
+     "factor": 2.68639683244769,
+     "basis": "zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050"
+    }
+   },
+   "main_fillet": {
+    "criterion": "refined-ball peak changes < 5% between the two finest meshes",
+    "two_finest_mm": [
+     0.5,
+     0.35
+    ],
+    "peaks_MPa": [
+     441.2951846146139,
+     453.9325388407882
+    ],
+    "change_pct": 2.7839718779460987,
+    "converged": true,
+    "series": [
+     {
+      "local_size_mm": 1.0,
+      "peak_MPa": 409.3583603374455
+     },
+     {
+      "local_size_mm": 0.7,
+      "peak_MPa": 416.64141839791847
+     },
+     {
+      "local_size_mm": 0.5,
+      "peak_MPa": 441.2951846146139
+     },
+     {
+      "local_size_mm": 0.35,
+      "peak_MPa": 453.9325388407882
+     }
+    ],
+    "converged_peak_MPa": 453.9325388407882,
+    "factor_on_converged_peak": 2.2910893381995874,
+    "increments_MPa": [
+     7.2830580604729676,
+     24.65376621669543,
+     12.637354226174295
+    ],
+    "extrapolated_peak_MPa": 483.7505311811937,
+    "factor_on_extrapolated_peak": 2.1498684403727455,
+    "official": {
+     "peak_MPa": 483.7505311811937,
+     "factor": 2.1498684403727455,
+     "basis": "zero-size linear extrapolation of the two finest meshes (mean ball edge), decision of the user D-050"
+    }
+   },
+   "main_fillet_decision": "bending alone: official main-fillet factor 2.15 >= 1.5; the combined bending + torsion factor (tools/crank_main_fillet_torsion.py) decides",
+   "web_vm_max_MPa": 105.8759895860574,
+   "ligament_vm_max_MPa": 105.8759895860574
+  }
+ }
+}

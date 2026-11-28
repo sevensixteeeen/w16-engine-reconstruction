@@ -40,7 +40,7 @@
   ],
   "bore_deflection_mm": 0.020258227503392803,
   "dofs": 56973,
-  "solve_s": 6.203482389450073,
+  "solve_s": 6.524687767028809,
   "yield_factor_on_p999": 4.965537836089752
  },
  "boundary_conditions": "bolt-hole surfaces fixed; support from the surrounding aluminium bedplate neglected (conservative)"

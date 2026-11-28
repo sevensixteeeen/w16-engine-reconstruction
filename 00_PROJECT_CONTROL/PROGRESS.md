@@ -1,9 +1,35 @@
 # Progress — resume from here
 
-_Last updated: 2026-11-24_
+_Last updated: 2026-11-28_
 
 Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-050) first. Run everything from the project root with
 `PYTHONPATH=src` and `.venv\Scripts\python.exe`.
+
+## 2026-11-28 — v1.0 engineering complete (tag `v1.0-concept`); D-050 regeneration and crank FE load correction
+
+- **Status: v1.0 engineering complete.** The user moved the engineering freeze to 2026-11-28 (was 12 Dec); this commit is tagged
+  `v1.0-concept`.
+- **Committed here:** the outputs of the full regeneration of 2026-11-21 / 22 (D-047: interference check 7,520 pairs, 2 static / 0
+  kinematic clash pairs; system diagrams; block / insert / rod FE) and of the partial D-050 regeneration of 2026-11-27
+  (`run_regeneration_d050.cmd`, 11 stages exit 0: reports, assembly, export, crank FE, oil drillings, torsion, targeted static +
+  kinematic interference - clean, render, drawings, docs); the duct-A record; the crank FE correction below.
+- **Crank FE load-model correction (D-050 item 9):** the regenerated crank record peaked at 959 MPa at a node of the 3-2-1 support. A
+  coding error in the land load (`fea.crank_solve`) split the pin load 35 / 65 % between the lands, and the support carried the
+  difference as a 9.4 kN couple. Fixed; per-node support guard (a run stops if a single support node carries more than 1 % of the pin
+  load) on the crank and on the piston (piston: from the next piston run). User's re-run (`run_crank_fix_d050.cmd`, 5.1 h): <= 0.21 %
+  per node; R2.5 official values pin groove 343 MPa (factor 3.03), main fillet 449 MPa (2.31); main fillet combined bending + torsion
+  1.74, Goodman 1.22, M53 Q 1.36 (before: 387 / 484 MPa, 2.69 / 2.15; 1.66 / 1.16 / 1.30). R2.5 stays (user, 2026-11-27); the option
+  comparison used the biased model (corrected estimate for (c): about 1.49). Pre-fix records kept as `*_before_fix_2026-11-27.json`.
+- **Videos:** `tools/render_videos.py` (seven clips; de7575b, f8b4282). Preview clips approved by the user as they are (2026-11-28).
+  Final set 1080p, 30 fps, `--quality high` (the defaults; about 20 min, needs about 3 GB of free RAM) - not rendered yet.
+- **Open items at v1.0** (DECISIONS, report section 14):
+  1. Piston thermal: hot fatigue NOT ASSESSABLE with public data, crown 376 degC - cooling upgrade + hot-strength alloy with
+     manufacturer data.
+  2. Packaging: clean-air duct A vs down-pipe B (2 clash pairs, 840 mm3 per bank).
+  3. Crank FE limits: relief groove and oil drillings (one slice, bending only, element-mean peaks extrapolated, no drillings in the FE).
+  4. Torsional: order-2.5 resonance at about 6,565 rpm inside the operating range - damper sizing and tuning.
+  5. Lubrication: big-end oil feed (half-turn feed from the 180-deg groove; 360-deg groove or cross-drillings).
+  The detail-design items in DECISIONS (seat-insert pockets, piston slot-end corner and oil-ring land, finger-follower walls) stay listed.
 
 ## 2026-11-25 (later) — D-050 option (b): R2.5 main fillets, 12.2 mm unchamfered shells; convergence run next
 
@@ -72,6 +98,8 @@ Read `EXECUTION_STRATEGY.md` and `DECISIONS.md` (D-001…D-050) first. Run every
 - **Chain planes** XH+25 / +40 (bank 1), +29 / +44 (bank 2): all four hydraulic tensioners fit perpendicular at mid-span.
   Intermediate shaft 72 mm; housing base 55 mm with a shallow crank zone (flywheel flange), tensioner pockets 60 mm, cam /
   phaser region 69 mm, 1.51 kg. Long block +5 mm (housing to x 399); dressed length unchanged (flex plate rearmost, x 403).
+- **Duct A double-elbow study** (scratchpad, time-boxed): not feasible (best -5 mm with 0.51 D / 0.81 D elbows and no straight
+  length; tube solids confirm 1,034 mm3 overlap) -> **documented open packaging item for v1.0** (DECISIONS, report limitation 12).
 - **Duct B:** 11 mm to charge pipe B accepted. **Duct A:** the compressor-A inlet elbow alone does not fit (down-pipe B
   reaches the duct footprint 20 mm in front of the inlet face) - options in DECISIONS, decision needed.
 - Targeted checks: static, groups 07 / crank / shells / flex plate / camshafts - no clashes (1,742 pairs); the earlier

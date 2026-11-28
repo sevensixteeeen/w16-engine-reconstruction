@@ -1,0 +1,190 @@
+{
+ "note": "statics of the discrete load vector of fea.case_crank on a re-mesh of the slice (no solve): reactions of the 3-2-1 point support per node and component; the record's support check adds each component over the nodes, so a couple carried by two nodes cancels in it",
+ "mesh": {
+  "nodes": 93794,
+  "tets": 503326,
+  "h_max": 5.0,
+  "quality_gamma_min": 0.14813850398518175,
+  "quality_gamma_mean": 0.7873848221094505,
+  "quality_below_0p1": 0,
+  "volume_mm3": 537938.3762947378,
+  "dropped_zero_volume_tets": 0
+ },
+ "mesh_identical_to_record": true,
+ "mesh_compare": {
+  "nodes": [
+   93794,
+   93794
+  ],
+  "tets": [
+   503326,
+   503326
+  ],
+  "volume_mm3": [
+   537938.3762947378,
+   537938.3762947378
+  ],
+  "quality_gamma_min": [
+   0.14813850398518175,
+   0.14813850398518175
+  ]
+ },
+ "pin_load_N": 78418.86502258164,
+ "applied_resultant_force_N": [
+  0.0,
+  0.0,
+  -7.275957614183426e-12
+ ],
+ "applied_resultant_moment_Nmm": [
+  -1601.4127398866701,
+  -4022.912761804612,
+  -2720.181685161539
+ ],
+ "reactions": [
+  {
+   "at": [
+    -155.0,
+    0.676,
+    0.421
+   ],
+   "component": "x",
+   "reaction_N": 0.0,
+   "pct_of_pin_load": 0.0
+  },
+  {
+   "at": [
+    -155.0,
+    0.676,
+    0.421
+   ],
+   "component": "y",
+   "reaction_N": -29.89210643034658,
+   "pct_of_pin_load": 0.0381185144948716
+  },
+  {
+   "at": [
+    -155.0,
+    0.676,
+    0.421
+   ],
+   "component": "z",
+   "reaction_N": 44.20783254729831,
+   "pct_of_pin_load": 0.05637397651007592
+  },
+  {
+   "at": [
+    -64.0,
+    0.676,
+    0.421
+   ],
+   "component": "y",
+   "reaction_N": 110.43766435668041,
+   "pct_of_pin_load": 0.140830480426972
+  },
+  {
+   "at": [
+    -64.0,
+    0.676,
+    0.421
+   ],
+   "component": "z",
+   "reaction_N": -44.207832547291034,
+   "pct_of_pin_load": 0.05637397651006664
+  },
+  {
+   "at": [
+    -64.0,
+    -2.296,
+    20.303
+   ],
+   "component": "y",
+   "reaction_N": -80.54555792633383,
+   "pct_of_pin_load": 0.10271196593210037
+  }
+ ],
+ "node_reaction_max_N": 110.43766435668041,
+ "node_reaction_max_pct": 0.140830480426972,
+ "land_load_N": {
+  "main_k": 39261.08676761305,
+  "main_k_plus_1": 39158.24521628904
+ },
+ "land_share": [
+  0.501,
+  0.499
+ ],
+ "section_moments": [
+  {
+   "section": "main fillet, main k (web face)",
+   "x": -137.0,
+   "M_model_Nm": -349.3,
+   "M_intended_Nm": -352.9,
+   "ratio": 0.99
+  },
+  {
+   "section": "pin groove a",
+   "x": -127.5,
+   "M_model_Nm": -721.8,
+   "M_intended_Nm": -725.4,
+   "ratio": 0.995
+  },
+  {
+   "section": "pin groove b",
+   "x": -91.5,
+   "M_model_Nm": -722.2,
+   "M_intended_Nm": -725.4,
+   "ratio": 0.996
+  },
+  {
+   "section": "main fillet, main k+1 (web face)",
+   "x": -82.0,
+   "M_model_Nm": -349.7,
+   "M_intended_Nm": -352.9,
+   "ratio": 0.991
+  }
+ ],
+ "support_node_A": {
+  "node": 25908,
+  "at": [
+   -155.0,
+   0.676,
+   0.421
+  ],
+  "elements": 10,
+  "element_max_edge_mm": [
+   5.76,
+   5.76,
+   5.13,
+   5.51,
+   5.07,
+   5.07,
+   5.51,
+   4.65,
+   4.84,
+   4.19
+  ],
+  "element_volume_mm3": [
+   9.078,
+   5.338,
+   8.88,
+   8.014,
+   7.482,
+   6.652,
+   7.677,
+   6.609,
+   6.633,
+   6.502
+  ]
+ },
+ "record_peak": {
+  "vm_max_MPa": 959.4848387934954,
+  "at": [
+   -154.0907371206147,
+   2.149129351577344,
+   -1.036342051687376
+  ],
+  "distance_to_node_A_mm": 2.263046860979591,
+  "nearest_element_centroid_around_A_mm": 0.0,
+  "peak_element_touches_node_A": true
+ },
+ "seconds": 30.8
+}

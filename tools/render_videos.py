@@ -43,7 +43,8 @@ Tested with pyvista 0.49.2, VTK 9.7.2, AMD Radeon 740M.
   --preview     = --size 640x360 --quality draft --out 09_ANIMATIONS/video_preview (git-ignored)
   default output: 09_ANIMATIONS/video_<height>p[<fps> if not 30]/, e.g. video_1080p, video_2160p60
 
-Final set (decision 2026-11-25, rendered after the 12 Dec freeze): 1080p, 30 fps, --quality high = the defaults.
+Final set (decision 2026-11-25; previews approved 2026-11-28): 1080p, 30 fps, --quality high = the defaults - rendered after
+the engineering freeze (moved to 2026-11-28, tag v1.0-concept).
 Measured 2026-11-25 at 1920 x 1080, high: push-in 0.71 s per frame (translucent parts, no SSAO), turntable 0.32 s per
 frame (SSAO); peak working set 1.71 GB, free system RAM fell by up to ~3 GB in all (the integrated GPU's memory is
 shared) - about 20 min estimated for the seven clips.

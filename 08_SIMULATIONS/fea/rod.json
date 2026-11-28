@@ -39,7 +39,7 @@
    ],
    "max_axial_displacement_mm": 0.27779531392829987,
    "dofs": 92202,
-   "solve_s": 16.38734531402588,
+   "solve_s": 16.937385320663452,
    "yield_factor_on_p999": 2.468001874129167
   },
   "tension_overspeed_inertia": {
@@ -59,7 +59,7 @@
    ],
    "max_axial_displacement_mm": 0.47330844759094964,
    "dofs": 92202,
-   "solve_s": 19.110504388809204,
+   "solve_s": 19.17469358444214,
    "yield_factor_on_p999": 1.805120223788826
   },
   "fatigue_estimate": {

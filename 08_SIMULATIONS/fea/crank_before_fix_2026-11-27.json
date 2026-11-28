@@ -1,0 +1,102 @@
+{
+ "case": "crank throw 3 in bending",
+ "material": {
+  "name": "42CrMo4 QT + nitrided",
+  "E": 210000.0,
+  "nu": 0.3,
+  "alpha": 1.2e-05,
+  "k": 0.042,
+  "yield_": 900,
+  "fatigue": 520,
+  "rho": 7850
+ },
+ "mesh": {
+  "nodes": 93794,
+  "tets": 503326,
+  "h_max": 5.0,
+  "quality_gamma_min": 0.14813850398518175,
+  "quality_gamma_mean": 0.7873848221094505,
+  "quality_below_0p1": 0,
+  "volume_mm3": 537938.3762947378,
+  "dropped_zero_volume_tets": 0
+ },
+ "inputs": {
+  "force_N": 78418.86502258164,
+  "direction": "towards the crank axis (firing TDC)",
+  "pin_fillet": "semicircular relief groove R2.5 (D-047 / D-048)",
+  "fillet_mesh_mm": 1.0,
+  "web_thk_mm": 9.5,
+  "groove_depth_mm": 2.5,
+  "web_remaining_at_groove_mm": 7.0,
+  "pin_bore_mm": 0.0,
+  "main_fillet_r_mm": 2.5,
+  "main_land_mm": 12.2,
+  "oil_drillings": "not modelled (D-049): stress at the drilling exits is not assessed"
+ },
+ "results": {
+  "applied_force_check_N": [
+   0.0,
+   -43925.78595477777,
+   64962.42727189691
+  ],
+  "vm_max_MPa": 959.4848387934954,
+  "vm_p999_MPa": 280.81534875083855,
+  "vm_max_location": [
+   -154.0907371206147,
+   2.149129351577344,
+   -1.036342051687376
+  ],
+  "fillet_vm_max_MPa": 317.1063634070458,
+  "fillet_vm_p999_MPa": 271.2354960703542,
+  "fillet_vm_max_location": [
+   -128.73,
+   8.05,
+   -12.39
+  ],
+  "main_fillet_vm_max_MPa": 409.3583603374455,
+  "main_fillet_vm_p999_MPa": 377.88400842847324,
+  "main_fillet_vm_max_location": [
+   -137.48,
+   21.42,
+   -27.3
+  ],
+  "web_vm_max_MPa": 107.22196375980985,
+  "web_vm_p999_MPa": 96.71549089456944,
+  "ligament_vm_max_MPa": 107.22196375980985,
+  "ligament_vm_p999_MPa": 98.56336153182613,
+  "ligament_vm_max_location": [
+   -136.69,
+   39.32,
+   -8.58
+  ],
+  "pin_deflection_mm": 0.03270889054338516,
+  "supports": {
+   "point_reaction_N": [
+    -9.735867934068665e-08,
+    -1.3640496376865485e-07,
+    -1.6541252989554778e-07
+   ],
+   "point_reaction_pct": 3.0027270529715785e-10,
+   "balance_force_N": [
+    0.0,
+    43925.78595477778,
+    -64962.42727189691
+   ],
+   "applied_force_N": [
+    0.0,
+    -43925.78595477777,
+    64962.42727189691
+   ],
+   "pin_deflection_rel_mains_mm": 0.03270889054338516,
+   "land_mm": 12.2,
+   "pin_facets": 10806,
+   "land_facets": 4085
+  },
+  "dofs": 2151300,
+  "solve_s": 2675.071773290634,
+  "fatigue_limit_MPa": 520,
+  "factor_on_fillet_max": 3.279656670481347,
+  "factor_on_main_fillet_max": 2.5405612802012865
+ },
+ "boundary_conditions": "bay simply supported on its two main bearings (D-050): bearing reactions as compressive pressures on the 12.2 mm shell lands (cosine around the loaded half, parabolic across the land), balanced to the pin load; 3-2-1 point support on the slice end faces (carries only the mesh residual, <= 1 %); pin load on the central part of the pin (D-047); pulsating load, alternating stress = half the peak; real main fillets R2.5 (D-050); bending only in the FE - combined bending + torsion at the main fillet by hand calculation (tools/crank_main_fillet_torsion.py); no oil drillings (D-049)"
+}

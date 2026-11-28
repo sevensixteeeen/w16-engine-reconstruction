@@ -11,37 +11,156 @@
   "rho": 7850
  },
  "mesh": {
-  "nodes": 19330,
-  "tets": 86269,
+  "nodes": 93794,
+  "tets": 503326,
   "h_max": 5.0,
-  "quality_gamma_min": 0.09330477958921947,
-  "quality_gamma_mean": 0.7746004199407092,
-  "quality_below_0p1": 1,
-  "volume_mm3": 504915.86965590407,
+  "quality_gamma_min": 0.14813850398518175,
+  "quality_gamma_mean": 0.7873848221094505,
+  "quality_below_0p1": 0,
+  "volume_mm3": 537938.3762947378,
   "dropped_zero_volume_tets": 0
  },
  "inputs": {
   "force_N": 78418.86502258164,
-  "direction": "towards the crank axis (firing TDC)"
+  "direction": "towards the crank axis (firing TDC)",
+  "pin_fillet": "semicircular relief groove R2.5 (D-047 / D-048)",
+  "fillet_mesh_mm": 1.0,
+  "web_thk_mm": 9.5,
+  "groove_depth_mm": 2.5,
+  "web_remaining_at_groove_mm": 7.0,
+  "pin_bore_mm": 0.0,
+  "main_fillet_r_mm": 2.5,
+  "main_land_mm": 12.2,
+  "oil_drillings": "not modelled (D-049): stress at the drilling exits is not assessed"
  },
  "results": {
   "applied_force_check_N": [
    0.0,
-   -43923.62411538472,
-   64959.23009895413
+   -43925.78595477777,
+   64962.42727189691
   ],
-  "vm_max_MPa": 167.27343659070922,
-  "vm_p999_MPa": 127.78152400921233,
+  "vm_max_MPa": 378.15397368491847,
+  "vm_p999_MPa": 270.3320284755231,
   "vm_max_location": [
-   -82.62336037438165,
-   9.374673328189854,
-   -32.34839635260151
+   -137.4778843132297,
+   21.415280384943784,
+   -27.301561107133637
   ],
-  "pin_deflection_mm": 0.015853579707652506,
-  "dofs": 406590,
-  "solve_s": 1588.9186544418335,
+  "fillet_vm_max_MPa": 280.53793073684204,
+  "fillet_vm_p999_MPa": 257.4743974120595,
+  "fillet_vm_max_location": [
+   -128.73,
+   8.05,
+   -12.39
+  ],
+  "main_fillet_vm_max_MPa": 378.15397368491847,
+  "main_fillet_vm_p999_MPa": 355.0230919385322,
+  "main_fillet_vm_max_location": [
+   -137.48,
+   21.42,
+   -27.3
+  ],
+  "web_vm_max_MPa": 104.31743575168817,
+  "web_vm_p999_MPa": 94.77348843235796,
+  "ligament_vm_max_MPa": 104.31743575168817,
+  "ligament_vm_p999_MPa": 100.06586852875535,
+  "ligament_vm_max_location": [
+   -82.33,
+   -5.46,
+   -39.72
+  ],
+  "pin_deflection_mm": 0.031164311138980386,
+  "supports": {
+   "point_reaction_N": [
+    8.778212645665917e-08,
+    -1.886428435682319e-07,
+    2.1165818253621183e-07
+   ],
+   "point_reaction_pct": 3.7848201161458354e-10,
+   "balance_force_N": [
+    0.0,
+    43925.78595477778,
+    -64962.4272718969
+   ],
+   "point_reactions_per_node": [
+    {
+     "node": 25908,
+     "at": [
+      -155.0,
+      0.676,
+      0.421
+     ],
+     "component": "x",
+     "reaction_N": 8.778212645665917e-08
+    },
+    {
+     "node": 25908,
+     "at": [
+      -155.0,
+      0.676,
+      0.421
+     ],
+     "component": "y",
+     "reaction_N": -29.892106448133035
+    },
+    {
+     "node": 25908,
+     "at": [
+      -155.0,
+      0.676,
+      0.421
+     ],
+     "component": "z",
+     "reaction_N": 44.20783262828446
+    },
+    {
+     "node": 18862,
+     "at": [
+      -64.0,
+      0.676,
+      0.421
+     ],
+     "component": "y",
+     "reaction_N": 110.43766428646164
+    },
+    {
+     "node": 18862,
+     "at": [
+      -64.0,
+      0.676,
+      0.421
+     ],
+     "component": "z",
+     "reaction_N": -44.207832416626275
+    },
+    {
+     "node": 19041,
+     "at": [
+      -64.0,
+      -2.296,
+      20.303
+     ],
+     "component": "y",
+     "reaction_N": -80.54555802697145
+    }
+   ],
+   "point_reaction_node_max_N": 118.9571777574843,
+   "point_reaction_node_max_pct": 0.15169459252340514,
+   "applied_force_N": [
+    0.0,
+    -43925.78595477777,
+    64962.42727189691
+   ],
+   "pin_deflection_rel_mains_mm": 0.031164311138980386,
+   "land_mm": 12.2,
+   "pin_facets": 10806,
+   "land_facets": 4085
+  },
+  "dofs": 2151300,
+  "solve_s": 2716.995039463043,
   "fatigue_limit_MPa": 520,
-  "factor_on_p999": 8.13889181604237
+  "factor_on_fillet_max": 3.7071635812968537,
+  "factor_on_main_fillet_max": 2.7502024899162847
  },
- "boundary_conditions": "both main-journal surfaces fully fixed (stiffer than real bearings -> fillet stress over-predicted); load on the central part of the pin; pulsating load, alternating stress = half the peak"
+ "boundary_conditions": "bay simply supported on its two main bearings (D-050): bearing reactions as compressive pressures on the 12.2 mm shell lands (cosine around the loaded half, parabolic across the land), balanced to the pin load; 3-2-1 point support on the slice end faces (carries only the mesh residual, <= 1 % of the pin load at every node); pin load on the central part of the pin (D-047); pulsating load, alternating stress = half the peak; real main fillets R2.5 (D-050); bending only in the FE - combined bending + torsion at the main fillet by hand calculation (tools/crank_main_fillet_torsion.py); no oil drillings (D-049)"
 }

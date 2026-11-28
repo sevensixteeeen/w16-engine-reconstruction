@@ -29,7 +29,7 @@ What exists:</p>
 </tr>
 <tr>
 <td>Parametric CAD</td>
-<td>151 part numbers, 1597 placed parts, 15 sub-assemblies, generated from one parameter file</td>
+<td>151 part numbers, 1599 placed parts, 15 sub-assemblies, generated from one parameter file</td>
 </tr>
 <tr>
 <td>Checks</td>
@@ -132,8 +132,8 @@ all firing intervals found numerically are 45.000 deg, which shows the published
 
 <p><img src="../06_ASSEMBLIES/views/cutaway_transparent_block.png" style="width:70%"><br><em>Crank train inside the transparent crankcase.</em></p>
 
-<p>Envelope from CAD: dressed engine 976 x 900 x 832 mm (L x W x H); long block 796 x 754 x 483 mm.
-The published length is 710 mm; this reconstruction's block is 660 mm long and the long block 796 mm including chain housing and crank nose.</p>
+<p>Envelope from CAD: dressed engine 976 x 900 x 832 mm (L x W x H); long block 801 x 754 x 483 mm.
+The published length is 710 mm; this reconstruction's block is 660 mm long and the long block 801 mm including chain housing and crank nose.</p>
 <h2>5. Component design</h2>
 <h3>5.1 Crankcase</h3>
 <p>Split at the crank axis: upper section with both banks, lower bearing support with nine cast-in iron bearing covers (4 bolts each), dry-sump pan.
@@ -141,9 +141,9 @@ Zig-zag bores with a 27.9 mm web at the deck and 4.0 mm at the bore foot. Closed
 connected volume of 1.22 L surrounding all eight bores (CAD-measured), fed at the free end, with four transfer holes per cylinder to the head.
 Oil: central gallery dia 18 mm to the nine main bearings and the inner-row piston jets; two side galleries for the outer-row jets.</p>
 <h3>5.2 Crank train</h3>
-<p>Crankshaft assembly group 32.49 kg, eight bored pins, R2.5 fillets, drilled oil ways. The webs are only 9.5 mm thick and the rods pass between them at BDC,
-so counterweights cannot be wider than the webs: each throw is balanced internally to 65-67 % and the sixteen
-counterweights are sized so that the resultant force and couple of the complete crank are zero (residual 7.2e-15 kg mm, 1.1e-13 kg mm2).
+<p>Crankshaft assembly group 34.26 kg, eight solid pins with R2.5 relief grooves, one straight oil drilling per rod (main journal -&gt; pin). The webs are only 9.5 mm thick and the rods pass between them at BDC,
+so counterweights cannot be wider than the webs: each throw is balanced internally to 59-61 % and the sixteen
+counterweights are sized so that the resultant force and couple of the complete crank are zero: the CAD crankshaft with its oil drillings and the rod / piston equivalents leaves 0.004 kg mm and 2.4 kg mm2 (2 N and 1.2 N m at 6,700 rpm); the final balance is set on the balancing machine.
 Titanium I-beam rods with trapezoidal small end; forged pistons with a crown tilted 16.01 deg to the pin-axis normal, three rings, slipper skirt.</p>
 <p><img src="../06_ASSEMBLIES/views/crank_train_isometric.png" style="width:70%"><br><em>Crankshaft, rods and pistons.</em></p>
 
@@ -187,7 +187,7 @@ Valve sizes 32 / 27 mm, lifts 10.0 / 9.5 mm, follower ratio 2.0. Cam lobes are t
 <td>Crankcase and cylinder block</td>
 <td>7</td>
 <td>48</td>
-<td>97.79</td>
+<td>97.65</td>
 </tr>
 <tr>
 <td>02</td>
@@ -215,7 +215,7 @@ Valve sizes 32 / 27 mm, lifts 10.0 / 9.5 mm, follower ratio 2.0. Cam lobes are t
 <td>Crankshaft</td>
 <td>1</td>
 <td>1</td>
-<td>32.49</td>
+<td>34.26</td>
 </tr>
 <tr>
 <td>06</td>
@@ -228,22 +228,22 @@ Valve sizes 32 / 27 mm, lifts 10.0 / 9.5 mm, follower ratio 2.0. Cam lobes are t
 <td>07</td>
 <td>Timing system</td>
 <td>10</td>
-<td>493</td>
-<td>5.89</td>
+<td>495</td>
+<td>6.17</td>
 </tr>
 <tr>
 <td>08</td>
 <td>Turbochargers</td>
 <td>14</td>
 <td>32</td>
-<td>22.43</td>
+<td>22.37</td>
 </tr>
 <tr>
 <td>09</td>
 <td>Intake system</td>
 <td>24</td>
 <td>24</td>
-<td>24.66</td>
+<td>24.84</td>
 </tr>
 <tr>
 <td>10</td>
@@ -257,7 +257,7 @@ Valve sizes 32 / 27 mm, lifts 10.0 / 9.5 mm, follower ratio 2.0. Cam lobes are t
 <td>Fuel injection and ignition</td>
 <td>7</td>
 <td>68</td>
-<td>8.86</td>
+<td>8.73</td>
 </tr>
 <tr>
 <td>12</td>
@@ -271,14 +271,14 @@ Valve sizes 32 / 27 mm, lifts 10.0 / 9.5 mm, follower ratio 2.0. Cam lobes are t
 <td>Cooling system</td>
 <td>14</td>
 <td>14</td>
-<td>3.79</td>
+<td>3.8</td>
 </tr>
 <tr>
 <td>14</td>
 <td>Accessory system</td>
 <td>15</td>
 <td>39</td>
-<td>32.7</td>
+<td>32.61</td>
 </tr>
 <tr>
 <td>15</td>
@@ -289,7 +289,7 @@ Valve sizes 32 / 27 mm, lifts 10.0 / 9.5 mm, follower ratio 2.0. Cam lobes are t
 </tr>
 </tbody>
 </table>
-<p>CAD mass 344.3 kg dry, as modelled (published: about 400 kg; the CAD figure includes dressing items such as pre-catalysts, air boxes,
+<p>CAD mass 346.1 kg dry, as modelled (published: about 400 kg; the CAD figure includes dressing items such as pre-catalysts, air boxes,
 oil tank and charge-air system, and excludes unmodelled small parts and fluids - the two numbers are not directly comparable).</p>
 <p><img src="../06_ASSEMBLIES/views/exploded_isometric.png" style="width:95%"><br><em>Exploded view.</em></p>
 
@@ -345,7 +345,7 @@ torque with two turbochargers from about 2,000 rpm, consistent with the publishe
 
 <h3>7.2 Crank train</h3>
 <p>Rod force 50.9 kN compression at full load, 23.5 kN tension at 7300 rpm; main bearing peak 36.7 kN.
-With fully balanced throws the free forces and moments would be 206 N and 39 N m at rated speed (higher orders only). First torsional mode 302 Hz (lumped model).</p>
+With fully balanced throws the free forces and moments would be 206 N and 39 N m at rated speed (higher orders only). First torsional mode 274 Hz (lumped model, CAD throw inertia); <strong>its order-2.5 resonance at about 6,565 rpm lies inside the operating range</strong> (up to 6,800 rpm, rated 6,700) - the viscous damper at the free end must address it.</p>
 <p><img src="../08_SIMULATIONS/analytical/torque_and_bearing_loads.png" style="width:90%"><br><em>Torque ripple and main-bearing load loci.</em></p>
 
 <h3>7.3 Thermal, lubrication, fuel</h3>
@@ -391,9 +391,9 @@ Peak values at re-entrant corners and at fixed boundaries are mesh-dependent; th
 <tr>
 <td>crank throw 3 in bending</td>
 <td>single load case</td>
-<td>86269 tets, gamma min 0.09</td>
-<td>vm max MPa = 167; vm p999 MPa = 128; pin deflection mm = 0.0159; factor on p999 = 8.14</td>
-<td>both main-journal surfaces fully fixed (stiffer than real bearings -&gt; fillet stress over-predicted); load on the central part of the pin; pulsating load, alternating stress = half the peak</td>
+<td>503326 tets, gamma min 0.15</td>
+<td>vm max MPa = 378; vm p999 MPa = 270; pin deflection mm = 0.0312; fillet vm max MPa = 281; main fillet vm max MPa = 378; factor on fillet max = 3.71; factor on main fillet max = 2.75; web vm max MPa = 104; ligament vm max MPa = 104</td>
+<td>bay simply supported on its two main bearings (D-050): bearing reactions as compressive pressures on the 12.2 mm shell lands (cosine around the loaded half, parabolic across the land), balanced to the pin load; 3-2-1 poi</td>
 </tr>
 <tr>
 <td>cylinder head slice, cylinder position 3 (thermal)</td>
@@ -637,16 +637,157 @@ the uncertainty band is x 1.0-2.0 (crown 272-376 degC). The earlier note that th
 0.4-0.5 x brake power was wrong (the model gives 0.31) and is withdrawn. Whatever the multiplier, the hot-fatigue factors stay far below 1
 (table) - see 8.1 for why that check cannot give a verdict with public data.</p>
 <p>Evaluation: <code>tools/piston_heat_input_study.py</code> -&gt; <code>08_SIMULATIONS/analytical/piston_heat_input_study.json</code>.</p>
+<h3>8.3 Crank throw: supports, mesh convergence and combined fatigue of the fillets (D-047 to D-050)</h3>
+<p><strong>Geometry.</strong> Solid crankpins (D-049); pin relief grooves R2.5, 2.5 mm into the 9.5 mm webs, 7.0 mm of web left behind them
+(D-048); main-journal fillets <strong>R2.5</strong> on the journal at every web, unchamfered main shells <strong>12.2 mm</strong> wide (the load-carrying width) - option (b) of D-050, decision of the user 2026-11-25: the
+shells are narrowed to the largest width, in 0.1 mm steps, that keeps the axial allowance to the fillets (0.36 mm for end float, block / crank thermal growth and tolerances; gap 0.40 mm nominal, 0.04 mm worst case). Option (c), R1.6 with
+16 mm shells chamfered 1.0 x 45 deg, missed the combined criterion in the comparison below; that comparison was made with the biased land load
+(correction below) and was not re-evaluated - corrected, (c) would reach about 1.49 combined, still below 1.5 (estimate: its bending peak x 0.929, the measured change of the R2.5 main-fillet peak, torsion unchanged). Option (b) is kept by the decision of the user of 2026-11-27 for its larger margin.</p>
+<p><strong>Boundary conditions (D-050).</strong> Until D-049 the slice was clamped: both main-journal surfaces fully fixed. A clamped journal cannot turn, so the
+throw acts as a frame fixed at both ends and most of its bending moment stays in the journals; the 9.5 mm webs see little of it. The slice is
+now a bay simply supported on its two main bearings: the bearing reactions are compressive pressures on the 12.2 mm shell lands (cosine
+around the loaded half, parabolic across the land), balanced to the pin load, and a statically determinate 3-2-1 point support carries only the
+mesh residual - checked per node in every run: largest reaction at a single support node 119 N, 0.15 % of the pin load (limit 1 %). This is the support of the dynamics bay model and of the classification method for crankshafts (IACS UR M53: a throw on two main
+bearings, statically determinate). Real bearings let the journal tilt within their clearance and the oil film cannot clamp it, while the
+neighbouring bays add some restraint: reality lies between the two models, nearer to simple support, so the new model is the more realistic and
+the conservative one. A fixed journal surface would also have sat on the main fillets. With the solid pin, the change moved the pin-groove factor
+from 5.34 (hollow pin, clamped, D-048) to
+2.83 at 0.35 mm /
+2.56 official (R1.6 main
+fillets, the run of option (c), made with the land-load error described next).</p>
+<p><strong>Load-model correction (2026-11-27, D-050 item 9).</strong> The bearing-land load had a coding error (<code>fea.crank_solve</code>: the axial coordinate was not
+removed from the radial direction of the land pressure), so the lands carried 35 / 65 % of the pin load instead of 50 / 50 and
+the end nodes of the 3-2-1 support carried the difference as a couple (9.4 kN per node; the summed support reaction, the only check
+then, cannot show a couple). Section moments against the intended simply supported bay: main fillet of main k x 1.172,
+pin groove a x 1.054, pin groove b x 0.940, main fillet of main k+1 x
+0.816 (<code>tools/crank_support_reactions.py</code>, statics of the discrete loads, no solve). The overall peak of that run, 959 MPa
+at support node A, was the point-load singularity of this reaction, not a crank stress. Corrected and re-run: the standard record and the R2.5 convergence below; every run now stops if a single support node carries more than 1 % of the pin load.
+Effect on the R2.5 records (pre-fix -&gt; corrected; the pre-fix records are kept as <code>*_before_fix_2026-11-27.json</code>): pin groove official 387 -&gt; 343 MPa (factor 2.69 -&gt; 3.03), main fillet 484 -&gt; 449 MPa (2.15 -&gt; 2.31); main fillet combined bending + torsion 1.66 -&gt; 1.74, Goodman 1.16 -&gt; 1.22, M53 Q 1.30 -&gt; 1.36. At every mesh size the corrected peaks are 11-12 % lower at the groove and 8 % lower at the main fillet - the local peaks do not follow the section moments alone; the governing peaks stay at the same places (main k, pin groove a).
+The R1.6 run of option (c) and the option comparison were not re-run (see there).</p>
+<p><strong>Mesh convergence</strong> (<code>tools/crank_groove_convergence.py</code>, two refinement balls in every refined mesh; element-mean von Mises peak at the
+design gas force, pulsating load, factor = fatigue strength 520 MPa / half the peak; converged = less than 5 % between the two finest meshes;
+largest reaction at a single support node &lt;= 0.21 % of the load in every run):</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>1.0 mm</th>
+<th>0.7 mm</th>
+<th>0.5 mm</th>
+<th>0.35 mm</th>
+<th>change, two finest</th>
+<th>0.35 mm value (factor)</th>
+<th>official: zero-size extrapolation (factor)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pin relief groove</td>
+<td>280.5</td>
+<td>295.6</td>
+<td>309.7</td>
+<td>319.8</td>
+<td>3.15 %</td>
+<td>319.8 (3.25)</td>
+<td><strong>343 (3.03)</strong></td>
+</tr>
+<tr>
+<td>Main-journal fillet R2.5</td>
+<td>378.2</td>
+<td>385.2</td>
+<td>406.7</td>
+<td>419.4</td>
+<td>3.03 %</td>
+<td>419.4 (2.48)</td>
+<td><strong>449 (2.31)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Increments per refinement step: +15.1, +14.1, +10.1 MPa at the groove,
++7.0, +21.6, +12.7 MPa at the main fillet. The <strong>official values are the zero-size linear
+extrapolation of the two finest meshes</strong> (decision D-050: the element-mean stress approaches the surface value about linearly with the element
+size, so the increments do not shrink) - conservative against the 0.35 mm values. The standard crank FE record (1.0 mm, section 8 table) gives 281 / 378 MPa, 18 % / 16 % below the official values. Web 104 MPa,
+ligament behind the groove 104 MPa (0.35 mm mesh).</p>
+<p><strong>Main-journal fillet, bending + torsion</strong> (hand calculation, <code>tools/crank_main_fillet_torsion.py</code>; no FE). Bending: the official peak
+of the R2.5 fillet, alternating 225 MPa. Torsion: stress concentration factor of the journal fillet from IACS UR M53
+Rev.4 (2019), M53.3.3 / 3.2, beta_T = 0.8 f(r,s) f(b) f(w) = <strong>3.03</strong> (r = R_G / D_G = 0.0368, w = W / D =
+0.170; outside M53's ranges r &gt;= 0.03 / w &gt;= 0.2 the larger of the extrapolated and the range-limit value is used:
+3.03 / 2.96); alternating torque <strong>2,327 N m</strong> at 6,715 rpm (most loaded
+section; harmonic synthesis of orders 0.5-12 as M53 2.2.2 of the torsional model with the CAD inertia and the EST damper; order 2.5 alone
+1,201 N m - its resonance is at 6,565 rpm), mean 1,738 N m; nominal shear
+37.7 / 28.2 MPa alternating / mean, 114 / 85 MPa with beta_T.
+Equivalent alternating stress (M53 5.2) sqrt(sigma_B,a^2 + 3 tau_a^2) = 299 MPa, bending and torsion peaks taken in phase at
+the same point.</p>
+<p><strong>Main-journal fillet R2.5 (option (b), D-050): combined factor 1.74 - meets the 1.5 criterion.</strong> Sensitivities,
+not criteria: with the mean stresses (Goodman on the von Mises equivalents, ultimate 1100 MPa) 1.22;
+M53 Q with M53's own fatigue strength without credit for nitriding (407 MPa) 1.36 (M53 asks &gt;= 1.15).
+Bending alone 2.31.</p>
+<p><strong>Option comparison on which D-050 was decided</strong> (light calculation, <code>tools/crank_main_fillet_torsion.py --compare</code>, 2026-11-25, made with
+the land-load error of the crank FE corrected on 2026-11-27: the figures of both options below are biased and were not re-evaluated - corrected, (c) would reach about 1.49 combined, still below 1.5 (estimate: its bending peak x 0.929, the measured change of the R2.5 main-fillet peak, torsion unchanged);
+option (b) is kept by the decision of the user of 2026-11-27 for its larger margin, and its corrected numbers are the ones above; the bending peak
+of (b) was the official R1.6 FE peak x 0.780, the ratio of the M53 journal-fillet bending factors f_B(r) = 0.1908
+r^-0.5568 (M53.3.3); same torque, damper and combination; rule of the user: main fillet below 1.5 combined -&gt; option (b)):</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>shell / land [mm]</th>
+<th>bending peak [MPa] (factor)</th>
+<th>beta_T</th>
+<th>combined factor</th>
+<th>with mean (Goodman)</th>
+<th>M53 Q</th>
+<th>main specific load [MPa]</th>
+<th>Ocvirk film at 6,700 rpm [um]</th>
+<th>alternating torque for 1.5 [N m]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(c) R1.6</td>
+<td>16.0 / 14.0</td>
+<td>583 (1.78)</td>
+<td>3.40</td>
+<td><strong>1.42</strong></td>
+<td>0.99</td>
+<td>1.13</td>
+<td>38.6</td>
+<td>1.40</td>
+<td>1,968</td>
+</tr>
+<tr>
+<td>(b) R2.5</td>
+<td>12.2 / 12.2</td>
+<td>455 (2.29)</td>
+<td>3.03</td>
+<td><strong>1.73</strong></td>
+<td>1.21</td>
+<td>1.35</td>
+<td>44.3</td>
+<td>1.14</td>
+<td>3,077</td>
+</tr>
+</tbody>
+</table>
+<p>Reference, 16 mm shells before D-050: 33.8 MPa, 1.71 um.</p>
+<p><strong>Oil drillings</strong> (D-049, <code>tools/check_oil_drillings.py</code>; not in the FE): one dia 5 drilling per rod, main surface -&gt; pin surface at
+276 deg; only the pin and main surfaces are cut; walls &gt;= 5.32 mm
+to the relief groove and the web faces; 3.16 mm to the main-fillet tangent on the inlet's exit ramp;
+inlet openings 1.84 mm inside the main-shell edge and 2.24 mm
+from the fillet tangent. <strong>Big-end feed - open (D-049):</strong> each drilling's inlet is under the 180-deg groove of the upper main shell for half a
+turn; a continuous feed needs a 360-deg groove or cross-drillings - to be confirmed with a lubrication network / big-end film model.</p>
+<p><strong>Targeted interference re-check after D-049 / D-050</strong> (the full check of section 9 ran on the D-047 geometry): W16-05-001 / W16-01-005 / W16-04-003: clear 341, expected 115; kinematic W16-0[34]- vs W16-05-001, 12 crank angles: clear 224, expected 96.</p>
+<p>Limitations: one throw slice under one rod's design gas force spread over the pin (D-047 load model), bending only in the FE, element-mean stresses, no oil drillings in the FE, torsion stress concentration from M53 formulae outside their ranges, torsional damper and damping estimated.</p>
 <p>Limitations of the FE work: linear elastic, no contact, no bolt preload, no bearing films, simplified supports, slices instead of the complete
 castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factors are simple ratios against handbook limits).</p>
 <h2>9. Validation results</h2>
 <ul>
 <li><strong>Compression ratio from CAD volumes:</strong> cyl 1: 9.00 (V_tdc 62.4 cm3), cyl 2: 9.00 (V_tdc 62.4 cm3); target 9.0.</li>
 <li><strong>Firing intervals:</strong> 45.000 deg for all 16 cylinders (numerical TDC search).</li>
-<li><strong>Interference check:</strong> all 7557 static candidate pairs checked, 12 crank angles. Of 7557 static candidate pairs (bounding boxes overlapping, 1597 placed solids):
-  4850 clear, 2497 intentional contacts by rule (threads, press fits, seats), 93 touching with no overlap
-  (zero distance; the common of the two solids, cut to their bounding-box overlap, is empty and the fuse residual is within volume-integration noise), 0 boolean errors, 0 not checked; 35 static clash pairs.
-  Kinematic sweep over 12 crank angles: 11886 pair checks clear, 0 touching, 1 clash pairs, boolean errors 0.</li>
+<li><strong>Interference check:</strong> all 7520 static candidate pairs checked, 12 crank angles. Of 7520 static candidate pairs (bounding boxes overlapping, 1599 placed solids):
+  4926 clear, 2499 intentional contacts by rule (threads, press fits, seats), 93 touching with no overlap
+  (zero distance; the common of the two solids, cut to their bounding-box overlap, is empty and the fuse residual is within volume-integration noise), 0 boolean errors, 0 not checked; 2 static clash pairs.
+  Kinematic sweep over 12 crank angles: 11997 pair checks clear, 0 touching, 0 clash pairs, boolean errors 0.</li>
 </ul>
 <table>
 <thead>
@@ -661,20 +802,6 @@ castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factor
 <tbody>
 <tr>
 <td>static</td>
-<td>W16-09-air_duct_B-L1</td>
-<td>W16-09-charge_pipe_B-L1</td>
-<td>1</td>
-<td>1488</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-09-air_duct_B-L2</td>
-<td>W16-09-charge_pipe_B-L2</td>
-<td>1</td>
-<td>1487</td>
-</tr>
-<tr>
-<td>static</td>
 <td>W16-09-air_duct_A-L1</td>
 <td>W16-10-downpipe_B-L1</td>
 <td>1</td>
@@ -686,230 +813,6 @@ castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factor
 <td>W16-10-downpipe_B-L2</td>
 <td>1</td>
 <td>838.5</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~10</td>
-<td>W16-07-010</td>
-<td>1</td>
-<td>598.9</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~03</td>
-<td>W16-07-010</td>
-<td>1</td>
-<td>521</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~05</td>
-<td>W16-07-010</td>
-<td>1</td>
-<td>468.9</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~08</td>
-<td>W16-07-010</td>
-<td>1</td>
-<td>468.9</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-13-pipe_pump_to_block_2</td>
-<td>W16-14-front_cover</td>
-<td>1</td>
-<td>238.7</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-13-pipe_pump_to_block_1</td>
-<td>W16-14-front_cover</td>
-<td>1</td>
-<td>238.7</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~09</td>
-<td>W16-07-010</td>
-<td>1</td>
-<td>223.2</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~04</td>
-<td>W16-07-010</td>
-<td>1</td>
-<td>175.7</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~06</td>
-<td>W16-07-009</td>
-<td>1</td>
-<td>149.7</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~04</td>
-<td>W16-07-009</td>
-<td>1</td>
-<td>149.6</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-08-003</td>
-<td>W16-10-downpipe_B-L1</td>
-<td>1</td>
-<td>137.9</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-08-004</td>
-<td>W16-10-downpipe_B-L2</td>
-<td>1</td>
-<td>137.9</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-08-003</td>
-<td>W16-10-shutoff_valve-L1</td>
-<td>1</td>
-<td>128.4</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-08-004</td>
-<td>W16-10-shutoff_valve-L2</td>
-<td>1</td>
-<td>128.4</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-02-001</td>
-<td>W16-11-rail_P-L1</td>
-<td>1</td>
-<td>118.5</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-02-002</td>
-<td>W16-11-rail_P-L2</td>
-<td>1</td>
-<td>118.5</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-01-001</td>
-<td>W16-14-mount_bracket_R</td>
-<td>1</td>
-<td>97.79</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-01-001</td>
-<td>W16-14-mount_bracket_L</td>
-<td>1</td>
-<td>97.79</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-006</td>
-<td>W16-07-010</td>
-<td>34</td>
-<td>96.57</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-11-003~0</td>
-<td>W16-11-003~1</td>
-<td>16</td>
-<td>82.45</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~07</td>
-<td>W16-07-010</td>
-<td>1</td>
-<td>47.63</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-008~06</td>
-<td>W16-07-010</td>
-<td>1</td>
-<td>47.63</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-07-006</td>
-<td>W16-07-009</td>
-<td>4</td>
-<td>47.14</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-04-003</td>
-<td>W16-05-001</td>
-<td>32</td>
-<td>26.53</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-08-014</td>
-<td>W16-10-precat_A-L2</td>
-<td>1</td>
-<td>25.69</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-08-013</td>
-<td>W16-10-precat_A-L1</td>
-<td>1</td>
-<td>25.69</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-08-004</td>
-<td>W16-10-precat_A-L2</td>
-<td>1</td>
-<td>21.2</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-08-003</td>
-<td>W16-10-precat_A-L1</td>
-<td>1</td>
-<td>21.2</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-13-pump_inlet_pipe</td>
-<td>W16-13-water_pump_impeller</td>
-<td>1</td>
-<td>6.81</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-13-pipe_pump_to_block_2</td>
-<td>W16-13-water_pump_impeller</td>
-<td>1</td>
-<td>4.87</td>
-</tr>
-<tr>
-<td>static</td>
-<td>W16-13-pipe_pump_to_block_1</td>
-<td>W16-13-water_pump_impeller</td>
-<td>1</td>
-<td>4.87</td>
-</tr>
-<tr>
-<td>kinematic</td>
-<td>W16-04-003</td>
-<td>W16-05-001</td>
-<td>96</td>
-<td>26.53</td>
 </tr>
 </tbody>
 </table>
@@ -939,7 +842,7 @@ castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factor
 <tr>
 <td>Engine architecture mechanically coherent</td>
 <td>PARTIAL - packaging overlaps listed</td>
-<td>interference check: 35 static and 1 kinematic clash pairs remain (listed in the report)</td>
+<td>interference check: 2 static and 0 kinematic clash pairs remain (listed in the report)</td>
 </tr>
 <tr>
 <td>Displacement consistent with bore and stroke</td>
@@ -1004,7 +907,7 @@ castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factor
 <tr>
 <td>STEP exports generated</td>
 <td>PASS</td>
-<td>166 component STEP files; master assembly 186.33 MB; 15 sub-assemblies</td>
+<td>166 component STEP files; master assembly 187.45 MB; 15 sub-assemblies</td>
 </tr>
 <tr>
 <td>STL and 3MF exports generated where supported</td>
@@ -1064,13 +967,14 @@ castings, cycle-mean thermal loads from the 0-D model, no fatigue solver (factor
 <li>No 3-D CFD of any kind (ports, plenum, coolant jacket, combustion). Flow results are 0-D / 1-D.</li>
 <li>The cycle model is uncalibrated; enrichment, boost and temperatures are plausible estimates. Knock is not modelled.</li>
 <li>Turbomachinery is sized, not designed: wheels and volutes are representative shapes; there are no compressor or turbine maps.</li>
-<li>FE is linear and local (see section 8). No fatigue, no bearing elasto-hydrodynamics, no valve-train dynamics, no crank 3-D torsional/bending model, no thermal-mechanical head analysis with valve-bridge detail.</li>
+<li>FE is linear and local (see section 8). No fatigue, no bearing elasto-hydrodynamics, no valve-train dynamics, no crank 3-D torsional/bending model, no thermal-mechanical head analysis with valve-bridge detail. The crank FE has no oil drillings, so the stress at the drilling exits is not assessed.</li>
 <li>Purchased units (injectors, coils, sensors, pumps, alternator, phasers, tensioners) are envelopes. Seals, O-rings, dowels, clips, brackets, most small fasteners, hoses and the detailed harness are not modelled.</li>
 <li>Castings have no draft, fillets or wall-thickness optimisation; mass is therefore indicative.</li>
 <li>Tolerances are classes, not a stack-up. Drawings are layout drawings.</li>
 <li>The valve-train conflicts found earlier are resolved: the long-valve spring through the short valve's support element (D-031) by the D-034 layout; the camshafts through the closed head / cover end walls, the retainers in the camshaft bearing webs, the opening long valves and the piston crown in a wedge left by the chamber cut, the follower pads on the valve tips and the cam / roller fit by D-039. The interference check finds no valve-train clashes. The finger ratio of 2.7 on the short valves is high and needs a stiffness / contact-stress check. Remaining packaging overlaps are listed in section 9.</li>
 <li>The engine-management description is an architecture, not software.</li>
 <li><strong>Piston:</strong> <strong>hot fatigue NOT ASSESSABLE with available public data</strong> (the method fails even production-range temperatures: with Woschni x 1.0 the crown runs at 272 degC, inside the 270-310 degC range of production gasoline pistons, and the factors are still 0.23-0.51); crown 376 degC (heat-consistent, Woschni x 2.0) is above the typical 270-310 degC range - <strong>OPEN: cooling upgrade + hot-strength piston alloy with manufacturer data</strong>. With 4032-T6 lower-bound strength (10,000 h at temperature) the factors are 0.10-0.28; neither they nor the room-temperature factor 2.05 are acceptance measures (sections 8.1, 8.2). The slot-end corner under the crown misses the 1.5 target (room-temperature factor 1.29, above 1.0 but below the 1.5 target, whatever the crown temperature) at a corner the concept CAD leaves unradiused, so the value is mesh-dependent: it needs a real radius and a mesh-converged re-check. A cooling / material decision and a new piston FE are needed before the piston is mechanically acceptable.</li>
+<li><strong>Packaging (open item for v1.0):</strong> clean-air duct A and down-pipe B overlap on both banks (up to 841 mm3): turbine B's outlet and compressor A's inlet face each other 120 mm apart on the same axis, and no pair of elbows fits between them - a compressor-A inlet elbow alone, or an inlet elbow plus a turbine-B outlet elbow, overlaps even with 0.5 D / 0.8 D elbows and no straight length (study 2026-11-21, DECISIONS). Resolution needs a different turbocharger orientation or spacing; a heat shield between the two is required in any resolution.</li>
 </ol>
 <h2>15. Future development recommendations</h2>
 <ol>
